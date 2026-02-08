@@ -1,14 +1,23 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import * as db from '../db.js';
 
-const API_KEY = process.env.API_KEY || 'default-secure-key'; // Default for dev, user should change this
-
-export const authenticate = (req, res, next) => {
+export const authenticate = async (req, res, next) => {
     const apiKey = req.headers['x-api-key'];
 
-    if (!apiKey || apiKey !== API_KEY) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
+    if (!apiKey) {
+        return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
     }
 
-    next();
+    try {
+        const result = await db.query('SELECT * FROM api_users WHERE api_key = $1', [apiKey]);
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
+        }
+
+        // Attach user info to request
+        req.user = result.rows[0];
+        next();
+    } catch (error) {
+        console.error('Auth Middleware Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };

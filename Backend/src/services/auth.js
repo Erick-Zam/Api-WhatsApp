@@ -1,44 +1,64 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import * as db from '../db.js';
+import crypto from 'crypto';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'super-secret-key-change-in-prod';
-const USERS = []; // In-memory store for demo. REPLACE WITH DB CALLS.
 
 export const registerUser = async (email, password, username) => {
-    // Check if user exists (mock check)
-    if (USERS.find(u => u.email === email)) {
+    // 1. Check if user exists
+    const checkRes = await db.query('SELECT * FROM api_users WHERE email = $1', [email]);
+    if (checkRes.rows.length > 0) {
         throw new Error('User already exists');
     }
 
+    // 2. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = `user_${Date.now()}`;
-    const apiKey = `key_${Math.random().toString(36).substr(2, 9)}`;
+    const apiKey = `key_${crypto.randomBytes(16).toString('hex')}`;
 
-    const newUser = {
-        id: userId,
-        email,
-        username,
-        password: hashedPassword,
-        apiKey
-    };
+    // 3. Insert into DB
+    const insertRes = await db.query(
+        `INSERT INTO api_users (username, email, password_hash, api_key) 
+         VALUES ($1, $2, $3, $4) 
+         RETURNING id, username, email, api_key, role, created_at`,
+        [username, email, hashedPassword, apiKey]
+    );
 
-    USERS.push(newUser); // Save to DB in real app
-    return { id: userId, email, username, apiKey };
+    return insertRes.rows[0];
 };
 
 export const loginUser = async (email, password) => {
-    const user = USERS.find(u => u.email === email);
+    // 1. Find user
+    const res = await db.query('SELECT * FROM api_users WHERE email = $1', [email]);
+    const user = res.rows[0];
+
     if (!user) {
         throw new Error('Invalid credentials');
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    // 2. Check password
+    const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
         throw new Error('Invalid credentials');
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
-    return { token, user: { id: user.id, email: user.email, username: user.username, apiKey: user.apiKey } };
+    // 3. Sign Token
+    const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        SECRET_KEY,
+        { expiresIn: '24h' }
+    );
+
+    return {
+        token,
+        user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            apiKey: user.api_key,
+            role: user.role
+        }
+    };
 };
 
 export const verifyToken = (token) => {

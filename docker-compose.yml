@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. PostgreSQL Database
   db:
@@ -30,9 +28,10 @@ services:
       # Persist WhatsApp session data
       - ./auth_info_baileys:/app/auth_info_baileys
       # For easier development (live reload), mount source - optional
-      # - ./Backend/src:/app/src
+      - ./Backend/src:/app/src
     depends_on:
       - db
+    command: npm run dev
     restart: always
 
   # 3. Frontend Dashboard

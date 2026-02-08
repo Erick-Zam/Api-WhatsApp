@@ -12,11 +12,14 @@ export default function Home() {
       </p>
 
       <div className="flex gap-4">
-        <Link href="/login" className="px-8 py-3 bg-green-500 rounded-full font-bold hover:bg-green-400 transition">
+        <Link href="/login" className="px-8 py-3 bg-green-500 rounded-full font-bold hover:bg-green-400 transition shadow-lg shadow-green-500/20">
           Login
         </Link>
-        <Link href="/docs" className="px-8 py-3 bg-gray-800 rounded-full font-bold hover:bg-gray-700 transition">
-          View Documentation
+        <Link href="/register" className="px-8 py-3 bg-blue-600 rounded-full font-bold hover:bg-blue-500 transition shadow-lg shadow-blue-500/20">
+          Register
+        </Link>
+        <Link href="/docs" className="px-8 py-3 bg-gray-800 rounded-full font-bold hover:bg-gray-700 transition border border-gray-700">
+          Docs
         </Link>
       </div>
 
