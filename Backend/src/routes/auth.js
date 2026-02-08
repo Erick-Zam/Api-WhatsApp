@@ -50,4 +50,33 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.put('/change-password', verifyJwt, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const { id } = req.user;
+
+        // Verify current password logic (needs bcrypt import if doing it here, or use service)
+        // For simplicity, let's call a service function or do it here.
+        // Let's import bcrypt here as it's not imported at top.
+        const bcrypt = await import('bcryptjs');
+        const db = await import('../db.js');
+
+        const userResult = await db.default.query('SELECT password_hash FROM api_users WHERE id = $1', [id]);
+        if (userResult.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
+        const valid = await bcrypt.default.compare(currentPassword, userResult.rows[0].password_hash);
+        if (!valid) return res.status(401).json({ error: 'Incorrect current password' });
+
+        const hashed = await bcrypt.default.hash(newPassword, 10);
+        await db.default.query('UPDATE api_users SET password_hash = $1 WHERE id = $2', [hashed, id]);
+
+        logAudit(id, 'PASSWORD_CHANGE', {}, req.ip);
+        res.json({ message: 'Password updated successfully' });
+
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.body);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 export default router;

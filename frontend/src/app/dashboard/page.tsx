@@ -68,6 +68,24 @@ export default function Dashboard() {
         }
     };
 
+    const handleDelete = async (sessionId: string) => {
+        if (!confirm(`Are you sure you want to permanently delete session '${sessionId}'? This cannot be undone.`)) return;
+        try {
+            await fetch(`http://localhost:3001/sessions/${sessionId}`, {
+                method: 'DELETE'
+            });
+            // Clear QR code if exists
+            setQrCodes(prev => {
+                const newCodes = { ...prev };
+                delete newCodes[sessionId];
+                return newCodes;
+            });
+            fetchSessions();
+        } catch (error) {
+            alert('Error deleting session');
+        }
+    };
+
     const handleDisconnect = async (sessionId: string) => {
         if (!confirm(`Disconnect session '${sessionId}'?`)) return;
         try {
@@ -194,7 +212,7 @@ export default function Dashboard() {
                             {session.status === 'CONNECTED' ? (
                                 <button
                                     onClick={() => handleDisconnect(session.id)}
-                                    className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 py-2 rounded-lg text-sm font-medium transition border border-red-500/30"
+                                    className="flex-1 bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 py-2 rounded-lg text-sm font-medium transition border border-orange-500/30"
                                 >
                                     Disconnect
                                 </button>
@@ -213,6 +231,14 @@ export default function Dashboard() {
                                 title="Refresh Status"
                             >
                                 ⟳
+                            </button>
+
+                            <button
+                                onClick={() => handleDelete(session.id)}
+                                className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition border border-red-200 dark:border-red-900/50"
+                                title="Delete Session"
+                            >
+                                🗑️
                             </button>
                         </div>
                     </div>

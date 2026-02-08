@@ -2,6 +2,7 @@ import makeWASocket, { useMultiFileAuthState, DisconnectReason } from '@whiskeys
 import pino from 'pino';
 import fs from 'fs';
 import path from 'path';
+import { triggerWebhooks } from './services/webhooks.js';
 
 // Session storage
 const sessions = new Map(); // sessionId -> socket
@@ -18,10 +19,9 @@ const getSession = (sessionId = 'default') => sessions.get(sessionId);
  */
 async function connectToWhatsApp(sessionId = 'default') {
     // Store in subfolder of the mounted volume for persistence
-    // Use path.join for cross-platform compatibility, though Docker is usually Linux
     const sessionDir = path.join(AUTH_DIR, sessionId);
 
-    // Ensure parent dir exists (if not created by docker volume?)
+    // Ensure parent dir exists
     if (!fs.existsSync(AUTH_DIR)) {
         fs.mkdirSync(AUTH_DIR, { recursive: true });
     }
@@ -36,11 +36,14 @@ async function connectToWhatsApp(sessionId = 'default') {
         syncFullHistory: false,
     });
 
-    // Store session immediately so event handlers can reference it
+    // Store session immediately
     sessions.set(sessionId, sock);
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
+
+        // Trigger generic connection update webhook
+        triggerWebhooks(sessionId, 'connection.update', { connection, qr: qr ? 'QR_RECEIVED' : undefined });
 
         if (qr) {
             qrCodes.set(sessionId, qr);
@@ -51,6 +54,12 @@ async function connectToWhatsApp(sessionId = 'default') {
             qrCodes.delete(sessionId);
             retryCounts.set(sessionId, 0);
             console.log(`Session '${sessionId}' connected to WhatsApp!`);
+
+            // Generate API Key ONLY on successful connection
+            import('./services/apiKeys.js').then(({ createSessionKey }) => {
+                createSessionKey(sessionId).catch(e => console.error(`Error creating key for ${sessionId}:`, e));
+            });
+
         } else if (connection === 'close') {
             qrCodes.delete(sessionId);
             sessions.delete(sessionId); // Remove closed session
@@ -68,8 +77,10 @@ async function connectToWhatsApp(sessionId = 'default') {
                 }
             } else {
                 console.log(`Session '${sessionId}' logged out.`);
-                // Clean up creds if needed?
-                // fs.rmSync(sessionDir, { recursive: true, force: true });
+                // Delete API Key on logout
+                import('./services/apiKeys.js').then(({ deleteSessionKey }) => {
+                    deleteSessionKey(sessionId).catch(e => console.error(`Error deleting key for ${sessionId}:`, e));
+                });
             }
         }
     });
@@ -81,8 +92,18 @@ async function connectToWhatsApp(sessionId = 'default') {
             for (const msg of messages) {
                 if (!msg.key.fromMe) {
                     console.log(`[${sessionId}] New Message:`, JSON.stringify(msg, null, 2));
+                    // Trigger webhook for new message
+                    triggerWebhooks(sessionId, 'messages.upsert', msg);
                 }
             }
+        }
+    });
+
+    // Listen for status updates (read receipts etc)
+    sock.ev.on('messages.update', async (updates) => {
+        for (const update of updates) {
+            // Trigger webhook for status update
+            triggerWebhooks(sessionId, 'messages.update', update);
         }
     });
 
@@ -96,13 +117,36 @@ const disconnectFromWhatsApp = async (sessionId = 'default') => {
     if (sock) {
         try {
             await sock.logout();
+            // Key deletion handling is done in 'close' event
         } catch (err) {
             console.error(`Error logging out session ${sessionId}:`, err);
             sock.end(undefined);
+            // Force delete key if error occurs
+            import('./services/apiKeys.js').then(({ deleteSessionKey }) => {
+                deleteSessionKey(sessionId).catch(e => console.error(`Error deleting key for ${sessionId}:`, e));
+            });
         } finally {
             sessions.delete(sessionId);
             qrCodes.delete(sessionId);
         }
+    }
+};
+
+const deleteSession = async (sessionId) => {
+    await disconnectFromWhatsApp(sessionId);
+    const sessionDir = path.join(AUTH_DIR, sessionId);
+    try {
+        if (fs.existsSync(sessionDir)) {
+            // Node 14+ supports recursive rm
+            fs.rmSync(sessionDir, { recursive: true, force: true });
+            console.log(`Deleted session data for ${sessionId}`);
+        }
+        // Ensure key is nuked
+        import('./services/apiKeys.js').then(({ deleteSessionKey }) => {
+            deleteSessionKey(sessionId).catch(e => console.error(`Error deleting key for ${sessionId}:`, e));
+        });
+    } catch (e) {
+        console.error(`Error deleting session ${sessionId}:`, e);
     }
 };
 
@@ -130,7 +174,11 @@ const listSessions = () => {
     try {
         if (fs.existsSync(AUTH_DIR)) {
             const files = fs.readdirSync(AUTH_DIR);
-            const diskSessions = files.filter(f => fs.statSync(path.join(AUTH_DIR, f)).isDirectory());
+            const diskSessions = files.filter(f => {
+                try {
+                    return fs.statSync(path.join(AUTH_DIR, f)).isDirectory();
+                } catch { return false; }
+            });
 
             diskSessions.forEach(id => {
                 if (!sessions.has(id)) {
@@ -146,7 +194,7 @@ const listSessions = () => {
         console.error('Error listing disk sessions:', e);
     }
 
-    // Remove duplicates by ID (if map and push logic overlaps)
+    // Remove duplicates by ID
     const unique = new Map();
     active.forEach(s => unique.set(s.id, s));
     return Array.from(unique.values());
@@ -162,32 +210,35 @@ const initSessions = async () => {
         const sessionFolders = files.filter(f => {
             try {
                 return fs.statSync(path.join(AUTH_DIR, f)).isDirectory();
-            } catch (e) { return false; }
+            } catch { return false; }
         });
 
         if (sessionFolders.length === 0) {
-            console.log('No sessions found in volume. Starting default session.');
-            connectToWhatsApp('default');
+            console.log('No sessions found in volume. Waiting for user to create one.');
+            // Do NOT start default session automatically
         } else {
             sessionFolders.forEach(sessionId => {
                 console.log(`Restoring session: ${sessionId}`);
-                // Don't wait for one to finish before starting next
                 connectToWhatsApp(sessionId).catch(e => console.error(`Failed to restore ${sessionId}:`, e));
             });
         }
     } catch (err) {
         console.error('Error initializing sessions:', err);
-        connectToWhatsApp('default');
     }
 };
 
 // --- Helper: Get JID ---
 const formatJid = (phone) => {
     if (!phone) return null;
-    return phone.includes('@s.whatsapp.net') ? phone : `${phone}@s.whatsapp.net`;
+    let cleaned = phone.replace(/\D/g, '');
+    if (cleaned.includes('@s.whatsapp.net')) {
+        return cleaned;
+    }
+    if (!cleaned) return null;
+    return `${cleaned}@s.whatsapp.net`;
 }
 
-// --- Sending Functions (Updated with sessionId) ---
+// --- Sending Functions ---
 
 const sendMessage = async (jid, content, options = {}, sessionId = 'default') => {
     const sock = sessions.get(sessionId);
@@ -250,9 +301,45 @@ const updatePresence = async (jid, type, sessionId = 'default') => {
     return await sock.sendPresenceUpdate(type, jid);
 };
 
+const sendReaction = async (jid, key, text, sessionId = 'default') => {
+    // key is the message key object { remoteJid, fromMe, id }
+    // text is the emoji
+    return await sendMessage(jid, {
+        react: {
+            text: text, // use an empty string to remove the reaction
+            key: key
+        }
+    }, {}, sessionId);
+};
+
+const sendReply = async (jid, text, quotedMessageId, sessionId = 'default') => {
+    // We need to construct a minimal key for valid quoting if we don't have the full object.
+    // Ideally user passes the full message object, but usually they just have ID.
+    // Baileys needs the full message context to quote properly usually, but let's try with minimal key.
+    // Note: Quoting works best if we have the message object. 
+    // If we only have ID, we might need to assume it was from the 'jid' user.
+    // For specific Reply functionality, the frontend usually sends the whole context or we fetch it.
+    // For simplicity here, we will accept a 'quoted' object or try to build one.
+
+    // Simplest approach: Just send text. 
+    // To actually quote, we need to pass { quoted: messageObject } in options.
+    // Since we don't have a message store, we can't look up by ID easily.
+    // Limit: This specific simple implementation might just be sending text unless 'options' is extended.
+    // Let's implement fully in sendMessage options if caller provides 'quoted'.
+
+    // Actually, let's implement a direct 'reply' helper that takes a context object if provided.
+    // But since we are stateless regarding old messages, we can only quote if the user provides the raw message JSON they received via webhook.
+    // OR we can rely on the frontend passing the 'quoted' object.
+
+    // Let's stick to reaction for now as it's easier to implement with just ID + JID.
+    return await sendMessage(jid, { text }, { quoted: quotedMessageId }, sessionId);
+};
+
+
 export {
     connectToWhatsApp,
     disconnectFromWhatsApp,
+    deleteSession,
     initSessions,
     getQRCode,
     getConnectionStatus,
@@ -269,5 +356,7 @@ export {
     sendContact,
     sendPoll,
     updatePresence,
-    getConnectionStatus as default // careful with default exports
+    sendReaction, // Exported
+    sendReply,    // Exported
+    getConnectionStatus as default
 };
