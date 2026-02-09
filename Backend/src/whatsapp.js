@@ -1,4 +1,5 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
+import makeWASocket, { useMultiFileAuthState, DisconnectReason, delay } from '@whiskeysockets/baileys';
+import { makeInMemoryStore } from './services/simpleStore.js';
 import pino from 'pino';
 import fs from 'fs';
 import path from 'path';
@@ -10,6 +11,25 @@ const qrCodes = new Map(); // sessionId -> qrCode
 const retryCounts = new Map(); // sessionId -> retryCount
 const MAX_RETRIES = 5;
 const AUTH_DIR = 'auth_info_baileys';
+const STORE_DIR = 'store_baileys';
+
+// Basic rate limiting
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_MESSAGES_PER_MINUTE = 10;
+const messageTracking = new Map(); // sessionId -> { timestamp, count }
+
+// Store setup
+const store = makeInMemoryStore({ logger: pino({ level: 'silent' }) });
+if (!fs.existsSync(STORE_DIR)) {
+    fs.mkdirSync(STORE_DIR, { recursive: true });
+}
+
+// Bind store to file
+const storeFile = path.join(STORE_DIR, 'baileys_store_multi.json');
+store.readFromFile(storeFile);
+setInterval(() => {
+    store.writeToFile(storeFile);
+}, 10_000);
 
 // Helper to get session ID from request or default
 const getSession = (sessionId = 'default') => sessions.get(sessionId);
@@ -33,11 +53,32 @@ async function connectToWhatsApp(sessionId = 'default') {
         printQRInTerminal: sessionId === 'default', // Only print default QR to terminal
         logger: pino({ level: 'silent' }),
         browser: [`WhatsApp API (${sessionId})`, 'Chrome', '1.0.0'],
-        syncFullHistory: false,
+        syncFullHistory: true, // Sync full history for better chat experience
+        getMessage: async (key) => {
+            if (store) {
+                const msg = await store.loadMessage(key.remoteJid, key.id);
+                return msg?.message || undefined;
+            }
+            return { conversation: 'hello' };
+        }
     });
 
-    // Store session immediately
+    // Bind store to socket
+    store.bind(sock.ev);
+
+    // Store session
     sessions.set(sessionId, sock);
+
+    // Create per-session store
+    const sessionStore = makeInMemoryStore({ logger: pino({ level: 'silent' }) });
+    const sessionStoreFile = path.join(STORE_DIR, `${sessionId}_store.json`);
+    sessionStore.readFromFile(sessionStoreFile);
+    setInterval(() => {
+        sessionStore.writeToFile(sessionStoreFile);
+    }, 10_000);
+
+    sessionStore.bind(sock.ev);
+    sessionStores.set(sessionId, sessionStore);
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
@@ -77,10 +118,8 @@ async function connectToWhatsApp(sessionId = 'default') {
                 }
             } else {
                 console.log(`Session '${sessionId}' logged out.`);
-                // Delete API Key on logout
-                import('./services/apiKeys.js').then(({ deleteSessionKey }) => {
-                    deleteSessionKey(sessionId).catch(e => console.error(`Error deleting key for ${sessionId}:`, e));
-                });
+                // Do NOT delete key on simple logout/disconnect. 
+                // We want to preserve ownership (userId) in DB.
             }
         }
     });
@@ -121,13 +160,12 @@ const disconnectFromWhatsApp = async (sessionId = 'default') => {
         } catch (err) {
             console.error(`Error logging out session ${sessionId}:`, err);
             sock.end(undefined);
-            // Force delete key if error occurs
-            import('./services/apiKeys.js').then(({ deleteSessionKey }) => {
-                deleteSessionKey(sessionId).catch(e => console.error(`Error deleting key for ${sessionId}:`, e));
-            });
+            // Don't delete key on error, only on explicit deleteSession() call
         } finally {
             sessions.delete(sessionId);
             qrCodes.delete(sessionId);
+            sessionStores.delete(sessionId); // Remove store from memory
+
         }
     }
 };
@@ -227,6 +265,31 @@ const initSessions = async () => {
     }
 };
 
+
+// Redoing store logic to be per-session to ensure isolation
+const sessionStores = new Map();
+
+// --- Rate Limiter Helper ---
+const checkRateLimit = (sessionId) => {
+    const now = Date.now();
+    const tracker = messageTracking.get(sessionId) || { timestamp: now, count: 0 };
+
+    if (now - tracker.timestamp > RATE_LIMIT_WINDOW) {
+        tracker.timestamp = now;
+        tracker.count = 1;
+    } else {
+        tracker.count++;
+    }
+
+    messageTracking.set(sessionId, tracker);
+
+    if (tracker.count > MAX_MESSAGES_PER_MINUTE) {
+        console.warn(`[RateLimit] Session ${sessionId} exceeded limit (${tracker.count}/${MAX_MESSAGES_PER_MINUTE})`);
+        return false; // Limit exceeded
+    }
+    return true; // OK
+};
+
 // --- Helper: Get JID ---
 const formatJid = (phone) => {
     if (!phone) return null;
@@ -240,9 +303,16 @@ const formatJid = (phone) => {
 
 // --- Sending Functions ---
 
+
+
 const sendMessage = async (jid, content, options = {}, sessionId = 'default') => {
     const sock = sessions.get(sessionId);
     if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+
+    if (!checkRateLimit(sessionId)) {
+        throw new Error('Rate limit exceeded. Please wait before sending more messages.');
+    }
+
     return await sock.sendMessage(jid, content, options);
 };
 
@@ -336,6 +406,69 @@ const sendReply = async (jid, text, quotedMessageId, sessionId = 'default') => {
 };
 
 
+// --- New Capability Functions ---
+
+const getChats = (sessionId) => {
+    const store = sessionStores.get(sessionId);
+    if (!store) return [];
+    return store.chats.all();
+};
+
+const getMessages = (sessionId, jid, limit = 25) => {
+    const store = sessionStores.get(sessionId);
+    if (!store) return [];
+    const messages = store.messages[jid]?.array || [];
+    return messages.slice(-limit); // Return last 'limit' messages
+};
+
+const createGroup = async (sessionId, subject, participants) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupCreate(subject, participants);
+};
+
+const getGroupMetadata = async (sessionId, jid) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupMetadata(jid);
+};
+
+const groupParticipantsUpdate = async (sessionId, jid, participants, action) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupParticipantsUpdate(jid, participants, action);
+};
+
+const groupUpdateSubject = async (sessionId, jid, subject) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupUpdateSubject(jid, subject);
+};
+
+const groupUpdateDescription = async (sessionId, jid, description) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupUpdateDescription(jid, description);
+};
+
+const groupInviteCode = async (sessionId, jid) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupInviteCode(jid);
+};
+
+const groupRevokeInvite = async (sessionId, jid) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupRevokeInvite(jid);
+};
+
+const groupLeave = async (sessionId, jid) => {
+    const sock = sessions.get(sessionId);
+    if (!sock) throw new Error(`Session '${sessionId}' not connected`);
+    return await sock.groupLeave(jid);
+};
+
 export {
     connectToWhatsApp,
     disconnectFromWhatsApp,
@@ -356,7 +489,17 @@ export {
     sendContact,
     sendPoll,
     updatePresence,
-    sendReaction, // Exported
-    sendReply,    // Exported
+    sendReaction,
+    sendReply,
+    getChats,
+    getMessages,
+    createGroup,
+    getGroupMetadata,
+    groupParticipantsUpdate,
+    groupUpdateSubject,
+    groupUpdateDescription,
+    groupInviteCode,
+    groupRevokeInvite,
+    groupLeave,
     getConnectionStatus as default
 };

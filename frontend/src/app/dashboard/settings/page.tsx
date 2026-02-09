@@ -89,7 +89,11 @@ export default function SettingsPage() {
             }
 
             // Fetch Sessions
-            const resSessions = await fetch('http://localhost:3001/sessions');
+            const resSessions = await fetch('http://localhost:3001/sessions', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (resSessions.ok) {
                 const sessionData = await resSessions.json();
                 setSessions(sessionData);

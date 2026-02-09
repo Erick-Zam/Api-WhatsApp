@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --primary: #2563eb;
+            --secondary: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--primary);
+        }
+
+        h2 {
+            margin-top: 2rem;
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #e2e8f0;
+            padding: 0.8rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+
+        .note {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .capacity-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>WhatsApp API Documentation</h1>
+            <p>Developer Guide & Server Capacity Information</p>
+        </header>
+
+        <section>
+            <h2>Overview</h2>
+            <p>This API allows you to send and receive WhatsApp messages programmatically. It is built on top of Baileys
+                library and runs on a optimized Node.js server.</p>
+            <div class="note">
+                <strong>Important:</strong> This is an unofficial API. Use responsibly to avoid number bans.
+            </div>
+        </section>
+
+        <section>
+            <h2>Usage Constraints & Capacity</h2>
+            <p>The server is hosted on a Digital Ocean Droplet with the following specifications:</p>
+            <ul>
+                <li><strong>CPU:</strong> 1 vCPU</li>
+                <li><strong>RAM:</strong> 2 GB</li>
+                <li><strong>Storage:</strong> 70 GB NVMe</li>
+            </ul>
+
+            <h3>Estimated Capacity</h3>
+            <div class="capacity-card">
+                <div class="card">
+                    <h4>Text Messages</h4>
+                    <p>~50-100 messages / second</p>
+                    <small>High throughput</small>
+                </div>
+                <div class="card">
+                    <h4>Media (Images/Video)</h4>
+                    <p>~5-10 uploads / second</p>
+                    <small>Bandwidth limited</small>
+                </div>
+                <div class="card">
+                    <h4>Concurrent Sessions</h4>
+                    <p>~5-10 active sessions</p>
+                    <small>RAM limited (each session consumes ~100MB)</small>
+                </div>
+            </div>
+
+            <h3>Rate Limits</h3>
+            <p>Global API Rate Limit: <strong>100 requests per 15 minutes</strong> per IP.</p>
+        </section>
+
+        <section>
+            <h2>API Endpoints</h2>
+
+            <h3>Authentication</h3>
+            <pre>POST /auth/login
+{
+  "email": "user@example.com",
+  "password": "password"
+}
+-> Returns { token, user }</pre>
+
+            <h3>Sending Messages</h3>
+            <p>Headers: <code>x-api-key: YOUR_API_KEY</code></p>
+
+            <pre>POST /messages/send-text
+{
+  "sessionId": "marketing",
+  "to": "1234567890",
+  "text": "Hello World!"
+}</pre>
+
+            <pre>POST /messages/send-image
+{
+  "sessionId": "marketing",
+  "to": "1234567890",
+  "url": "https://example.com/image.png",
+  "caption": "Check this out!"
+}</pre>
+
+            <h3>Session Management</h3>
+            <p>Headers: <code>Authorization: Bearer JWT_TOKEN</code></p>
+            <pre>GET /api/admin/stats</pre>
+            <pre>GET /sessions</pre>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 WhatsApp SaaS API. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+
+</html>

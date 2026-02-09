@@ -1,0 +1,233 @@
+
+:root {
+    --bg: #0f172a;
+    --primary: #8b5cf6;
+    --secondary: #ec4899;
+    --text: #ffffff;
+    --text-muted: #94a3b8;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --hover: rgba(255, 255, 255, 0.1);
+    --font: 'Inter', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font);
+    background: linear-gradient(135deg, #1e1e2f 0%, #16213e 100%);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Glass Effect */
+.glass {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Layout */
+#app {
+    display: flex;
+    height: 100%;
+}
+
+/* Login Screen */
+#login-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+}
+
+.login-container {
+    padding: 2rem;
+    width: 350px;
+    text-align: center;
+}
+
+.login-container h1 {
+    margin-bottom: 2rem;
+    color: var(--primary);
+}
+
+input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1.5rem;
+    color: var(--primary);
+    text-align: center;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: var(--text-muted);
+}
+
+.sidebar li:hover, .sidebar li.active {
+    background: var(--hover);
+    color: var(--text);
+    border-left: 3px solid var(--primary);
+}
+
+.logout-btn {
+    margin-top: auto;
+    color: #ef4444 !important;
+}
+
+/* Main Content */
+.content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    position: relative;
+}
+
+.page {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--text);
+}
+
+.stat-card .value.error {
+    color: #ef4444;
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+th {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+tr:hover {
+    background: rgba(255,255,255,0.02);
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+.error-msg {
+    color: #ef4444;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+select {
+    background: #1e293b;
+    color: white;
+    border: 1px solid #334155;
+    padding: 0.3rem;
+    border-radius: 4px;
+}

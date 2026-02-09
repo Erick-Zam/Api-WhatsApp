@@ -10,18 +10,55 @@ export default function Dashboard() {
     const [isCreating, setIsCreating] = useState(false);
     const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
 
-    const fetchSessions = async () => {
-        try {
-            const res = await fetch('http://localhost:3001/sessions');
-            const data = await res.json();
-            setSessions(data);
+    const [token, setToken] = useState<string | null>(null);
 
-            // Also fetch QR for any session that is connecting/disconnected
-            data.forEach((s: any) => {
-                if (s.status !== 'CONNECTED') {
-                    fetchQr(s.id);
-                }
-            });
+    useEffect(() => {
+        const t = localStorage.getItem('token');
+        if (!t) {
+            window.location.href = '/login';
+        } else {
+            setToken(t);
+        }
+    }, []);
+
+    const authorizedFetch = async (url: string, options: RequestInit = {}) => {
+        if (!token) return null;
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+            throw new Error('Unauthorized');
+        }
+        return res;
+    };
+
+    const fetchSessions = async () => {
+        if (!token) return;
+        try {
+            const res = await authorizedFetch('http://localhost:3001/sessions');
+            if (!res || !res.ok) return;
+
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setSessions(data);
+
+                // Also fetch QR for any session that is connecting/disconnected
+                data.forEach((s: any) => {
+                    if (s.status !== 'CONNECTED') {
+                        fetchQr(s.id);
+                    }
+                });
+            } else {
+                console.error('Invalid sessions data:', data);
+            }
             setLoading(false);
         } catch (error) {
             console.error('Error fetching sessions:', error);
@@ -30,8 +67,11 @@ export default function Dashboard() {
     };
 
     const fetchQr = async (sessionId: string) => {
+        if (!token) return;
         try {
-            const res = await fetch(`http://localhost:3001/qr?sessionId=${sessionId}`);
+            const res = await authorizedFetch(`http://localhost:3001/qr?sessionId=${sessionId}`);
+            if (!res || !res.ok) return;
+
             const data = await res.json();
             if (data.qr) {
                 setQrCodes(prev => ({ ...prev, [sessionId]: data.qr }));
@@ -45,18 +85,19 @@ export default function Dashboard() {
     };
 
     useEffect(() => {
-        fetchSessions();
-        const interval = setInterval(fetchSessions, 5000);
-        return () => clearInterval(interval);
-    }, []);
+        if (token) {
+            fetchSessions();
+            const interval = setInterval(fetchSessions, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [token]);
 
     const handleCreateSession = async () => {
-        if (!newSessionId) return;
+        if (!newSessionId || isCreating || !token) return;
         setIsCreating(true);
         try {
-            await fetch('http://localhost:3001/whatsapp/connect', {
+            await authorizedFetch('http://localhost:3001/whatsapp/connect', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId: newSessionId })
             });
             setNewSessionId('');
@@ -71,7 +112,7 @@ export default function Dashboard() {
     const handleDelete = async (sessionId: string) => {
         if (!confirm(`Are you sure you want to permanently delete session '${sessionId}'? This cannot be undone.`)) return;
         try {
-            await fetch(`http://localhost:3001/sessions/${sessionId}`, {
+            await authorizedFetch(`http://localhost:3001/sessions/${sessionId}`, {
                 method: 'DELETE'
             });
             // Clear QR code if exists
@@ -89,9 +130,8 @@ export default function Dashboard() {
     const handleDisconnect = async (sessionId: string) => {
         if (!confirm(`Disconnect session '${sessionId}'?`)) return;
         try {
-            await fetch('http://localhost:3001/whatsapp/logout', {
+            await authorizedFetch('http://localhost:3001/whatsapp/logout', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })
             });
             fetchSessions();
@@ -102,9 +142,8 @@ export default function Dashboard() {
 
     const handleReconnect = async (sessionId: string) => {
         try {
-            await fetch('http://localhost:3001/whatsapp/connect', {
+            await authorizedFetch('http://localhost:3001/whatsapp/connect', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId })
             });
             fetchQr(sessionId);
@@ -163,8 +202,8 @@ export default function Dashboard() {
                         <div className="p-4 bg-gray-50 dark:bg-black/40 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center">
                             <h3 className="font-bold text-gray-800 dark:text-white">{session.id}</h3>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${session.status === 'CONNECTED'
-                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                 }`}>
                                 {session.status}
                             </span>

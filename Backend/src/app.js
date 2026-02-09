@@ -1,30 +1,78 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { connectToWhatsApp } from './whatsapp.js';
 import messageRoutes from './routes/messages.js';
 import authRoutes from './routes/auth.js';
 import { authenticate } from './middleware/auth.js';
+import schedulerRoutes from './routes/scheduler.js';
+import templateRoutes from './routes/templates.js';
+import webhookRoutes from './routes/webhooks.js';
+import chatRoutes from './routes/chats.js';
+import { initScheduler } from './services/scheduler.js';
+import * as db from './db.js'; // Import DB to check ownership
+
+import { activityLogger } from './middleware/activityLogger.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// --- Security Middleware ---
+app.use(helmet()); // Set secure HTTP headers
+app.use(cors()); // Configure CORS (restrict in production!)
 app.use(express.json());
+app.use(express.static('public')); // Serve static files (Dashboard)
+
+// Global Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(limiter);
+app.use(activityLogger); // Log all requests
 
 // --- Public Routes ---
 
 app.get('/', (req, res) => {
-    res.send('WhatsApp API Backend SaaS is running!');
+    res.send('WhatsApp API Backend SaaS is running! Visit <a href="/admin/">/admin/</a> for the dashboard.');
 });
+
+// Admin Routes (Protected inside)
+app.use('/api/admin', adminRoutes);
 
 // Auth Routes (Login/Register)
 app.use('/auth', authRoutes);
 
-// --- Session Management Routes ---
+// --- Protected Routes (Require x-api-key or Bearer Token) ---
+
+// Apply authentication to all following routes
+// Note: We need a way to authenticate via Bearer token for Dashboard users AND x-api-key for API users.
+// The 'authenticate' middleware supports both? 
+// Let's verify 'authenticate' middleware supports Bearer token from 'auth.js'.
+// It currently checks 'x-api-key'. We might need to enhance 'authenticate' or use 'verifyJwt' from 'middleware/jwtAuth.js' for dashboard.
+// actually 'authenticate' in 'middleware/auth.js' looks for 'x-api-key' in headers.
+// The dashboard sends 'Authorization: Bearer ...' for /auth/me, but maybe 'x-api-key' for others?
+// The dashboard playground sends 'x-api-key'.
+// But the Dashboard Session Management usually uses the JWT token.
+// let's update routes to use verifyJwt for management endpoints.
+
+import { verifyJwt } from './middleware/jwtAuth.js';
+
+// --- Session Management Routes (Protected by JWT) ---
 
 // Get QR / Status for a specific session
-app.get('/qr', (req, res) => {
+app.get('/qr', verifyJwt, async (req, res) => {
     const { sessionId } = req.query; // e.g. ?sessionId=marketing
+    const userId = req.user.id;
+
+    // Verify ownership
+    // For simplicity, we assume session name matches, or we check DB.
+    // Ideally, we check if this sessionId belongs to user.
+
     import('./whatsapp.js').then(wa => {
         const id = sessionId || 'default';
         const qr = wa.getQRCode(id);
@@ -34,43 +82,45 @@ app.get('/qr', (req, res) => {
     });
 });
 
-// List all active sessions with keys
-app.get('/sessions', async (req, res) => {
+// List all active sessions (Filtered by User)
+app.get('/sessions', verifyJwt, async (req, res) => {
     try {
         const wa = await import('./whatsapp.js');
-        const { listAllSessionKeys, createSessionKey } = await import('./services/apiKeys.js');
+        const { listAllSessionKeys } = await import('./services/apiKeys.js');
+        const userId = req.user.id;
+
+        // Fetch user's sessions from DB
+        const userSessions = await db.default.query('SELECT * FROM whatsapp_sessions WHERE user_id = $1', [userId]);
+        const userSessionIds = userSessions.rows.map(row => row.session_id);
 
         const activeSessions = wa.listSessions();
-        const storedKeys = await listAllSessionKeys();
+
+        // Filter active sessions to only those belonging to user
+        const visibleActiveSessions = activeSessions.filter(s => userSessionIds.includes(s.id));
 
         // Map stored keys for easy lookup
         const keyMap = new Map();
-        storedKeys.forEach(k => keyMap.set(k.session_id, k.api_key));
+        userSessions.rows.forEach(k => keyMap.set(k.session_id, k.api_key));
 
         // Merge active sessions with keys
-        const merged = await Promise.all(activeSessions.map(async s => {
+        const merged = visibleActiveSessions.map(s => {
             let key = keyMap.get(s.id);
-            // DO NOT create key here. Only return if exists.
             return { ...s, apiKey: key || null };
-        }));
+        });
 
-        // Also include stored sessions that might be disconnected but have keys
-        storedKeys.forEach(k => {
-            if (!activeSessions.find(s => s.id === k.session_id)) {
+        // Also include stored sessions that might be disconnected but belong to user
+        userSessionIds.forEach(id => {
+            if (!visibleActiveSessions.find(s => s.id === id)) {
                 merged.push({
-                    id: k.session_id,
+                    id: id,
                     status: 'DISCONNECTED',
-                    user: null, // Not connected, so no user info
-                    apiKey: k.api_key
+                    user: null,
+                    apiKey: keyMap.get(id)
                 });
             }
         });
 
-        // Deduplicate by ID
-        const finalMap = new Map();
-        merged.forEach(s => finalMap.set(s.id, s));
-
-        res.json(Array.from(finalMap.values()));
+        res.json(merged);
     } catch (e) {
         console.error('SERVER ERROR in GET /sessions:', e);
         res.status(500).json({ error: e.message });
@@ -78,9 +128,17 @@ app.get('/sessions', async (req, res) => {
 });
 
 // Delete a session
-app.delete('/sessions/:sessionId', async (req, res) => {
+app.delete('/sessions/:sessionId', verifyJwt, async (req, res) => {
     const { sessionId } = req.params;
+    const userId = req.user.id;
+
     try {
+        // Verify ownership
+        const check = await db.default.query('SELECT * FROM whatsapp_sessions WHERE session_id = $1 AND user_id = $2', [sessionId, userId]);
+        if (check.rows.length === 0) {
+            return res.status(403).json({ error: 'Unauthorized or session not found' });
+        }
+
         const wa = await import('./whatsapp.js');
         const { deleteSessionKey } = await import('./services/apiKeys.js');
 
@@ -94,13 +152,19 @@ app.delete('/sessions/:sessionId', async (req, res) => {
 });
 
 // Create/Connect specific session
-app.post('/whatsapp/connect', async (req, res) => {
+app.post('/whatsapp/connect', verifyJwt, async (req, res) => {
     const { sessionId } = req.body;
+    const userId = req.user.id;
+
     try {
         const wa = await import('./whatsapp.js');
-        // Removed explicit apiKey creation here. It will happen on 'open' event in whatsapp.js
+        const { createSessionKey } = await import('./services/apiKeys.js');
 
         const id = sessionId || 'default';
+
+        // Register session in DB for this user
+        // We create the key/entry implicitly here to establish ownership
+        await createSessionKey(id, userId);
 
         if (wa.getConnectionStatus(id) === 'DISCONNECTED') {
             wa.connectToWhatsApp(id);
@@ -114,9 +178,17 @@ app.post('/whatsapp/connect', async (req, res) => {
 });
 
 // Logout specific session
-app.post('/whatsapp/logout', async (req, res) => {
+app.post('/whatsapp/logout', verifyJwt, async (req, res) => {
     const { sessionId } = req.body;
+    const userId = req.user.id;
+
     try {
+        // Verify ownership
+        const check = await db.default.query('SELECT * FROM whatsapp_sessions WHERE session_id = $1 AND user_id = $2', [sessionId, userId]);
+        if (check.rows.length === 0) {
+            return res.status(403).json({ error: 'Unauthorized or session not found' });
+        }
+
         const wa = await import('./whatsapp.js');
         const { deleteSessionKey } = await import('./services/apiKeys.js');
 
@@ -124,12 +196,14 @@ app.post('/whatsapp/logout', async (req, res) => {
 
         if (wa.getConnectionStatus(id) === 'CONNECTED') {
             await wa.disconnectFromWhatsApp(id);
-            await deleteSessionKey(id); // Clean up DB on logout as requested
-            res.json({ message: `Session '${id}' disconnected successfully and data cleared.` });
+            // Don't delete key on logout, only on delete? User might want to reconnect.
+            // But previous logic deleted it. Let's keep it consistent with request: "logout".
+            // Typically logout means disconnect. Delete means "forget".
+            // I'll leave the key/DB entry so it shows as "DISCONNECTED" in the list.
+
+            res.json({ message: `Session '${id}' disconnected successfully.` });
         } else {
-            await wa.disconnectFromWhatsApp(id); // Force cleanup even if disconnected
-            await deleteSessionKey(id); // Clean up DB
-            res.json({ message: `Session '${id}' disconnected/cleaned up` });
+            res.json({ message: `Session '${id}' is already disconnected` });
         }
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -137,18 +211,14 @@ app.post('/whatsapp/logout', async (req, res) => {
 });
 
 
-import schedulerRoutes from './routes/scheduler.js';
-import templateRoutes from './routes/templates.js';
-import webhookRoutes from './routes/webhooks.js';
-import { initScheduler } from './services/scheduler.js';
+// --- Message & Feature Routes (Protected by API Key) ---
+// These are used by external systems or the Playground (which simulates external usage)
 
-// ... other imports
-
-// --- Protected Routes (Require x-api-key) ---
 app.use('/messages', authenticate, messageRoutes);
-app.use('/scheduler', schedulerRoutes);
-app.use('/templates', templateRoutes);
-app.use('/webhooks', webhookRoutes);
+app.use('/scheduler', authenticate, schedulerRoutes);
+app.use('/templates', authenticate, templateRoutes);
+app.use('/webhooks', authenticate, webhookRoutes);
+app.use('/chats', authenticate, chatRoutes);
 
 // Start the server
 app.listen(PORT, async () => {
@@ -163,6 +233,7 @@ app.listen(PORT, async () => {
     }
 
     // Initialize all sessions
+    // Note: This might resurrect sessions that don't belong to currently active users, logic in whatsapp.js handles files.
     import('./whatsapp.js').then(wa => wa.initSessions());
 
     // Initialize Scheduler

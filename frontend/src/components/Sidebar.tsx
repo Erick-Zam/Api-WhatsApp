@@ -1,13 +1,28 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Sidebar() {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [userRole, setUserRole] = useState<string>('');
 
     const isActive = (path: string) => pathname === path;
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            fetch('http://localhost:3001/auth/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.user?.role) setUserRole(data.user.role);
+                })
+                .catch(err => console.error(err));
+        }
+    }, []);
 
     return (
         <nav
@@ -59,6 +74,21 @@ export default function Sidebar() {
                         {!isCollapsed && <span className="ml-3 font-medium">Logs & Activity</span>}
                     </Link>
                 </li>
+
+                {userRole === 'admin' && (
+                    <li>
+                        <Link
+                            href="/dashboard/admin"
+                            className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/admin') ? 'bg-purple-900/40 text-purple-200 border border-purple-500/30' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                }`}
+                            title={isCollapsed ? "Administration" : ""}
+                        >
+                            <span className="text-xl">🛡️</span>
+                            {!isCollapsed && <span className="ml-3 font-medium">Administration</span>}
+                        </Link>
+                    </li>
+                )}
+
                 <li>
                     <Link
                         href="/dashboard/settings"
@@ -92,6 +122,17 @@ export default function Sidebar() {
                     >
                         <span className="text-xl">🧪</span>
                         {!isCollapsed && <span className="ml-3 font-medium">API Playground</span>}
+                    </Link>
+                </li>
+                <li>
+                    <Link
+                        href="/dashboard/chats"
+                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/chats') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                            }`}
+                        title={isCollapsed ? "Chats" : ""}
+                    >
+                        <span className="text-xl">💬</span>
+                        {!isCollapsed && <span className="ml-3 font-medium">Chats</span>}
                     </Link>
                 </li>
             </ul>

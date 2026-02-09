@@ -24,7 +24,12 @@ router.post('/register', async (req, res) => {
 router.get('/me', verifyJwt, async (req, res) => {
     try {
         const { id } = req.user;
-        const result = await db.query('SELECT id, username, email, api_key, role, created_at FROM api_users WHERE id = $1', [id]);
+        const result = await db.query(`
+            SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at 
+            FROM api_users u 
+            LEFT JOIN roles r ON u.role_id = r.id 
+            WHERE u.id = $1
+        `, [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
