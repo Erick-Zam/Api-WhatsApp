@@ -28,7 +28,7 @@ app.use(express.static('public')); // Serve static files (Dashboard)
 // Global Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 3000, // Increased limit to support dashboard polling (approx 5s interval)
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -167,8 +167,11 @@ app.post('/whatsapp/connect', verifyJwt, async (req, res) => {
         await createSessionKey(id, userId);
 
         if (wa.getConnectionStatus(id) === 'DISCONNECTED') {
-            wa.connectToWhatsApp(id);
-            res.json({ message: `Connection process started for session '${id}'` });
+            // Force a fresh QR by cleaning up potentially stale session data 
+            // This is critical for users who are stuck in a "Connecting..." loop 
+            // or have invalid credentials.
+            wa.connectToWhatsApp(id, { deleteOld: true });
+            res.json({ message: `Connection process started for session '${id}' (Fresh Start)` });
         } else {
             res.status(400).json({ error: `Session '${id}' is already connected or connecting` });
         }

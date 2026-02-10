@@ -65,6 +65,17 @@ export default function Sidebar() {
                 </li>
                 <li>
                     <Link
+                        href="/dashboard/chats"
+                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/chats') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                            }`}
+                        title={isCollapsed ? "Chats" : ""}
+                    >
+                        <span className="text-xl">💬</span>
+                        {!isCollapsed && <span className="ml-3 font-medium">Chats</span>}
+                    </Link>
+                </li>
+                <li>
+                    <Link
                         href="/dashboard/logs"
                         className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/logs') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                             }`}
@@ -72,6 +83,30 @@ export default function Sidebar() {
                     >
                         <span className="text-xl">📊</span>
                         {!isCollapsed && <span className="ml-3 font-medium">Logs & Activity</span>}
+                    </Link>
+                </li>
+                <li>
+                    <Link
+                        href="/dashboard/playground"
+                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-all font-mono text-sm border ${isActive('/dashboard/playground')
+                            ? 'bg-blue-900/40 text-blue-200 border-blue-500/50'
+                            : 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 text-blue-300 border-blue-900/50 hover:bg-blue-900/30'
+                            }`}
+                        title={isCollapsed ? "API Playground" : ""}
+                    >
+                        <span className="text-xl">🧪</span>
+                        {!isCollapsed && <span className="ml-3 font-medium">API Playground</span>}
+                    </Link>
+                </li>
+                <li>
+                    <Link
+                        href="/dashboard/docs"
+                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/docs') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                            }`}
+                        title={isCollapsed ? "API Docs" : ""}
+                    >
+                        <span className="text-xl">📚</span>
+                        {!isCollapsed && <span className="ml-3 font-medium">API Docs</span>}
                     </Link>
                 </li>
 
@@ -98,41 +133,6 @@ export default function Sidebar() {
                     >
                         <span className="text-xl">⚙️</span>
                         {!isCollapsed && <span className="ml-3 font-medium">Settings</span>}
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        href="/dashboard/docs"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/docs') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            }`}
-                        title={isCollapsed ? "API Docs" : ""}
-                    >
-                        <span className="text-xl">📚</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">API Docs</span>}
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        href="/dashboard/playground"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-all font-mono text-sm border ${isActive('/dashboard/playground')
-                            ? 'bg-blue-900/40 text-blue-200 border-blue-500/50'
-                            : 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 text-blue-300 border-blue-900/50 hover:bg-blue-900/30'
-                            }`}
-                        title={isCollapsed ? "API Playground" : ""}
-                    >
-                        <span className="text-xl">🧪</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">API Playground</span>}
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        href="/dashboard/chats"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/chats') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            }`}
-                        title={isCollapsed ? "Chats" : ""}
-                    >
-                        <span className="text-xl">💬</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">Chats</span>}
                     </Link>
                 </li>
             </ul>

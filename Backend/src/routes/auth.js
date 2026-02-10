@@ -27,7 +27,7 @@ router.get('/me', verifyJwt, async (req, res) => {
         const result = await db.query(`
             SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at 
             FROM api_users u 
-            LEFT JOIN roles r ON u.role_id = r.id 
+            LEFT JOIN roles r ON u.role_id = r.id
             WHERE u.id = $1
         `, [id]);
 

@@ -1,4 +1,4 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, delay } from '@whiskeysockets/baileys';
+import makeWASocket, { useMultiFileAuthState, DisconnectReason, delay, fetchLatestBaileysVersion } from '@whiskeysockets/baileys';
 import { makeInMemoryStore } from './services/simpleStore.js';
 import pino from 'pino';
 import fs from 'fs';
@@ -37,9 +37,21 @@ const getSession = (sessionId = 'default') => sessions.get(sessionId);
 /**
  * Connect to WhatsApp with a specific session ID
  */
-async function connectToWhatsApp(sessionId = 'default') {
+async function connectToWhatsApp(sessionId = 'default', options = {}) {
     // Store in subfolder of the mounted volume for persistence
     const sessionDir = path.join(AUTH_DIR, sessionId);
+
+    // Force cleanup if requested
+    if (options.deleteOld) {
+        try {
+            if (fs.existsSync(sessionDir)) {
+                fs.rmSync(sessionDir, { recursive: true, force: true });
+                console.log(`[Connect] Forced cleanup of session '${sessionId}' before start.`);
+            }
+        } catch (e) {
+            console.error(`[Connect] Error cleaning up session '${sessionId}':`, e);
+        }
+    }
 
     // Ensure parent dir exists
     if (!fs.existsSync(AUTH_DIR)) {
@@ -48,12 +60,19 @@ async function connectToWhatsApp(sessionId = 'default') {
 
     const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
 
+    // Fetch latest version to avoid 405 Method Not Allowed (Connection Failure)
+    const { version, isLatest } = await fetchLatestBaileysVersion();
+    console.log(`[Connect] Using WA v${version.join('.')} (isLatest: ${isLatest})`);
+
     const sock = makeWASocket({
+        version,
         auth: state,
-        printQRInTerminal: sessionId === 'default', // Only print default QR to terminal
+        printQRInTerminal: false, // We handle QR via API/Sockets
         logger: pino({ level: 'silent' }),
-        browser: [`WhatsApp API (${sessionId})`, 'Chrome', '1.0.0'],
-        syncFullHistory: true, // Sync full history for better chat experience
+        browser: ['WhatsApp SaaS', 'Chrome', '1.0.0'], // Standard browser signature
+        syncFullHistory: true, // Sync full history for comprehensive chat view
+        markOnlineOnConnect: false, // Only mark online when active
+
         getMessage: async (key) => {
             if (store) {
                 const msg = await store.loadMessage(key.remoteJid, key.id);
@@ -83,12 +102,17 @@ async function connectToWhatsApp(sessionId = 'default') {
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
 
+        // DEBUG: Force print everything
+        console.log(`[DEBUG_CONNECTION] Session ${sessionId} Update:`, JSON.stringify(update, null, 2));
+
         // Trigger generic connection update webhook
         triggerWebhooks(sessionId, 'connection.update', { connection, qr: qr ? 'QR_RECEIVED' : undefined });
 
         if (qr) {
             qrCodes.set(sessionId, qr);
-            console.log(`QR Code received for session: ${sessionId}`);
+            console.log(`[QR GENERATED] Session '${sessionId}' - Length: ${qr.length}`);
+        } else {
+            console.log(`[QR UPDATE] Session '${sessionId}' - Updates (no QR in this packet)`);
         }
 
         if (connection === 'open') {
@@ -136,6 +160,17 @@ async function connectToWhatsApp(sessionId = 'default') {
                 }
             }
         }
+    });
+
+    // Listen for contacts update
+    sock.ev.on('contacts.update', (update) => {
+        console.log(`[${sessionId}] Contacts Update:`, update.length);
+        triggerWebhooks(sessionId, 'contacts.update', update);
+    });
+
+    sock.ev.on('contacts.upsert', (contacts) => {
+        console.log(`[${sessionId}] Contacts Upsert:`, contacts.length);
+        triggerWebhooks(sessionId, 'contacts.upsert', contacts);
     });
 
     // Listen for status updates (read receipts etc)
@@ -411,7 +446,32 @@ const sendReply = async (jid, text, quotedMessageId, sessionId = 'default') => {
 const getChats = (sessionId) => {
     const store = sessionStores.get(sessionId);
     if (!store) return [];
-    return store.chats.all();
+
+    const chats = store.chats.all();
+    const contacts = store.contacts; // Direct access to the contacts object map
+
+    // Enrich with names
+    return chats.map(chat => {
+        const contact = contacts[chat.id];
+
+        // Priority: Chat Name > Contact Name > PushName > Verified Name > Phone Number
+        const displayName = chat.name ||
+            contact?.name ||
+            contact?.notify ||
+            contact?.verifiedName ||
+            chat.id.replace('@s.whatsapp.net', '');
+
+        return {
+            ...chat,
+            name: displayName
+        };
+    });
+};
+
+const getContacts = (sessionId) => {
+    const store = sessionStores.get(sessionId);
+    if (!store) return {};
+    return store.contacts;
 };
 
 const getMessages = (sessionId, jid, limit = 25) => {

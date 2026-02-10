@@ -29,7 +29,7 @@ export const authenticate = async (req, res, next) => {
         const userResult = await db.query('SELECT * FROM api_users WHERE api_key = $1', [apiKey]);
         if (userResult.rows.length > 0) {
             req.user = userResult.rows[0];
-            req.sessionId = req.body.sessionId || 'default'; // Default if not specified
+            req.sessionId = (req.body && req.body.sessionId) || req.query.sessionId || 'default'; // Check query param too
             return next();
         }
 

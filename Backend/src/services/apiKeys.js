@@ -24,11 +24,11 @@ export const createSessionKey = async (sessionId, userId = null) => {
     const newKey = generateApiKey();
 
     await db.query(
-        `INSERT INTO whatsapp_sessions (session_id, api_key, user_id, session_name, status, created_at, updated_at) 
-         VALUES ($1, $2, $3, $4, 'DISCONNECTED', NOW(), NOW()) 
+        `INSERT INTO whatsapp_sessions (session_id, api_key, user_id, status, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'DISCONNECTED', NOW(), NOW()) 
          ON CONFLICT (session_id) 
          DO UPDATE SET api_key = EXCLUDED.api_key WHERE whatsapp_sessions.api_key IS NULL`,
-        [sessionId, newKey, userId, sessionId]
+        [sessionId, newKey, userId]
     );
 
     return newKey;

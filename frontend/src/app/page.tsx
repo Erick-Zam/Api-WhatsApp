@@ -37,6 +37,56 @@ export default function Home() {
           <p className="text-gray-400">Send polls, stickers, and location data.</p>
         </div>
       </div>
+
+      <div className="mt-24 max-w-4xl text-left border-t border-zinc-800 pt-16">
+        <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
+          System Capabilities
+        </h2>
+
+        <div className="grid md:grid-cols-2 gap-12">
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">🚀 Advanced Messaging</h4>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Go beyond simple text. Send images, videos, audio, PDF documents, contacts, and location coordinates directly through the API.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">📊 Real-time Monitoring</h4>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Watch message status updates (sent, delivered, read) in real-time. Use webhooks to integrate these events into your own CRM or external systems.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">🤖 Automated Workflows</h4>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Create automated responses, chatbots, and scheduled messages. Ideal for customer support, appointment reminders, and marketing campaigns.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">🔐 Secure & Isolated</h4>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Each session runs in its own isolated environment. User data and authentication tokens are encrypted and securely stored.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">👥 Group Management</h4>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Programmatically create groups, add/remove participants, and update group settings. Manage communities at scale.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-2">📝 Interactive Polls</h4>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Engage your audience with native WhatsApp polls. Collect feedback and survey results instantly via the API.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

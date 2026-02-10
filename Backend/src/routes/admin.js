@@ -82,6 +82,8 @@ router.get('/logs/activity', async (req, res) => {
  * GET /users
  * List all users.
  */
+// GET /users
+// List all users.
 router.get('/users', async (req, res) => {
     try {
         const users = await query(`

@@ -16,11 +16,14 @@ export const registerUser = async (email, password, username) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const apiKey = `key_${crypto.randomBytes(16).toString('hex')}`;
 
-    // Get default role ID (general)
+    // 3. Get Role ID for 'general'
     const roleRes = await db.query("SELECT id FROM roles WHERE name = 'general'");
-    const roleId = roleRes.rows[0]?.id;
+    if (roleRes.rows.length === 0) {
+        throw new Error("System error: Default role 'general' not found");
+    }
+    const roleId = roleRes.rows[0].id;
 
-    // 3. Insert into DB (using role_id)
+    // 4. Insert into DB
     const insertRes = await db.query(
         `INSERT INTO api_users (username, email, password_hash, api_key, role_id) 
          VALUES ($1, $2, $3, $4, $5) 
@@ -29,17 +32,17 @@ export const registerUser = async (email, password, username) => {
     );
 
     const newUser = insertRes.rows[0];
-    newUser.role = 'general'; // Manually add for response consistency
+    newUser.role = 'general'; // Add manually for consistent response
 
     return newUser;
 };
 
 export const loginUser = async (email, password) => {
-    // 1. Find user with role name
+    // 1. Find user AND role
     const res = await db.query(`
-        SELECT u.*, r.name as role_name 
-        FROM api_users u 
-        LEFT JOIN roles r ON u.role_id = r.id 
+        SELECT u.id, u.username, u.email, u.password_hash, u.api_key, u.created_at, r.name as role_name
+        FROM api_users u
+        LEFT JOIN roles r ON u.role_id = r.id
         WHERE u.email = $1
     `, [email]);
 
@@ -55,10 +58,9 @@ export const loginUser = async (email, password) => {
         throw new Error('Invalid credentials');
     }
 
-    // Use role_name from joined table, or fallback to user.role if migration incomplete (but we should prefer role_name)
-    const role = user.role_name || user.role || 'general';
+    // 3. Sign Token (using role name)
+    const role = user.role_name || 'general'; // Fallback if join failed
 
-    // 3. Sign Token
     const token = jwt.sign(
         { id: user.id, email: user.email, role: role },
         SECRET_KEY,
