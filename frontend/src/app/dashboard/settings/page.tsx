@@ -37,7 +37,7 @@ export default function SettingsPage() {
         const token = localStorage.getItem('token');
 
         try {
-            const res = await fetch('http://localhost:3001/auth/change-password', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/change-password`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export default function SettingsPage() {
 
         try {
             // Fetch User Profile
-            const resUser = await fetch('http://localhost:3001/auth/me', {
+            const resUser = await fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -89,7 +89,7 @@ export default function SettingsPage() {
             }
 
             // Fetch Sessions
-            const resSessions = await fetch('http://localhost:3001/sessions', {
+            const resSessions = await fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/sessions`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

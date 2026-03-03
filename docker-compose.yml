@@ -7,8 +7,8 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: whatsapp_saas
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - db_data:/var/lib/postgresql/data
       # Initialize tables automatically on first run
@@ -18,35 +18,34 @@ services:
   backend:
     build: ./Backend
     container_name: whatsapp-backend
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     environment:
       PORT: 3001
       DATABASE_URL: postgres://admin:password@db:5432/whatsapp_saas
       JWT_SECRET: docker-secret-key
     volumes:
       # Persist WhatsApp session data
-      - ./auth_info_baileys:/app/auth_info_baileys
-      # For easier development (live reload), mount source - optional
-      - ./Backend/src:/app/src
+      - whatsapp_sessions:/app/auth_info_baileys
     depends_on:
       - db
-    command: npm run dev
     restart: always
 
   # 3. Frontend Dashboard
   frontend:
     build: ./frontend
     container_name: whatsapp-frontend
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
-      # In Docker network, backend is at 'http://backend:3001'
-      # But for client-side fetching (browser), we still use localhost or public IP
-      NEXT_PUBLIC_API_URL: http://localhost:3001
+      # URL base del proxy
+      NEXT_PUBLIC_API_URL: /api
+      # URL interna del backend dentro de la red docker para el rewrite de Next.js
+      BACKEND_INTERNAL_URL: http://backend:3001
     depends_on:
       - backend
     restart: always
 
 volumes:
   db_data:
+  whatsapp_sessions:

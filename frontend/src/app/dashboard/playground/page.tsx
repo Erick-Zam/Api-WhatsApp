@@ -31,7 +31,7 @@ export default function Playground() {
         const token = localStorage.getItem('token');
         if (token) {
             // Get API Key
-            fetch('http://localhost:3001/auth/me', {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -41,7 +41,7 @@ export default function Playground() {
                 .catch(err => console.error(err));
 
             // Get Sessions
-            fetch('http://localhost:3001/sessions', {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/sessions`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -123,19 +123,19 @@ export default function Playground() {
         let method = 'POST';
 
         if (category === 'messaging') {
-            endpoint = `http://localhost:3001/messages/${messageType}`;
+            endpoint = `/api/messages/${messageType}`;
         } else {
             // Group Endpoints
-            if (groupAction === 'create') endpoint = `http://localhost:3001/chats/groups`;
+            if (groupAction === 'create') endpoint = `/api/chats/groups`;
             else if (groupAction === 'metadata') {
-                endpoint = `http://localhost:3001/chats/groups/${encodeURIComponent(groupJid)}?sessionId=${selectedSession}`;
+                endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}?sessionId=${selectedSession}`;
                 method = 'GET';
             }
             else if (groupAction === 'participants') {
-                endpoint = `http://localhost:3001/chats/groups/${encodeURIComponent(groupJid)}/participants`;
+                endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}/participants`;
             }
             else if (groupAction === 'invite-code') {
-                endpoint = `http://localhost:3001/chats/groups/${encodeURIComponent(groupJid)}/invite-code?sessionId=${selectedSession}`;
+                endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}/invite-code?sessionId=${selectedSession}`;
                 method = 'GET';
             }
         }

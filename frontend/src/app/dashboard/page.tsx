@@ -43,7 +43,7 @@ export default function Dashboard() {
     const fetchSessions = async () => {
         if (!token) return;
         try {
-            const res = await authorizedFetch('http://localhost:3001/sessions');
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/sessions`);
             if (!res || !res.ok) return;
 
             const data = await res.json();
@@ -73,7 +73,7 @@ export default function Dashboard() {
     const fetchQr = async (sessionId: string) => {
         if (!token) return;
         try {
-            const res = await authorizedFetch(`http://localhost:3001/qr?sessionId=${sessionId}`);
+            const res = await authorizedFetch(`/api/qr?sessionId=${sessionId}`);
             if (!res || !res.ok) return;
 
             const data = await res.json();
@@ -100,7 +100,7 @@ export default function Dashboard() {
         if (!newSessionId || isCreating || !token) return;
         setIsCreating(true);
         try {
-            await authorizedFetch('http://localhost:3001/whatsapp/connect', {
+            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/whatsapp/connect`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId: newSessionId })
             });
@@ -116,7 +116,7 @@ export default function Dashboard() {
     const handleDelete = async (sessionId: string) => {
         if (!confirm(`Are you sure you want to permanently delete session '${sessionId}'? This cannot be undone.`)) return;
         try {
-            await authorizedFetch(`http://localhost:3001/sessions/${sessionId}`, {
+            await authorizedFetch(`/api/sessions/${sessionId}`, {
                 method: 'DELETE'
             });
             // Clear QR code if exists
@@ -134,7 +134,7 @@ export default function Dashboard() {
     const handleDisconnect = async (sessionId: string) => {
         if (!confirm(`Disconnect session '${sessionId}'?`)) return;
         try {
-            await authorizedFetch('http://localhost:3001/whatsapp/logout', {
+            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/whatsapp/logout`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId })
             });
@@ -149,7 +149,7 @@ export default function Dashboard() {
             console.log(`[Dashboard] Initiating connection for ${sessionId}...`);
             setQrLoading(prev => ({ ...prev, [sessionId]: true }));
 
-            const res = await authorizedFetch('http://localhost:3001/whatsapp/connect', {
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/whatsapp/connect`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId })
             });
@@ -170,7 +170,7 @@ export default function Dashboard() {
                 // Stop if we have navigatged away or component unmounted (simple check)
 
                 try {
-                    const qrRes = await authorizedFetch(`http://localhost:3001/qr?sessionId=${sessionId}`);
+                    const qrRes = await authorizedFetch(`/api/qr?sessionId=${sessionId}`);
                     if (qrRes && qrRes.ok) {
                         const data = await qrRes.json();
                         if (data.qr) {

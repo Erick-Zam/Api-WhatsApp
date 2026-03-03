@@ -85,7 +85,7 @@ export default function ChatsPage() {
         const token = localStorage.getItem('token');
         if (token) {
             // Get API Key
-            fetch('http://localhost:3001/auth/me', {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -95,7 +95,7 @@ export default function ChatsPage() {
                 .catch(err => console.error(err));
 
             // Get Sessions
-            fetch('http://localhost:3001/sessions', {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/sessions`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -115,7 +115,7 @@ export default function ChatsPage() {
         if (!selectedSession || !apiKey) return;
 
         setLoadingChats(true);
-        fetch(`http://localhost:3001/chats?sessionId=${selectedSession}`, {
+        fetch(`/api/chats?sessionId=${selectedSession}`, {
             headers: { 'x-api-key': apiKey }
         })
             .then(res => res.json())
@@ -151,7 +151,7 @@ export default function ChatsPage() {
 
         setLoadingMessages(true);
         const encodedJid = encodeURIComponent(selectedChat);
-        fetch(`http://localhost:3001/chats/${encodedJid}/messages?sessionId=${selectedSession}&limit=50`, {
+        fetch(`/api/chats/${encodedJid}/messages?sessionId=${selectedSession}&limit=50`, {
             headers: { 'x-api-key': apiKey }
         })
             .then(res => res.json())
@@ -178,7 +178,7 @@ export default function ChatsPage() {
 
         setSending(true);
         try {
-            const res = await fetch('http://localhost:3001/messages/text', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/messages/text`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -13,7 +13,7 @@ export default function Sidebar() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            fetch('http://localhost:3001/auth/me', {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())

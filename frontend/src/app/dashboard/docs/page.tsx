@@ -93,7 +93,7 @@ export default function Docs() {
                             <div className="px-4 py-2 bg-zinc-950/50 border-b border-zinc-800 text-xs text-zinc-500 font-mono">Example Request</div>
                             <div className="p-6 overflow-x-auto">
                                 <pre className="text-sm font-mono leading-relaxed text-blue-300">
-                                    {`curl -X POST http://localhost:3001/messages/text \\
+                                    {`curl -X POST /api/messages/text \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_SESSION_API_KEY" \\
   -d '{"phone": "593991234567", "message": "Hello World"}'`}

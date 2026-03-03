@@ -43,7 +43,7 @@ export default function AdminPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await authorizedFetch('http://localhost:3001/api/admin/stats');
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/api/admin/stats`);
             const data = await res.json();
             setStats(data);
         } catch (err) {
@@ -53,7 +53,7 @@ export default function AdminPage() {
 
     const fetchUsers = async () => {
         try {
-            const res = await authorizedFetch('http://localhost:3001/api/admin/users');
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/api/admin/users`);
             const data = await res.json();
             setUsers(data);
         } catch (err) {
@@ -73,7 +73,7 @@ export default function AdminPage() {
 
     const handleRoleChange = async (userId: string, newRole: string) => {
         try {
-            const res = await authorizedFetch(`http://localhost:3001/api/admin/users/${userId}/role`, {
+            const res = await authorizedFetch(`/api/api/admin/users/${userId}/role`, {
                 method: 'PUT',
                 body: JSON.stringify({ roleName: newRole })
             });
