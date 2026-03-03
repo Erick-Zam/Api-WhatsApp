@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useCallback } from 'react';
 
 type MessageType = 'text' | 'image' | 'video' | 'audio' | 'document' | 'location' | 'poll';
@@ -94,7 +95,7 @@ export default function Playground() {
                     return {
                         ...msgBase,
                         name: pollName,
-                        values: pollValues.split(',').map(v => v.trim()).filter(v => v),
+                        values: pollValues.split(',').map(v => v.trim()).filter(Boolean),
                         singleSelect: true
                     };
                 default: return msgBase;
@@ -106,14 +107,14 @@ export default function Playground() {
                     return {
                         ...base,
                         subject: groupSubject,
-                        participants: participants.split(',').map(p => p.trim()).filter(p => p)
+                        participants: participants.split(',').map(p => p.trim()).filter(Boolean)
                     };
                 case 'participants':
                     return {
                         ...base,
                         jid: groupJid,
                         action: 'add', // Default for preview, user should select
-                        participants: participants.split(',').map(p => p.trim()).filter(p => p)
+                        participants: participants.split(',').map(p => p.trim()).filter(Boolean)
                     };
                 default:
                     return { ...base, jid: groupJid };
@@ -135,20 +136,16 @@ export default function Playground() {
 
         if (category === 'messaging') {
             endpoint = `/api/messages/${messageType}`;
-        } else {
-            // Group Endpoints
-            if (groupAction === 'create') endpoint = `/api/chats/groups`;
-            else if (groupAction === 'metadata') {
-                endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}?sessionId=${selectedSession}`;
-                method = 'GET';
-            }
-            else if (groupAction === 'participants') {
-                endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}/participants`;
-            }
-            else if (groupAction === 'invite-code') {
-                endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}/invite-code?sessionId=${selectedSession}`;
-                method = 'GET';
-            }
+        } else if (groupAction === 'create') {
+            endpoint = `/api/chats/groups`;
+        } else if (groupAction === 'metadata') {
+            endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}?sessionId=${selectedSession}`;
+            method = 'GET';
+        } else if (groupAction === 'participants') {
+            endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}/participants`;
+        } else if (groupAction === 'invite-code') {
+            endpoint = `/api/chats/groups/${encodeURIComponent(groupJid)}/invite-code?sessionId=${selectedSession}`;
+            method = 'GET';
         }
 
         try {
@@ -201,8 +198,9 @@ export default function Playground() {
                     </div>
 
                     <div className="mb-6">
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">WhatsApp Session</label>
+                        <label htmlFor="select-session" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">WhatsApp Session</label>
                         <select
+                            id="select-session"
                             value={selectedSession}
                             onChange={(e) => setSelectedSession(e.target.value)}
                             className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white focus:ring-2 focus:ring-green-500 outline-none"
@@ -219,8 +217,9 @@ export default function Playground() {
                     {category === 'messaging' ? (
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Message Type</label>
+                                <label htmlFor="msg-type" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Message Type</label>
                                 <select
+                                    id="msg-type"
                                     value={messageType}
                                     onChange={(e) => setMessageType(e.target.value as MessageType)}
                                     className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white focus:ring-2 focus:ring-green-500 outline-none"
@@ -236,8 +235,9 @@ export default function Playground() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Phone</label>
+                                <label htmlFor="target-phone" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Phone</label>
                                 <input
+                                    id="target-phone"
                                     type="text"
                                     value={phone}
                                     onChange={e => setPhone(e.target.value)}
@@ -248,8 +248,9 @@ export default function Playground() {
 
                             {messageType === 'text' && (
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Message Content</label>
+                                    <label htmlFor="msg-content" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Message Content</label>
                                     <textarea
+                                        id="msg-content"
                                         value={message}
                                         onChange={e => setMessage(e.target.value)}
                                         rows={4}
@@ -260,8 +261,9 @@ export default function Playground() {
 
                             {['image', 'video', 'audio', 'document'].includes(messageType) && (
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Media URL</label>
+                                    <label htmlFor="media-url" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Media URL</label>
                                     <input
+                                        id="media-url"
                                         type="text"
                                         value={mediaUrl}
                                         onChange={e => setMediaUrl(e.target.value)}
@@ -270,8 +272,9 @@ export default function Playground() {
                                     />
                                     {messageType === 'document' && (
                                         <div className="mt-2">
-                                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">File Name</label>
+                                            <label htmlFor="file-name" className="block text-xs font-semibold text-gray-500 uppercase mb-1">File Name</label>
                                             <input
+                                                id="file-name"
                                                 type="text"
                                                 value={fileName}
                                                 onChange={e => setFileName(e.target.value)}
@@ -285,8 +288,9 @@ export default function Playground() {
 
                             {['image', 'video'].includes(messageType) && (
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Caption</label>
+                                    <label htmlFor="caption" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Caption</label>
                                     <input
+                                        id="caption"
                                         type="text"
                                         value={caption}
                                         onChange={e => setCaption(e.target.value)}
@@ -299,8 +303,9 @@ export default function Playground() {
                             {messageType === 'poll' && (
                                 <>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Poll Question</label>
+                                        <label htmlFor="poll-name" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Poll Question</label>
                                         <input
+                                            id="poll-name"
                                             type="text"
                                             value={pollName}
                                             onChange={e => setPollName(e.target.value)}
@@ -309,8 +314,9 @@ export default function Playground() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Options (comma separated)</label>
+                                        <label htmlFor="poll-values" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Options (comma separated)</label>
                                         <input
+                                            id="poll-values"
                                             type="text"
                                             value={pollValues}
                                             onChange={e => setPollValues(e.target.value)}
@@ -323,8 +329,9 @@ export default function Playground() {
                             {messageType === 'location' && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Latitude</label>
+                                        <label htmlFor="lat" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Latitude</label>
                                         <input
+                                            id="lat"
                                             type="text"
                                             value={latitude}
                                             onChange={e => setLatitude(e.target.value)}
@@ -333,8 +340,9 @@ export default function Playground() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Longitude</label>
+                                        <label htmlFor="long" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Longitude</label>
                                         <input
+                                            id="long"
                                             type="text"
                                             value={longitude}
                                             onChange={e => setLongitude(e.target.value)}
@@ -348,8 +356,9 @@ export default function Playground() {
                     ) : (
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Group Action</label>
+                                <label htmlFor="group-action" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Group Action</label>
                                 <select
+                                    id="group-action"
                                     value={groupAction}
                                     onChange={(e) => setGroupAction(e.target.value)}
                                     className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white focus:ring-2 focus:ring-green-500 outline-none"
@@ -364,8 +373,9 @@ export default function Playground() {
                             {groupAction === 'create' && (
                                 <>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Group Subject</label>
+                                        <label htmlFor="group-sub" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Group Subject</label>
                                         <input
+                                            id="group-sub"
                                             type="text"
                                             value={groupSubject}
                                             onChange={e => setGroupSubject(e.target.value)}
@@ -374,8 +384,9 @@ export default function Playground() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Participants (Phone numbers, comma sep)</label>
+                                        <label htmlFor="group-parts" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Participants (Phone numbers, comma sep)</label>
                                         <input
+                                            id="group-parts"
                                             type="text"
                                             value={participants}
                                             onChange={e => setParticipants(e.target.value)}
@@ -388,8 +399,9 @@ export default function Playground() {
 
                             {['metadata', 'participants', 'invite-code'].includes(groupAction) && (
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Group JID</label>
+                                    <label htmlFor="group-jid" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Group JID</label>
                                     <input
+                                        id="group-jid"
                                         type="text"
                                         value={groupJid}
                                         onChange={e => setGroupJid(e.target.value)}
@@ -401,8 +413,9 @@ export default function Playground() {
 
                             {groupAction === 'participants' && (
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Participants to Add/Remove</label>
+                                    <label htmlFor="part-manage" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Participants to Add/Remove</label>
                                     <input
+                                        id="part-manage"
                                         type="text"
                                         value={participants}
                                         onChange={e => setParticipants(e.target.value)}
@@ -415,8 +428,9 @@ export default function Playground() {
                     )}
 
                     <div className="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-800">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">API Key used for request</label>
+                        <label htmlFor="req-apiKey" className="block text-xs font-semibold text-gray-500 uppercase mb-1">API Key used for request</label>
                         <input
+                            id="req-apiKey"
                             type="password"
                             value={apiKey}
                             onChange={e => setApiKey(e.target.value)}
@@ -440,7 +454,11 @@ export default function Playground() {
                         <div className="px-4 py-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Request Body (JSON)</span>
                             <span className="text-xs font-mono text-green-400">
-                                {category === 'messaging' ? `POST /messages/${messageType}` : `${groupAction === 'metadata' ? 'GET' : 'POST'} /chats/groups...`}
+                                {(() => {
+                                    if (category === 'messaging') return `POST /messages/${messageType}`;
+                                    const actionMethod = groupAction === 'metadata' || groupAction === 'invite-code' ? 'GET' : 'POST';
+                                    return `${actionMethod} /chats/groups...`;
+                                })()}
                             </span>
                         </div>
                         <div className="p-4 overflow-x-auto">
