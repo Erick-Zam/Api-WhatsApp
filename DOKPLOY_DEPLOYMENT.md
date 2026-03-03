@@ -1,7 +1,6 @@
-# Guía de Despliegue en Dokploy - WhatsApp API SaaS
+# Guía Final de Despliegue en Dokploy - WhatsApp API SaaS
 
 Este documento te guiará paso a paso sobre cómo desplegar este proyecto en tu servidor utilizando **Dokploy**.
-El proyecto ya ha sido optimizado y configurado para funcionar correctamente en un entorno de producción mediante Docker Compose.
 
 ---
 
@@ -9,7 +8,7 @@ El proyecto ya ha sido optimizado y configurado para funcionar correctamente en 
 
 1. Tener tu servidor con **Dokploy** instalado y funcionando.
 2. Haber enlazado tu cuenta de **GitHub** a Dokploy ("Settings" -> "Git providers").
-3. Haber hecho **commit y push** de todos los cambios recientes que se te hicieron en el código, especialmente del archivo `docker-compose.yml`, `next.config.ts`, `schema.sql` y las rutas del frontend.
+3. Haber hecho **commit y push** de todos tus archivos en tu repositorio `Api-WhatsApp`.
 
 ---
 
@@ -25,59 +24,69 @@ Sigue estos pasos dentro de tu panel de Dokploy:
 ### 2.1. Configuración de Pestaña "General"
 Dentro del nuevo servicio "Compose", configura lo siguiente:
 
-* **Name:** Ponle el nombre que quieras a tu servicio (ej. `whatsapp-api`).
-* En "Source", selecciona: **Git Repository** (Aparecerá el logo de GitHub, GitLab, etc.).
-* **Provider:** Selecciona tu cuenta de GitHub vinculada.
-* **Repository:** Busca y selecciona `Api-WhatsApp` (o el nombre de este repo en tu cuenta).
-* **Branch:** Normalmente es `main` o `master` (la rama donde tengas el código finalizado).
-* **Compose Path:** Asegúrate de escribir exactamente `docker-compose.yml`.
+* **Name:** Ponle el nombre que quieras a tu servicio (ej. `ws`).
+* **App Name:** Se autocompletará. (Dejar por defecto)
+* **Compose Type:** Selecciona `Docker Compose`
+* Dale clic a **Create**.
 
-### 2.2. Opcional: Variables de Entorno (Pestaña Environment)
-En tu `docker-compose.yml` tienes valores por defecto como contraseñas y claves maestras. Es altamente recomendable que las modifiques por seguridad antes de subir todo a producción.
-Si quieres, puedes cambiar las contraseñas que están quemadas en el archivo `docker-compose.yml` por unas secretas tuyas, específicamente las que dicen:
-```yaml
-  POSTGRES_PASSWORD: password    # (Cambia "password" por una clave robusta tuya)
-  JWT_SECRET: docker-secret-key  # (Cambia "docker-secret-key" por una frase aleatoria tuya)
-```
-Si efectúas cambios, recuerda hacer de nuevo **commit y push** a tu repositorio.
+En la siguiente pantalla de configuración, bajo la sección de **Provider**:
+* En "Source", selecciona: **GitHub**.
+* **Github Account:** Selecciona tu cuenta (`Erick-Zam-Server`).
+* **Repository:** Selecciona el repositorio `Api-WhatsApp`.
+* **Branch:** Selecciona `main`.
+* **Compose Path:** Asegúrate de escribir exactamente `./docker-compose.yml`.
+* **Trigger Type:** Déjalo en `On Push` (para despliegues automáticos al actualizar tu código).
+* **Dale clic a Save** (Esquina inferior derecha).
 
 ---
 
 ## 3. Desplegar (Pestaña Deployments)
 
-1. Una vez hecho el paso anterior, dirígete a la pestaña superior derecha **Deployments** o al botón que dice **Save / Deploy**.
-2. Dale clic al botón azul **Deploy** e iniciará el proceso de compilación.
-3. Dokploy va a descargar las imágenes (Node, Postgres), construir tu código de Front y Backend y levantar los 3 contenedores. Podrás ver los logs en vivo.
+1. ¡No necesitas hacer nada en la pestaña **Environment**! Las variables, la base de datos y la persistencia de las sesiones de WhatsApp ya están preconfiguradas y automatizadas en tu archivo de docker-compose.
+2. Dirígete a la pestaña superior derecha **Deployments**.
+3. Dale clic al botón azul **Deploy** e iniciará el proceso de compilación. Espera unos minutos hasta que veas que todo está encendido y el estatus marque Éxito (Success/Running).
 
 ---
 
-## 4. Configurar el Dominio Público (Pestaña Domains)
+## 4. Configurar los Dominios (Pestaña Domains)
 
-Una vez que el estado del despliegue sea **Running (Exitoso)**, necesitas decirle a Dokploy a qué contenedor tiene que mandar todo el tráfico web de tu dominio para que el proyecto se vea en internet.
+Una vez que el despliegue haya finalizado exitosamente, debes enrutar tus dominios al frontend y al backend. **NO expongas ni crees dominio para la Base de Datos (`db`) por seguridad.**
 
-1. Ve a la pestaña **Domains** *(o Trafik / Ingress dependiendo de la versión de tu Dokploy)* dentro del servicio.
-2. Da clic en **Add Domain**.
-3. **Host:** Escribe aquí tu dominio o subdominio (ej. `whatsapp.tudominio.com`). **Ojo**, recuerda que este dominio debe apuntar a la IP de tu servidor en tu proveedor de DNS (Cloudflare, GoDaddy, etc.).
-4. **Port:** Aquí es crucial colocar el puerto `3000`. Este es el puerto del _Frontend_ de Next.js, el cual se encarga de mostrar la página visual y además, ahora mismo tiene el proxy de tráfico para pasarle peticiones internamente a tu Backend.
-5. Selecciona la opción para **Generar Certificados SSL Automáticos (Let's Encrypt / HTTPS)**.
-6. Dale a **Save / Create**.
+### 4.1. Añadir el dominio para el Frontend (Tu panel web)
+Ve a la pestaña **Domains** dentro de tu proyecto en Dokploy:
+1. Haz clic en **Add Domain**.
+2. **Service Name:** Selecciona `frontend`. 
+3. **Host:** Escribe `ws.erickvillon.dev`.
+4. **Path:** `/`
+5. **Internal Path:** `/`
+6. **Container Port:** Escribe `3000`.
+7. **HTTPS:** Activa el interruptor para provisionar automáticamente un certificado SSL gratuito.
+8. Dale a **Create**.
+
+### 4.2. Añadir el dominio para el Backend (API)
+Haz clic nuevamente en **Add Domain** para añadir la API:
+1. **Service Name:** Selecciona `backend`. 
+2. **Host:** Escribe `ws-api.erickvillon.dev`.
+3. **Path:** `/`
+4. **Internal Path:** `/`
+5. **Container Port:** Escribe `3001`.
+6. **HTTPS:** Activa el interruptor para el certificado SSL.
+7. Dale a **Create**.
 
 ---
 
-## 5. ¡A Probar!
+## 5. Iniciar Sesión por Primera Vez
 
-Una vez generado el Let's Encrypt (toma menos de 1 minuto):
-1. Ingresa a `https://whatsapp.tudominio.com` (o como le hayas llamado).
-2. Deberías poder ver la interfaz de inicio de sesión de Next.js.
-3. Las comunicaciones Backend estarán yendo detrás de escena en `/api`, así que los problemas de conexión por CORS no ocurrirán.
+Como la base de datos es totalmente nueva y privada por seguridad, no existe una cuenta "admin" por defecto compartida.
 
-### Nota sobre el inicio de sesión
+1. Espera unos 30-60 segundos tras crear el dominio para que el candado SSL (HTTPS) se active, luego ingresa a `https://ws.erickvillon.dev/register` desde tu navegador.
+2. Llena el breve formulario con un correo, un usuario y una clave de tu elección.
+3. Ahora ve a `https://ws.erickvillon.dev/login` e inicia sesión con las credenciales seguras que acabas de inventar.
+4. Conecta tu WhatsApp escaneando el código QR dentro del panel web. ¡Tus sesiones estarán permanentemente guardadas!
 
-Como la base de datos es nueva, no tendrás un usuario creado. Es posible que tengas que ver cómo crear ese usuario en la interfaz / base de datos o verificar tu ruta `/register` del frontend, en el archivo respectivo para crear la cuenta de usuario con rol administrativo.
+## Resumen de la Arquitectura
+* ✔️ **whatsapp-db** (PostgreSQL privado y seguro, auto-creado)
+* ✔️ **whatsapp-backend** (En `ws-api.erickvillon.dev`)
+* ✔️ **whatsapp-frontend** (Tu panel en `ws.erickvillon.dev` conectado de forma nativa a la API)
 
-## Resumen de la Arquitectura desplegada
-* ✔️ **whatsapp-db** (Base de Datos Postgres inicializado con todas las tablas)
-* ✔️ **whatsapp-backend** (El motor Baileys conectado persistente por el volumen)
-* ✔️ **whatsapp-frontend** (Tu panel web conectado como puente de forma segura)
-
-¡Listos para producción! 🚀
+¡Listo para producción! 🚀
