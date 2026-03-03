@@ -59,8 +59,8 @@ const LoginForm = ({ onClose, onSwitch }: { onClose: () => void, onSwitch: () =>
 };
 
 const RegisterForm = ({ onClose, onSwitch }: { onClose: () => void, onSwitch: () => void }) => {
-    const [email, setEmail] = useState('admin@erickvillon.dev');
-    const [username, setUsername] = useState('Erick Villon');
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -95,8 +95,8 @@ const RegisterForm = ({ onClose, onSwitch }: { onClose: () => void, onSwitch: ()
                 <h2 className="text-3xl font-extrabold text-white mb-6 text-center">Create Account</h2>
                 <form onSubmit={handleRegister} className="space-y-4 text-left">
                     <div>
-                        <label htmlFor="reg-username" className="block text-xs font-bold text-gray-400 uppercase mb-1">Username</label>
-                        <input id="reg-username" type="text" placeholder="Username" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={username} onChange={e => setUsername(e.target.value)} required />
+                        <label htmlFor="reg-username" className="block text-xs font-bold text-gray-400 uppercase mb-1">Nombre</label>
+                        <input id="reg-username" type="text" placeholder="Nombre" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={username} onChange={e => setUsername(e.target.value)} required />
                     </div>
                     <div>
                         <label htmlFor="reg-email" className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
