@@ -1,8 +1,8 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, delay, fetchLatestBaileysVersion } from '@whiskeysockets/baileys';
+import makeWASocket, { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from '@whiskeysockets/baileys';
 import { makeInMemoryStore } from './services/simpleStore.js';
 import pino from 'pino';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { triggerWebhooks } from './services/webhooks.js';
 
 // Session storage
@@ -328,7 +328,7 @@ const checkRateLimit = (sessionId) => {
 // --- Helper: Get JID ---
 const formatJid = (phone) => {
     if (!phone) return null;
-    let cleaned = phone.replace(/\D/g, '');
+    let cleaned = phone.replaceAll(/\D/g, '');
     if (cleaned.includes('@s.whatsapp.net')) {
         return cleaned;
     }
@@ -443,14 +443,30 @@ const sendReply = async (jid, text, quotedMessageId, sessionId = 'default') => {
 
 // --- New Capability Functions ---
 
+const getChatSnippet = (msg) => {
+    if (!msg || !msg.message) return '';
+    const m = msg.message;
+    const type = Object.keys(m)[0]; // Simplified
+    if (m.conversation) return m.conversation;
+    if (m.extendedTextMessage) return m.extendedTextMessage.text;
+    if (m.imageMessage) return '📷 Photo';
+    if (m.videoMessage) return '🎥 Video';
+    if (m.audioMessage) return '🎵 Audio';
+    if (m.documentMessage) return '📄 Document';
+    if (m.pollCreationMessage || m.pollCreationMessageV2) return '📊 Poll';
+    if (m.locationMessage) return '📍 Location';
+    if (m.contactMessage || m.contactsArrayMessage) return '👤 Contact';
+    return `[${type.replace('Message', '')}]`;
+};
+
 const getChats = (sessionId) => {
     const store = sessionStores.get(sessionId);
     if (!store) return [];
 
     const chats = store.chats.all();
-    const contacts = store.contacts; // Direct access to the contacts object map
+    const contacts = store.contacts;
 
-    // Enrich with names
+    // Enrich with names and last message snippets
     return chats.map(chat => {
         const contact = contacts[chat.id];
 
@@ -459,13 +475,20 @@ const getChats = (sessionId) => {
             contact?.name ||
             contact?.notify ||
             contact?.verifiedName ||
-            chat.id.replace('@s.whatsapp.net', '');
+            chat.id.replace('@s.whatsapp.net', '').replace('@g.us', '');
+
+        // Find last message for snippet
+        const msgs = store.messages[chat.id]?.array || [];
+        const lastMsg = msgs[msgs.length - 1];
+        const snippet = getChatSnippet(lastMsg);
 
         return {
             ...chat,
-            name: displayName
+            name: displayName,
+            lastMessage: snippet || 'Click to view history',
+            isGroup: chat.id.endsWith('@g.us')
         };
-    });
+    }).sort((a, b) => (b.conversationTimestamp || 0) - (a.conversationTimestamp || 0));
 };
 
 const getContacts = (sessionId) => {
@@ -474,11 +497,23 @@ const getContacts = (sessionId) => {
     return store.contacts;
 };
 
-const getMessages = (sessionId, jid, limit = 25) => {
+const getMessages = (sessionId, jid, limit = 50) => {
     const store = sessionStores.get(sessionId);
     if (!store) return [];
+    
+    // Baileys structure: messages[jid].array
     const messages = store.messages[jid]?.array || [];
-    return messages.slice(-limit); // Return last 'limit' messages
+    
+    // For each message, if it's from someone else and store has contact, add pushName if missing
+    return messages.slice(-limit).map(msg => {
+        if (!msg.key.fromMe && !msg.pushName) {
+            const contact = store.contacts[msg.key.remoteJid];
+            if (contact) {
+                msg.pushName = contact.name || contact.notify;
+            }
+        }
+        return msg;
+    });
 };
 
 const createGroup = async (sessionId, subject, participants) => {
@@ -560,6 +595,7 @@ export {
     groupUpdateDescription,
     groupInviteCode,
     groupRevokeInvite,
-    groupLeave,
-    getConnectionStatus as default
+    groupLeave
 };
+
+export default getConnectionStatus;

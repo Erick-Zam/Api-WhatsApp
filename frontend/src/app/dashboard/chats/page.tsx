@@ -21,7 +21,9 @@ interface Chat {
     name?: string;
     unreadCount?: number;
     conversationTimestamp?: number;
-    imgUrl?: string; // Placeholder for future avatar support
+    imgUrl?: string;
+    lastMessage?: string;
+    isGroup?: boolean;
 }
 
 interface Message {
@@ -32,10 +34,10 @@ interface Message {
     };
     message?: {
         conversation?: string;
-        imageMessage?: any;
-        videoMessage?: any;
-        audioMessage?: any;
-        documentMessage?: any;
+        imageMessage?: { caption?: string; url?: string };
+        videoMessage?: { caption?: string; url?: string };
+        audioMessage?: { url?: string };
+        documentMessage?: { fileName?: string; mimetype?: string; url?: string };
         extendedTextMessage?: {
             text: string;
         };
@@ -49,14 +51,23 @@ interface Message {
             options: { optionName: string }[];
             selectableCount: number;
         };
+        ephemeralMessage?: { message: Message['message'] };
+        viewOnceMessage?: { message: Message['message']; viewOnceMessage?: { message: Message['message'] } };
+        viewOnceMessageV2?: { message: Message['message']; viewOnceMessage?: { message: Message['message'] } };
+        documentWithCaptionMessage?: { message: Message['message'] };
     };
     pushName?: string;
     messageTimestamp?: number;
 }
 
+interface WASession {
+    id: string;
+    status: string;
+}
+
 export default function ChatsPage() {
     // State
-    const [sessions, setSessions] = useState<any[]>([]);
+    const [sessions, setSessions] = useState<WASession[]>([]);
     const [selectedSession, setSelectedSession] = useState('default');
     const [chats, setChats] = useState<Chat[]>([]);
     const [originalChats, setOriginalChats] = useState<Chat[]>([]); // For filtering
@@ -65,7 +76,6 @@ export default function ChatsPage() {
     const [newMessage, setNewMessage] = useState('');
     const [loadingChats, setLoadingChats] = useState(false);
     const [loadingMessages, setLoadingMessages] = useState(false);
-    const [sending, setSending] = useState(false);
     const [apiKey, setApiKey] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -73,6 +83,12 @@ export default function ChatsPage() {
     const [showConsentModal, setShowConsentModal] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    };
 
     // 1. Initial Load & Auth
     useEffect(() => {
@@ -83,9 +99,11 @@ export default function ChatsPage() {
         }
 
         const token = localStorage.getItem('token');
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+
         if (token) {
             // Get API Key
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/me`, {
+            fetch(`${API_URL}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -95,14 +113,14 @@ export default function ChatsPage() {
                 .catch(err => console.error(err));
 
             // Get Sessions
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/sessions`, {
+            fetch(`${API_URL}/sessions`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
                 .then(data => {
                     if (Array.isArray(data)) {
                         setSessions(data);
-                        const connected = data.find((s: any) => s.status === 'CONNECTED');
+                        const connected = data.find((s: WASession) => s.status === 'CONNECTED');
                         if (connected) setSelectedSession(connected.id);
                     }
                 })
@@ -121,11 +139,9 @@ export default function ChatsPage() {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const sorted = data.chats.sort((a: Chat, b: Chat) =>
-                        (b.conversationTimestamp || 0) - (a.conversationTimestamp || 0)
-                    );
-                    setOriginalChats(sorted);
-                    setChats(sorted);
+                    // API now returns pre-sorted and enriched chats
+                    setOriginalChats(data.chats);
+                    setChats(data.chats);
                 }
             })
             .catch(err => console.error(err))
@@ -166,19 +182,13 @@ export default function ChatsPage() {
             .finally(() => setLoadingMessages(false));
     }, [selectedChat, selectedSession, apiKey]);
 
-    const scrollToBottom = () => {
-        setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newMessage.trim() || !selectedChat || !apiKey) return;
 
-        setSending(true);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/messages/text`, {
+            const res = await fetch(`${API_URL}/messages/text`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -202,8 +212,6 @@ export default function ChatsPage() {
             }
         } catch (err) {
             console.error(err);
-        } finally {
-            setSending(false);
         }
     };
 
@@ -213,23 +221,33 @@ export default function ChatsPage() {
     };
 
     const renderMessageContent = (msg: Message) => {
-        const m = msg.message;
-        if (!m) return <span className="text-gray-500 italic">Message removed or empty</span>;
+        let m = msg.message;
+        if (!m) return <span className="text-gray-500 italic font-light opacity-50">Empty message</span>;
+
+        // Unwrap common wrappers
+        if (m.ephemeralMessage) m = m.ephemeralMessage.message;
+        if (m?.viewOnceMessage) m = m.viewOnceMessage.message || m.viewOnceMessage.viewOnceMessage?.message;
+        if (m?.viewOnceMessageV2) m = m.viewOnceMessageV2.message || m.viewOnceMessageV2.viewOnceMessage?.message;
+        if (m?.documentWithCaptionMessage) m = m.documentWithCaptionMessage.message;
+
+        if (!m) return <span className="text-gray-500 italic font-light opacity-50">Content unavailable</span>;
 
         // Poll handling
         const poll = m.pollCreationMessage || m.pollCreationMessageV2;
         if (poll) {
             return (
-                <div className="bg-zinc-800/10 dark:bg-zinc-700/50 p-3 rounded-lg w-full min-w-[200px]">
-                    <h4 className="font-bold text-sm mb-2 opacity-90">📊 {poll.name}</h4>
+                <div className="bg-zinc-800/20 dark:bg-zinc-900/40 p-3 rounded-xl w-full min-w-[220px] border border-zinc-700/50">
+                    <h4 className="font-bold text-sm mb-2 text-blue-400 flex items-center gap-2">
+                        <span className="text-lg">📊</span> {poll.name}
+                    </h4>
                     <ul className="space-y-2">
-                        {poll.options.map((opt, i) => (
-                            <li key={i} className="px-3 py-2 bg-white dark:bg-zinc-800 rounded border border-gray-200 dark:border-zinc-700 text-xs text-center font-medium">
+                        {poll.options.map((opt: { optionName: string }) => (
+                            <li key={opt.optionName} className="px-4 py-2.5 bg-zinc-800 dark:bg-zinc-800/80 rounded-lg border border-zinc-700 text-xs text-center font-semibold hover:bg-zinc-700 transition-colors">
                                 {opt.optionName}
                             </li>
                         ))}
                     </ul>
-                    <div className="mt-2 text-[10px] text-gray-500 text-center">
+                    <div className="mt-3 text-[10px] text-zinc-500 text-center font-medium uppercase tracking-wider">
                         Selectable: {poll.selectableCount}
                     </div>
                 </div>
@@ -237,21 +255,72 @@ export default function ChatsPage() {
         }
 
         // Standard Text
-        if (m.conversation) return <p className="whitespace-pre-wrap">{m.conversation}</p>;
-        if (m.extendedTextMessage?.text) return <p className="whitespace-pre-wrap">{m.extendedTextMessage.text}</p>;
+        if (m.conversation) return <p className="whitespace-pre-wrap leading-relaxed">{m.conversation}</p>;
+        if (m.extendedTextMessage?.text) return <p className="whitespace-pre-wrap leading-relaxed">{m.extendedTextMessage.text}</p>;
 
-        // Media
+        // Image
         if (m.imageMessage) return (
-            <div className="flex flex-col">
-                <div className="bg-gray-200 dark:bg-zinc-700 w-48 h-48 rounded-lg flex items-center justify-center mb-1">
-                    <PhotoIcon className="w-10 h-10 opacity-50" />
+            <div className="flex flex-col gap-2">
+                <div className="bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700">
+                    {/* Placeholder for real image display if URL is provided by backend later */}
+                    <div className="w-full aspect-square bg-zinc-800 flex items-center justify-center">
+                        <PhotoIcon className="w-12 h-12 text-zinc-600 animate-pulse" />
+                    </div>
                 </div>
-                <span className="text-xs opacity-70 italic">Image attachment</span>
-                {m.imageMessage.caption && <p className="mt-1">{m.imageMessage.caption}</p>}
+                {m.imageMessage.caption && <p className="text-sm px-1">{m.imageMessage.caption}</p>}
+                <div className="flex items-center gap-1.5 opacity-60 text-[10px] font-bold uppercase tracking-tight">
+                    <PhotoIcon className="w-3 h-3" /> Image Attachment
+                </div>
             </div>
         );
 
-        return <span className="text-gray-500 italic">[Media/Other Message Type]</span>;
+        // Video
+        if (m.videoMessage) return (
+            <div className="flex flex-col gap-2">
+                <div className="bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700 flex items-center justify-center h-32">
+                    <VideoCameraIcon className="w-10 h-10 text-zinc-600" />
+                </div>
+                {m.videoMessage.caption && <p className="text-sm px-1">{m.videoMessage.caption}</p>}
+                <div className="flex items-center gap-1.5 opacity-60 text-[10px] font-bold uppercase tracking-tight">
+                    <VideoCameraIcon className="w-3 h-3" /> Video Attachment
+                </div>
+            </div>
+        );
+
+        // Audio
+        if (m.audioMessage) return (
+            <div className="flex items-center gap-3 bg-zinc-800/50 p-3 rounded-xl border border-zinc-700/30">
+                <div className="w-10 h-10 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center shrink-0">
+                    <MicrophoneIcon className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                    <div className="h-1.5 w-full bg-zinc-700 rounded-full overflow-hidden">
+                        <div className="h-full w-1/3 bg-blue-500 opacity-50"></div>
+                    </div>
+                    <span className="text-[10px] font-bold opacity-60 mt-1 block">AUDIO MESSAGE</span>
+                </div>
+            </div>
+        );
+
+        // Document
+        if (m.documentMessage) return (
+            <div className="flex items-center gap-3 bg-zinc-800/80 p-3 rounded-xl border border-zinc-700">
+                <div className="w-10 h-10 bg-zinc-700 text-zinc-300 rounded-lg flex items-center justify-center shrink-0 shadow-inner">
+                    <PaperClipIcon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold truncate">{m.documentMessage.fileName || 'document.pdf'}</p>
+                    <p className="text-[10px] opacity-60 font-medium uppercase">{m.documentMessage.mimetype?.split('/')[1] || 'FILE'}</p>
+                </div>
+            </div>
+        );
+
+        return (
+            <div className="flex items-center gap-2 opacity-60 italic text-xs py-1">
+                <InformationCircleIcon className="w-4 h-4" />
+                <span>Unsupported message type</span>
+            </div>
+        );
     };
 
     return (
@@ -328,44 +397,57 @@ export default function ChatsPage() {
                 {/* Chat List */}
                 <div className="flex-1 overflow-y-auto px-2 space-y-1 custom-scrollbar">
                     {loadingChats ? (
-                        <div className="text-center text-gray-500 mt-10 text-xs">Loading conversations...</div>
+                        <div className="flex flex-col items-center justify-center mt-10 space-y-3 opacity-40">
+                            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent animate-spin rounded-full"></div>
+                            <div className="text-xs font-bold uppercase tracking-widest">Syncing sessions...</div>
+                        </div>
                     ) : chats.map(chat => (
                         <div
                             key={chat.id}
                             onClick={() => setSelectedChat(chat.id)}
-                            className={`group flex items-center p-3 rounded-lg cursor-pointer transition-colors ${selectedChat === chat.id ? 'bg-blue-500/10' : 'hover:bg-zinc-800'
+                            className={`group flex items-center p-3 rounded-2xl cursor-pointer transition-all duration-200 ${selectedChat === chat.id ? 'bg-blue-600/20 ring-1 ring-blue-500/30' : 'hover:bg-zinc-800/70 hover:translate-x-1'
                                 }`}
                         >
                             {/* Avatar */}
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-600 flex items-center justify-center text-lg font-bold mr-3 relative shrink-0">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mr-3 relative shrink-0 shadow-lg ${chat.isGroup ? 'bg-gradient-to-tr from-emerald-600 to-teal-500' : 'bg-gradient-to-br from-zinc-700 to-zinc-600'}`}>
                                 {chat.name ? chat.name[0].toUpperCase() : '?'}
                                 {selectedChat === chat.id && (
-                                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900"></div>
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-zinc-900 shadow-sm animate-pulse"></div>
                                 )}
                             </div>
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                                <h4 className={`text-sm font-semibold truncate ${selectedChat === chat.id ? 'text-blue-400' : 'text-gray-200'}`}>
-                                    {chat.name || chat.id.split('@')[0]}
-                                </h4>
-                                <div className="flex justify-between items-center mt-0.5">
-                                    <p className="text-xs text-gray-500 truncate max-w-[140px]">
-                                        {/* Mock last message */}
-                                        Click to view history
-                                    </p>
+                                <div className="flex justify-between items-baseline mb-0.5">
+                                    <h4 className={`text-sm font-bold truncate ${selectedChat === chat.id ? 'text-blue-400' : 'text-zinc-100'}`}>
+                                        {chat.name}
+                                    </h4>
                                     {chat.conversationTimestamp && (
-                                        <span className="text-[10px] text-gray-600">
-                                            {/* Show short readable time */}
+                                        <span className="text-[10px] font-bold text-zinc-600 whitespace-nowrap ml-2">
                                             {(() => {
-                                                const date = new Date(chat.conversationTimestamp * 1000);
+                                                // Handle Baileys timestamps (seconds) safely
+                                                const ts = chat.conversationTimestamp > 2000000000 ? chat.conversationTimestamp : chat.conversationTimestamp * 1000;
+                                                const date = new Date(ts);
+                                                if (isNaN(date.getTime())) return '';
+                                                
                                                 const now = new Date();
                                                 const diff = now.getTime() - date.getTime();
                                                 if (diff < 86400000) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                                return date.toLocaleDateString();
+                                                if (diff < 172800000) return 'Yesterday';
+                                                return date.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
                                             })()}
                                         </span>
                                     )}
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <p className={`text-xs truncate max-w-[180px] font-medium leading-tight ${selectedChat === chat.id ? 'text-blue-300/60' : 'text-zinc-500'}`}>
+                                        {chat.lastMessage}
+                                    </p>
+                                    {chat.unreadCount ? (
+                                        <span className="bg-blue-600 text-[10px] font-black px-1.5 py-0.5 rounded-full text-white min-w-[18px] text-center ml-2">
+                                            {chat.unreadCount}
+                                        </span>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
