@@ -67,10 +67,10 @@ export default function Docs() {
                                 <strong className="text-white">Create an Account:</strong> Register on the platform to get your main API Access.
                             </li>
                             <li className="pl-2">
-                                <strong className="text-white">Start a Session:</strong> Go to the Dashboard and click <span className="text-blue-400">Add Device</span>. Give it a name (e.g., "Support-Bot").
+                                <strong className="text-white">Start a Session:</strong> Go to the Dashboard and click <span className="text-blue-400">Add Device</span>. Give it a name (e.g., &quot;Support-Bot&quot;).
                             </li>
                             <li className="pl-2">
-                                <strong className="text-white">Scan QR Code:</strong> Click "Connect" and scan the QR code with your WhatsApp mobile app (Linked Devices).
+                                <strong className="text-white">Scan QR Code:</strong> Click &quot;Connect&quot; and scan the QR code with your WhatsApp mobile app (Linked Devices).
                             </li>
                             <li className="pl-2">
                                 <strong className="text-white">Get API Key:</strong> Once connected, the dashboard will reveal your unique <code>x-api-key</code> for that session.
