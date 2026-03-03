@@ -104,7 +104,7 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="p-8 md:p-12 overflow-y-auto h-full">
+        <div className="h-full">
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold mb-8 text-black dark:text-white">Admin Dashboard</h1>
 

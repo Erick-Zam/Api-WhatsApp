@@ -8,7 +8,7 @@ export default function LogsPage() {
     ];
 
     return (
-        <div>
+        <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl font-bold mb-6 text-black dark:text-white">Logs & Activity</h2>
 
             <div className="bg-white dark:bg-zinc-900 rounded-xl shadow border border-gray-200 dark:border-zinc-800 overflow-hidden">
