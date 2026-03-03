@@ -5,9 +5,9 @@ import Link from 'next/link';
 
 export default function Register() {
     const router = useRouter();
-    const [email, setEmail] = useState('admin@erickvillon.dev');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [username, setUsername] = useState('Erick Villon');
+    const [username, setUsername] = useState('');
     const [error, setError] = useState('');
 
     const handleRegister = async (e: SyntheticEvent) => {
@@ -58,7 +58,7 @@ export default function Register() {
 
                 <form onSubmit={handleRegister} className="space-y-5">
                     <div>
-                        <label htmlFor="username" className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 px-1">Username</label>
+                        <label htmlFor="username" className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 px-1">Nombre</label>
                         <input
                             id="username"
                             type="text"

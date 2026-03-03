@@ -69,8 +69,7 @@ export default function ChatsPage() {
     // State
     const [sessions, setSessions] = useState<WASession[]>([]);
     const [selectedSession, setSelectedSession] = useState('default');
-    const [chats, setChats] = useState<Chat[]>([]);
-    const [originalChats, setOriginalChats] = useState<Chat[]>([]); // For filtering
+    const [originalChats, setOriginalChats] = useState<Chat[]>([]); // Source of truth
     const [selectedChat, setSelectedChat] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
@@ -79,8 +78,13 @@ export default function ChatsPage() {
     const [apiKey, setApiKey] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Consent Modal State
-    const [showConsentModal, setShowConsentModal] = useState(false);
+    // Consent Modal State - initialized from localStorage to avoid cascading render in useEffect
+    const [showConsentModal, setShowConsentModal] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return !localStorage.getItem('chat_data_consent');
+        }
+        return false;
+    });
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -92,12 +96,6 @@ export default function ChatsPage() {
 
     // 1. Initial Load & Auth
     useEffect(() => {
-        // Check consent first (mock check)
-        const hasConsented = localStorage.getItem('chat_data_consent');
-        if (!hasConsented) {
-            setShowConsentModal(true);
-        }
-
         const token = localStorage.getItem('token');
         const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
@@ -132,7 +130,7 @@ export default function ChatsPage() {
     useEffect(() => {
         if (!selectedSession || !apiKey) return;
 
-        setLoadingChats(true);
+        Promise.resolve().then(() => setLoadingChats(true));
         fetch(`/api/chats?sessionId=${selectedSession}`, {
             headers: { 'x-api-key': apiKey }
         })
@@ -141,31 +139,23 @@ export default function ChatsPage() {
                 if (data.success) {
                     // API now returns pre-sorted and enriched chats
                     setOriginalChats(data.chats);
-                    setChats(data.chats);
                 }
             })
             .catch(err => console.error(err))
             .finally(() => setLoadingChats(false));
     }, [selectedSession, apiKey]);
 
-    // Search Filter
-    useEffect(() => {
-        if (!searchTerm) {
-            setChats(originalChats);
-        } else {
-            const lower = searchTerm.toLowerCase();
-            setChats(originalChats.filter(c =>
-                (c.name || '').toLowerCase().includes(lower) ||
-                c.id.includes(lower)
-            ));
-        }
-    }, [searchTerm, originalChats]);
+    // Derive filtered chats
+    const chats = searchTerm ? originalChats.filter(c =>
+        (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.id.includes(searchTerm.toLowerCase())
+    ) : originalChats;
 
     // 3. Load Messages
     useEffect(() => {
         if (!selectedSession || !selectedChat || !apiKey) return;
 
-        setLoadingMessages(true);
+        Promise.resolve().then(() => setLoadingMessages(true));
         const encodedJid = encodeURIComponent(selectedChat);
         fetch(`/api/chats/${encodedJid}/messages?sessionId=${selectedSession}&limit=50`, {
             headers: { 'x-api-key': apiKey }
@@ -182,7 +172,7 @@ export default function ChatsPage() {
             .finally(() => setLoadingMessages(false));
     }, [selectedChat, selectedSession, apiKey]);
 
-    const handleSendMessage = async (e: React.FormEvent) => {
+    const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!newMessage.trim() || !selectedChat || !apiKey) return;
 
@@ -402,10 +392,10 @@ export default function ChatsPage() {
                             <div className="text-xs font-bold uppercase tracking-widest">Syncing sessions...</div>
                         </div>
                     ) : chats.map(chat => (
-                        <div
+                        <button
                             key={chat.id}
                             onClick={() => setSelectedChat(chat.id)}
-                            className={`group flex items-center p-3 rounded-2xl cursor-pointer transition-all duration-200 ${selectedChat === chat.id ? 'bg-blue-600/20 ring-1 ring-blue-500/30' : 'hover:bg-zinc-800/70 hover:translate-x-1'
+                            className={`group w-full text-left flex items-center p-3 rounded-2xl transition-all duration-200 ${selectedChat === chat.id ? 'bg-blue-600/20 ring-1 ring-blue-500/30' : 'hover:bg-zinc-800/70 hover:translate-x-1'
                                 }`}
                         >
                             {/* Avatar */}
@@ -428,7 +418,7 @@ export default function ChatsPage() {
                                                 // Handle Baileys timestamps (seconds) safely
                                                 const ts = chat.conversationTimestamp > 2000000000 ? chat.conversationTimestamp : chat.conversationTimestamp * 1000;
                                                 const date = new Date(ts);
-                                                if (isNaN(date.getTime())) return '';
+                                                if (Number.isNaN(date.getTime())) return '';
                                                 
                                                 const now = new Date();
                                                 const diff = now.getTime() - date.getTime();
@@ -450,7 +440,7 @@ export default function ChatsPage() {
                                     ) : null}
                                 </div>
                             </div>
-                        </div>
+                        </button>
                     ))}
                 </div>
             </div>
@@ -481,21 +471,27 @@ export default function ChatsPage() {
 
                         {/* Messages */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-2">
-                            {loadingMessages ? (
-                                <div className="flex items-center justify-center h-full">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                                </div>
-                            ) : messages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-500 opacity-50">
-                                    <p>No messages yet.</p>
-                                    <p className="text-sm">Say hello! 👋</p>
-                                </div>
-                            ) : (
-                                messages.map((msg, idx) => {
+                            {(() => {
+                                if (loadingMessages) {
+                                    return (
+                                        <div className="flex items-center justify-center h-full">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                        </div>
+                                    );
+                                }
+                                if (messages.length === 0) {
+                                    return (
+                                        <div className="flex flex-col items-center justify-center h-full text-gray-500 opacity-50">
+                                            <p>No messages yet.</p>
+                                            <p className="text-sm">Say hello! 👋</p>
+                                        </div>
+                                    );
+                                }
+                                return messages.map((msg, idx) => {
                                     const isMe = msg.key.fromMe;
                                     const isNextSame = messages[idx + 1]?.key.fromMe === isMe;
                                     return (
-                                        <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-${isNextSame ? '1' : '4'}`}>
+                                        <div key={msg.key.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-${isNextSame ? '1' : '4'}`}>
                                             {/* Avatar for receiver */}
                                             {!isMe && !isNextSame && (
                                                 <div className="w-8 h-8 rounded-full bg-zinc-700 items-center justify-center flex text-xs mr-2 self-end mb-1">
@@ -514,8 +510,8 @@ export default function ChatsPage() {
                                             </div>
                                         </div>
                                     );
-                                })
-                            )}
+                                });
+                            })()}
                             <div ref={messagesEndRef} />
                         </div>
 
@@ -527,23 +523,27 @@ export default function ChatsPage() {
                                 <PaperClipIcon className="w-6 h-6 cursor-pointer hover:bg-zinc-800 rounded-full p-1" />
                             </div>
 
-                            <form onSubmit={handleSendMessage} className="flex-1 relative">
-                                <input
-                                    value={newMessage}
-                                    onChange={e => setNewMessage(e.target.value)}
-                                    placeholder="Aa"
-                                    className="w-full bg-zinc-800 text-white rounded-full py-2 px-4 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                />
-                                <FaceSmileIcon className="w-5 h-5 text-gray-400 absolute right-3 top-2.5 cursor-pointer" />
-                            </form>
+                            <form onSubmit={handleSendMessage} className="flex-1 flex items-center gap-3">
+                                <div className="flex-1 relative">
+                                    <input
+                                        value={newMessage}
+                                        onChange={e => setNewMessage(e.target.value)}
+                                        placeholder="Aa"
+                                        className="w-full bg-zinc-800 text-white rounded-full py-2 px-4 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    />
+                                    <FaceSmileIcon className="w-5 h-5 text-gray-400 absolute right-3 top-2.5 cursor-pointer" />
+                                </div>
 
-                            {newMessage.trim() ? (
-                                <button onClick={handleSendMessage} className="text-blue-500 hover:text-blue-400 transform transition hover:scale-110">
-                                    <PaperAirplaneIcon className="w-6 h-6" />
-                                </button>
-                            ) : (
-                                <MicrophoneIcon className="w-6 h-6 text-blue-500 hover:text-blue-400 cursor-pointer" />
-                            )}
+                                {newMessage.trim() ? (
+                                    <button type="submit" className="text-blue-500 hover:text-blue-400 transform transition hover:scale-110">
+                                        <PaperAirplaneIcon className="w-6 h-6" />
+                                    </button>
+                                ) : (
+                                    <button type="button" className="text-blue-500 hover:text-blue-400 cursor-pointer">
+                                        <MicrophoneIcon className="w-6 h-6" />
+                                    </button>
+                                )}
+                            </form>
                         </div>
                     </>
                 ) : (
@@ -560,7 +560,7 @@ export default function ChatsPage() {
 }
 
 // Simple Icons
-function PlusIcon({ className }: { className?: string }) {
+function PlusIcon({ className }: { readonly className?: string }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -568,7 +568,7 @@ function PlusIcon({ className }: { className?: string }) {
     )
 }
 
-function PaperAirplaneIcon({ className }: { className?: string }) {
+function PaperAirplaneIcon({ className }: { readonly className?: string }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
             <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
