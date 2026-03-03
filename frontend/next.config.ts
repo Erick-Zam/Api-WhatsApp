@@ -4,13 +4,11 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   async rewrites() {
-    // Check if we are in production or local development mode
-    const isProd = process.env.NODE_ENV === 'production';
     return [
       {
         source: '/api/:path*',
-        // En producción de Dokploy, la red interna de docker se llama "backend". En local usamos localhost.
-        destination: isProd ? 'http://backend:3001/:path*' : 'http://localhost:3001/:path*'
+        // Fallback a ruta absoluta pública vía variable real de sistema o dominio público si falla la red docker
+        destination: `${process.env.BACKEND_INTERNAL_URL || 'https://ws-api.erickvillon.dev'}/:path*`
       }
     ]
   }
