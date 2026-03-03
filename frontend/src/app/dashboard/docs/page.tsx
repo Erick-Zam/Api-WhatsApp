@@ -9,7 +9,7 @@ export default function Docs() {
         }
     };
 
-    const baseUrl = "https://ws-api.erickvillon.dev/api";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://ws.erickvillon.dev/api";
 
     return (
         <div className="max-w-7xl mx-auto flex gap-8 relative">
@@ -29,9 +29,19 @@ export default function Docs() {
                         <h5 className="mb-4 font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider text-xs">Messaging Endpoints</h5>
                         <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
                             <li><button onClick={() => scrollToSection('send-text')} className="hover:text-green-500 transition text-left w-full">Text Messages</button></li>
-                            <li><button onClick={() => scrollToSection('send-media')} className="hover:text-green-500 transition text-left w-full">Media (Img/Vid)</button></li>
+                            <li><button onClick={() => scrollToSection('send-media')} className="hover:text-green-500 transition text-left w-full">Images & Videos</button></li>
+                            <li><button onClick={() => scrollToSection('send-audio')} className="hover:text-green-500 transition text-left w-full">Audio & Documents</button></li>
                             <li><button onClick={() => scrollToSection('send-location')} className="hover:text-green-500 transition text-left w-full">Location</button></li>
                             <li><button onClick={() => scrollToSection('send-poll')} className="hover:text-green-500 transition text-left w-full">Polls</button></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h5 className="mb-4 font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider text-xs">Advanced API</h5>
+                        <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+                            <li><button onClick={() => scrollToSection('groups')} className="hover:text-green-500 transition text-left w-full">Group Management</button></li>
+                            <li><button onClick={() => scrollToSection('webhooks')} className="hover:text-green-500 transition text-left w-full">Webhooks</button></li>
+                            <li><button onClick={() => scrollToSection('errors')} className="hover:text-green-500 transition text-left w-full">Error Codes</button></li>
                         </ul>
                     </div>
                 </nav>
@@ -133,20 +143,54 @@ export default function Docs() {
                             <span className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-sm font-bold">POST</span>
                             <h2 className="text-2xl md:text-3xl font-bold m-0 break-all">{baseUrl}/messages/image</h2>
                         </div>
-                        <p className="mb-4 text-gray-600 dark:text-gray-400">Fetch and send a remote image via a public URL directly to the user&apos;s chat. Can also support descriptions via captions.</p>
+                        <p className="mb-4 text-gray-600 dark:text-gray-400">Send images and videos to any chat. High-quality media is processed and delivered via WhatsApp&apos;s native media handling.</p>
                         
-                        <h4 className="font-bold mb-2">Request Body Requirements</h4>
-                        <ul className="mb-4 text-sm text-gray-600 dark:text-gray-400 space-y-2 list-disc ml-5">
-                            <li><code className="text-blue-400 font-bold">phone</code> (string, <span className="text-red-400">required</span>): The standard digits-only recipient number.</li>
-                            <li><code className="text-blue-400 font-bold">imageUrl</code> (string, <span className="text-red-400">required</span>): Direct HTTP/HTTPS link to your chosen image ending in jpg/png/webp.</li>
-                            <li><code className="text-blue-400 font-bold">caption</code> (string, optional): Supplementary text that appears appended to the image box on WhatsApp.</li>
-                        </ul>
-
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl p-4">
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl p-4 mb-8">
+                            <div className="text-xs text-gray-500 mb-2 uppercase font-mono">Image Example</div>
                             <pre className="text-sm font-mono text-emerald-400">{`{ 
   "phone": "593981234567", 
   "imageUrl": "https://picsum.photos/500/300", 
   "caption": "¡Increíble promoción sólo por hoy!" 
+}`}</pre>
+                        </div>
+
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-sm font-bold">POST</span>
+                            <h2 className="text-2xl md:text-3xl font-bold m-0 break-all">{baseUrl}/messages/video</h2>
+                        </div>
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl p-4">
+                            <div className="text-xs text-gray-500 mb-2 uppercase font-mono">Video Example</div>
+                            <pre className="text-sm font-mono text-emerald-400">{`{ 
+  "phone": "593981234567", 
+  "videoUrl": "https://example.com/demo.mp4", 
+  "caption": "Check this video!" 
+}`}</pre>
+                        </div>
+                    </section>
+
+                    <section id="send-audio" className="scroll-mt-24 mb-20">
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-sm font-bold">POST</span>
+                            <h2 className="text-2xl md:text-3xl font-bold m-0 break-all">{baseUrl}/messages/audio</h2>
+                        </div>
+                        <p className="mb-4 text-gray-600 dark:text-gray-400">Deliver audio notes or music files. Supported formats: mp3, ogg, wav.</p>
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl p-4 mb-12">
+                            <pre className="text-sm font-mono text-emerald-400">{`{ 
+  "phone": "593981234567", 
+  "audioUrl": "https://example.com/voice.mp3"
+}`}</pre>
+                        </div>
+
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-sm font-bold">POST</span>
+                            <h2 className="text-2xl md:text-3xl font-bold m-0 break-all">{baseUrl}/messages/document</h2>
+                        </div>
+                        <p className="mb-4 text-gray-600 dark:text-gray-400">Send PDF, Word, Excel, or other files as native document attachments.</p>
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl p-4">
+                            <pre className="text-sm font-mono text-emerald-400">{`{ 
+  "phone": "593981234567", 
+  "documentUrl": "https://example.com/report.pdf",
+  "fileName": "Monthly Report Q1.pdf"
 }`}</pre>
                         </div>
                     </section>
@@ -174,29 +218,90 @@ export default function Docs() {
                         </div>
                     </section>
 
-                    <section id="send-poll" className="scroll-mt-24 mb-20">
-                        <div className="flex items-center gap-3 mb-6">
-                            <span className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-sm font-bold">POST</span>
-                            <h2 className="text-2xl md:text-3xl font-bold m-0 break-all">{baseUrl}/messages/poll</h2>
-                        </div>
-                        <p className="mb-4 text-gray-600 dark:text-gray-400">Send WhatsApp-native multi-choice polls straight into the chat. Perfect for feedback queries or rapid service selections.</p>
+                    <section id="groups" className="scroll-mt-24 mb-20">
+                        <h2 className="text-3xl font-bold mb-6">Group Management</h2>
+                        <p className="mb-8 text-gray-600 dark:text-gray-400">Programmatically create groups, add participants, and manage metadata.</p>
                         
-                        <h4 className="font-bold mb-2">Request Body Requirements</h4>
-                        <ul className="mb-4 text-sm text-gray-600 dark:text-gray-400 space-y-2 list-disc ml-5">
-                            <li><code className="text-blue-400 font-bold">phone</code> (string, <span className="text-red-400">required</span>): The digits-only recipient number.</li>
-                            <li><code className="text-blue-400 font-bold">name</code> (string, <span className="text-red-400">required</span>): The central prompt or central question displaying at the head.</li>
-                            <li><code className="text-blue-400 font-bold">values</code> (array, <span className="text-red-400">required</span>): Array list holding between 2 to 12 strings as your selectable choices.</li>
-                            <li><code className="text-blue-400 font-bold">singleSelect</code> (boolean, optional): Default to true if you don&apos;t explicitly pass this. Prevents the user from selecting multiple concurrent answers.</li>
-                        </ul>
+                        <div className="space-y-12">
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-sm font-bold">POST</span>
+                                    <h3 className="text-xl font-bold m-0">{baseUrl}/chats/groups</h3>
+                                </div>
+                                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden p-4">
+                                    <pre className="text-sm font-mono text-emerald-400">{`{
+  "subject": "Company Team",
+  "participants": ["593991234560", "593991234561"]
+}`}</pre>
+                                </div>
+                            </div>
 
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="px-3 py-1 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded text-sm font-bold">GET</span>
+                                    <h3 className="text-xl font-bold m-0">{baseUrl}/chats/groups/[jid]</h3>
+                                </div>
+                                <p className="text-sm text-gray-500 mb-4 italic">Fetch metadata for a group you are part of.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="webhooks" className="scroll-mt-24 mb-20">
+                        <h2 className="text-3xl font-bold mb-6">Webhooks & Events</h2>
+                        <p className="mb-6 text-gray-600 dark:text-gray-400">
+                            Configure your webhook URL in the Dashboard to receive real-time notifications about incoming messages, status updates, and session changes.
+                        </p>
+                        <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-lg mb-8">
+                            <p className="text-sm text-amber-500"><strong>Note:</strong> Your webhook server must return a 200 OK status to acknowledge event delivery.</p>
+                        </div>
+                        
                         <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl p-4">
-                            <pre className="text-sm font-mono text-emerald-400">{`{ 
-  "phone": "593991234567", 
-  "name": "¿Qué herramienta te gusta más usar en DevOps?", 
-  "values": ["Docker", "Kubernetes", "Dokploy"],
-  "singleSelect": true 
+                            <div className="text-xs text-gray-500 mb-2 uppercase font-mono">Incoming Message Payload (example)</div>
+                            <pre className="text-sm font-mono text-blue-300">{`{
+  "sessionId": "Support-Bot",
+  "event": "messages.upsert",
+  "data": {
+    "key": { "remoteJid": "593991234567@s.whatsapp.net", "fromMe": false, "id": "..." },
+    "message": { "conversation": "Hello, how can I help?" },
+    "pushName": "John Doe"
+  }
 }`}</pre>
                         </div>
+                    </section>
+
+                    <section id="errors" className="scroll-mt-24 mb-20">
+                        <h2 className="text-3xl font-bold mb-6">Error Codes & Limits</h2>
+                        <table className="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr className="border-b border-gray-200 dark:border-zinc-800">
+                                    <th className="py-2 pr-4">Code</th>
+                                    <th className="py-2 pr-4">Meaning</th>
+                                    <th className="py-2">Solution</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-zinc-900">
+                                <tr>
+                                    <td className="py-3 text-red-500 font-bold">401</td>
+                                    <td className="py-3">Unauthorized</td>
+                                    <td className="py-3 text-gray-500">API key is missing or invalid. Check x-api-key header.</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-red-500 font-bold">403</td>
+                                    <td className="py-3">Forbidden</td>
+                                    <td className="py-3 text-gray-500">Rate limit exceeded or session is disconnected.</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-red-500 font-bold">404</td>
+                                    <td className="py-3">Not Found</td>
+                                    <td className="py-3 text-gray-500">Recipent number is not on WhatsApp or invalid JID.</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-red-500 font-bold">429</td>
+                                    <td className="py-3">Too Many Requests</td>
+                                    <td className="py-3 text-gray-500">Wait a few seconds. Limit: 10 messages/min per session.</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </section>
                 </div>
             </main>

@@ -1,16 +1,16 @@
 'use client';
-import { useState } from 'react';
+import { useState, SyntheticEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Register() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState('admin@erickvillon.dev');
     const [password, setPassword] = useState('');
-    const [username, setUsername] = useState('');
+    const [username, setUsername] = useState('Erick Villon');
     const [error, setError] = useState('');
 
-    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleRegister = async (e: SyntheticEvent) => {
         e.preventDefault();
         setError('');
 

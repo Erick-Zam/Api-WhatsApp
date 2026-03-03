@@ -1,7 +1,18 @@
-'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 type MessageType = 'text' | 'image' | 'video' | 'audio' | 'document' | 'location' | 'poll';
+
+interface PlaygroundSession {
+    id: string;
+    status: string;
+}
+
+interface ApiResponse {
+    status?: number;
+    statusText?: string;
+    data?: unknown;
+    error?: string;
+}
 
 export default function Playground() {
     const [apiKey, setApiKey] = useState('');
@@ -10,7 +21,7 @@ export default function Playground() {
     const [loading, setLoading] = useState(false);
 
     // Session Management
-    const [sessions, setSessions] = useState<any[]>([]);
+    const [sessions, setSessions] = useState<PlaygroundSession[]>([]);
     const [selectedSession, setSelectedSession] = useState('default');
 
     // Type specific fields
@@ -23,15 +34,15 @@ export default function Playground() {
     const [pollName, setPollName] = useState('');
     const [pollValues, setPollValues] = useState(''); // Comma separated
 
-    const [response, setResponse] = useState<any>(null);
-    const [requestPreview, setRequestPreview] = useState<any>(null);
+    const [response, setResponse] = useState<ApiResponse | null>(null);
+    const [requestPreview, setRequestPreview] = useState<unknown>(null);
 
     useEffect(() => {
         // Fetch sessions
         const token = localStorage.getItem('token');
         if (token) {
             // Get API Key
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/me`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -41,7 +52,7 @@ export default function Playground() {
                 .catch(err => console.error(err));
 
             // Get Sessions
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/sessions`, {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -49,14 +60,14 @@ export default function Playground() {
                     if (Array.isArray(data)) {
                         setSessions(data);
                         // Auto-select first connected or first available
-                        const connected = data.find((s: any) => s.status === 'CONNECTED');
+                        const connected = data.find((s: PlaygroundSession) => s.status === 'CONNECTED');
                         if (connected && selectedSession === 'default') setSelectedSession(connected.id);
                         else if (data.length > 0 && selectedSession === 'default') setSelectedSession(data[0].id);
                     }
                 })
                 .catch(err => console.error(err));
         }
-    }, []);
+    }, [selectedSession]);
 
     const [category, setCategory] = useState<'messaging' | 'groups'>('messaging');
     const [groupAction, setGroupAction] = useState('create');
@@ -65,7 +76,7 @@ export default function Playground() {
     const [participants, setParticipants] = useState(''); // Comma separated
 
     // Construct the payload dynamically based on selected type
-    const constructPayload = () => {
+    const constructPayload = useCallback(() => {
         const base = {
             sessionId: selectedSession
         };
@@ -108,11 +119,11 @@ export default function Playground() {
                     return { ...base, jid: groupJid };
             }
         }
-    };
+    }, [selectedSession, category, phone, messageType, message, mediaUrl, caption, fileName, latitude, longitude, pollName, pollValues, groupAction, groupSubject, participants, groupJid]);
 
     useEffect(() => {
         setRequestPreview(constructPayload());
-    }, [category, messageType, groupAction, phone, message, mediaUrl, caption, fileName, latitude, longitude, pollName, pollValues, selectedSession, groupJid, groupSubject, participants]);
+    }, [constructPayload]);
 
     const handleSend = async () => {
         setLoading(true);
@@ -141,7 +152,7 @@ export default function Playground() {
         }
 
         try {
-            const options: any = {
+            const options: RequestInit = {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -152,9 +163,13 @@ export default function Playground() {
 
             const res = await fetch(endpoint, options);
             const data = await res.json();
-            setResponse({ status: res.status, statusText: res.statusText, data });
-        } catch (error: any) {
-            setResponse({ error: error.message });
+            setResponse({
+                status: res.status,
+                statusText: res.statusText,
+                data: data as unknown
+            });
+        } catch (error: unknown) {
+            setResponse({ error: error instanceof Error ? error.message : String(error) });
         } finally {
             setLoading(false);
         }
@@ -193,7 +208,7 @@ export default function Playground() {
                             className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white focus:ring-2 focus:ring-green-500 outline-none"
                         >
                             <option value="default">default</option>
-                            {sessions.map((s: any) => (
+                            {sessions.map((s: PlaygroundSession) => (
                                 <option key={s.id} value={s.id}>
                                     {s.id} ({s.status})
                                 </option>
@@ -253,6 +268,18 @@ export default function Playground() {
                                         placeholder="https://example.com/file.jpg"
                                         className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
                                     />
+                                    {messageType === 'document' && (
+                                        <div className="mt-2">
+                                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">File Name</label>
+                                            <input
+                                                type="text"
+                                                value={fileName}
+                                                onChange={e => setFileName(e.target.value)}
+                                                placeholder="document.pdf"
+                                                className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -292,6 +319,30 @@ export default function Playground() {
                                         />
                                     </div>
                                 </>
+                            )}
+                            {messageType === 'location' && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Latitude</label>
+                                        <input
+                                            type="text"
+                                            value={latitude}
+                                            onChange={e => setLatitude(e.target.value)}
+                                            placeholder="-2.17"
+                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Longitude</label>
+                                        <input
+                                            type="text"
+                                            value={longitude}
+                                            onChange={e => setLongitude(e.target.value)}
+                                            placeholder="-79.92"
+                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                        />
+                                    </div>
+                                </div>
                             )}
                         </div>
                     ) : (
@@ -403,7 +454,7 @@ export default function Playground() {
                     <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800 min-h-[200px]">
                         <div className="px-4 py-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Server Response</span>
-                            {response && (
+                            {response?.status && (
                                 <span className={`text-xs font-bold px-2 py-1 rounded ${response.status >= 200 && response.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
                                     {response.status} {response.statusText}
                                 </span>

@@ -1,16 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+
+interface AdminStats {
+    users: number;
+    totalRequests?: number;
+    errors?: number;
+}
+
+interface AdminUser {
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+    created_at: string;
+}
 
 export default function AdminPage() {
     const router = useRouter();
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<AdminStats | null>(null);
 
-    const authorizedFetch = async (url: string, options: RequestInit = {}) => {
+    const authorizedFetch = useCallback(async (url: string, options: RequestInit = {}) => {
         const token = localStorage.getItem('token');
         if (!token) {
             router.push('/login');
@@ -39,21 +53,21 @@ export default function AdminPage() {
         }
 
         return res;
-    };
+    }, [router]);
 
-    const fetchStats = async () => {
+    const fetchStats = useCallback(async () => {
         try {
-            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/api/admin/stats`);
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/api/admin/stats`);
             const data = await res.json();
             setStats(data);
         } catch (err) {
             console.error(err);
         }
-    };
+    }, [authorizedFetch]);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
-            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/api/admin/users`);
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/api/admin/users`);
             const data = await res.json();
             setUsers(data);
         } catch (err) {
@@ -61,7 +75,7 @@ export default function AdminPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [authorizedFetch]);
 
     useEffect(() => {
         const init = async () => {
@@ -69,7 +83,7 @@ export default function AdminPage() {
             await fetchUsers();
         };
         init();
-    }, []);
+    }, [fetchStats, fetchUsers]);
 
     const handleRoleChange = async (userId: string, newRole: string) => {
         try {

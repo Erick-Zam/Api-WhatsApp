@@ -84,4 +84,43 @@ router.put('/change-password', verifyJwt, async (req, res) => {
     }
 });
 
+router.get('/logs', verifyJwt, async (req, res) => {
+    try {
+        const { id } = req.user;
+        const limit = Number.parseInt(req.query.limit) || 50;
+        const offset = Number.parseInt(req.query.offset) || 0;
+
+        const result = await db.query(`
+            SELECT * FROM api_usage_logs 
+            WHERE user_id = $1 
+            ORDER BY created_at DESC 
+            LIMIT $2 OFFSET $3
+        `, [id, limit, offset]);
+
+        res.json(result.rows);
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.query);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.put('/profile', verifyJwt, async (req, res) => {
+    try {
+        const { username, email } = req.body;
+        const { id } = req.user;
+
+        if (!username || !email) {
+            return res.status(400).json({ error: 'Username and Email are required' });
+        }
+
+        await db.query('UPDATE api_users SET username = $1, email = $2 WHERE id = $3', [username, email, id]);
+
+        logAudit(id, 'PROFILE_UPDATE', { username, email }, req.ip);
+        res.json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.body);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 export default router;

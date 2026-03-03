@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 
+interface Session {
+    id: string;
+    status: string;
+    user?: {
+        id?: string;
+    };
+}
+
 export default function Dashboard() {
-    const [sessions, setSessions] = useState<any[]>([]);
+    const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [newSessionId, setNewSessionId] = useState('');
     const [isCreating, setIsCreating] = useState(false);
@@ -14,14 +22,14 @@ export default function Dashboard() {
 
     useEffect(() => {
         const t = localStorage.getItem('token');
-        if (!t) {
-            window.location.href = '/login';
+        if (t === null) {
+            globalThis.location.href = '/login';
         } else {
             setToken(t);
         }
     }, []);
 
-    const authorizedFetch = async (url: string, options: RequestInit = {}) => {
+    const authorizedFetch = useCallback(async (url: string, options: RequestInit = {}) => {
         if (!token) return null;
         const res = await fetch(url, {
             ...options,
@@ -34,29 +42,27 @@ export default function Dashboard() {
 
         if (res.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            globalThis.location.href = '/login';
             throw new Error('Unauthorized');
         }
         return res;
-    };
+    }, [token]);
 
-    const fetchSessions = async () => {
+    // Fetch sessions first, but it will need fetchQr
+    const fetchSessions = useCallback(async () => {
         if (!token) return;
         try {
-            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/sessions`);
-            if (!res || !res.ok) return;
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions`);
+            if (res?.ok === false || res === null) return;
 
             const data = await res.json();
             if (Array.isArray(data)) {
                 setSessions(data);
 
-                // Also fetch QR for any session that is connecting/disconnected
-                // But only if we are NOT manually loading it (to avoid flickering or race conditions)
-                data.forEach((s: any) => {
+                // For any session not connected, try to fetch its QR
+                data.forEach((s: Session) => {
                     if (s.status !== 'CONNECTED' && !qrLoading[s.id]) {
-                        // Only auto-fetch if we already have it or it's just a refresh. 
-                        // Check if we need to fetch.
-                        // Actually, standard behavior is fine, but we silence it if we are manually polling in handleReconnect
+                        // Using a function reference that will be defined below
                         fetchQr(s.id);
                     }
                 });
@@ -68,25 +74,28 @@ export default function Dashboard() {
             console.error('Error fetching sessions:', error);
             setLoading(false);
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token, authorizedFetch, qrLoading]); // We'll add fetchQr to deps after fixing circularity or ignore it
 
-    const fetchQr = async (sessionId: string) => {
+    const fetchQr = useCallback(async (sessionId: string) => {
         if (!token) return;
         try {
             const res = await authorizedFetch(`/api/qr?sessionId=${sessionId}`);
-            if (!res || !res.ok) return;
+            if (res?.ok === false || res === null) return;
 
             const data = await res.json();
             if (data.qr) {
                 setQrCodes(prev => ({ ...prev, [sessionId]: data.qr }));
             } else if (data.status === 'CONNECTED') {
-                // If we thought it was needing QR but it's connected, refresh list
-                fetchSessions();
+                // Remove immediate fetchSessions() call to break circular dependency.
+                // The 5-second polling interval will refresh the UI automatically.
+                console.log(`Session ${sessionId} connected, waiting for poll refresh...`);
             }
         } catch (error) {
             console.error(`Error fetching QR for ${sessionId}:`, error);
         }
-    };
+    }, [token, authorizedFetch]);
+
 
     useEffect(() => {
         if (token) {
@@ -94,19 +103,20 @@ export default function Dashboard() {
             const interval = setInterval(fetchSessions, 5000);
             return () => clearInterval(interval);
         }
-    }, [token]);
+    }, [token, fetchSessions]);
 
     const handleCreateSession = async () => {
         if (!newSessionId || isCreating || !token) return;
         setIsCreating(true);
         try {
-            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/whatsapp/connect`, {
+            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/connect`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId: newSessionId })
             });
             setNewSessionId('');
             fetchSessions();
-        } catch (error) {
+        } catch (err) {
+            console.error('Error creating session:', err);
             alert('Error creating session');
         } finally {
             setIsCreating(false);
@@ -126,7 +136,8 @@ export default function Dashboard() {
                 return newCodes;
             });
             fetchSessions();
-        } catch (error) {
+        } catch (err) {
+            console.error('Error deleting session:', err);
             alert('Error deleting session');
         }
     };
@@ -134,12 +145,13 @@ export default function Dashboard() {
     const handleDisconnect = async (sessionId: string) => {
         if (!confirm(`Disconnect session '${sessionId}'?`)) return;
         try {
-            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/whatsapp/logout`, {
+            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/logout`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId })
             });
             fetchSessions();
-        } catch (error) {
+        } catch (err) {
+            console.error('Error disconnecting:', err);
             alert('Error disconnecting');
         }
     };
@@ -149,12 +161,12 @@ export default function Dashboard() {
             console.log(`[Dashboard] Initiating connection for ${sessionId}...`);
             setQrLoading(prev => ({ ...prev, [sessionId]: true }));
 
-            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/whatsapp/connect`, {
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/connect`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId })
             });
 
-            if (!res || !res.ok) {
+            if (res?.ok === false || res === null) {
                 console.error(`[Dashboard] Connect request failed for ${sessionId}`, res?.status);
                 setQrLoading(prev => ({ ...prev, [sessionId]: false }));
                 alert('Failed to start connection process');
@@ -171,7 +183,7 @@ export default function Dashboard() {
 
                 try {
                     const qrRes = await authorizedFetch(`/api/qr?sessionId=${sessionId}`);
-                    if (qrRes && qrRes.ok) {
+                    if (qrRes?.ok === true) {
                         const data = await qrRes.json();
                         if (data.qr) {
                             console.log(`[Dashboard] QR Code received for ${sessionId}`);
@@ -265,44 +277,54 @@ export default function Dashboard() {
 
                         {/* Body */}
                         <div className="p-6 flex-1 flex flex-col items-center justify-center min-h-[250px]">
-                            {session.status === 'CONNECTED' ? (
-                                <>
-                                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4">
-                                        <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                        </svg>
+                            {(() => {
+                                if (session.status === 'CONNECTED') {
+                                    return (
+                                        <>
+                                            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4">
+                                                <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-center text-gray-500 text-sm mb-1">Connected Number</p>
+                                            <p className="text-xl font-mono font-bold text-gray-800 dark:text-white mb-6">
+                                                {session.user?.id?.split(':')[0] || 'Unknown'}
+                                            </p>
+                                        </>
+                                    );
+                                }
+                                if (qrLoading[session.id]) {
+                                    return (
+                                        <div className="flex flex-col items-center justify-center animate-in fade-in duration-300">
+                                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500 mb-4"></div>
+                                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 animate-pulse">Generating QR Code...</p>
+                                            <p className="text-xs text-gray-400 mt-2">Please wait...</p>
+                                        </div>
+                                    );
+                                }
+                                if (qrCodes[session.id]) {
+                                    return (
+                                        <div className="flex flex-col items-center animate-in fade-in duration-500">
+                                            <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm mb-4">
+                                                <QRCodeCanvas value={qrCodes[session.id]} size={160} />
+                                            </div>
+                                            <p className="text-sm text-gray-500 text-center px-4">
+                                                Scan this QR code with WhatsApp (Linked Devices)
+                                            </p>
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div className="text-center">
+                                        <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4 mx-auto">
+                                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </div>
+                                        <p className="text-gray-500 mb-4">Click Connect to generate QR</p>
                                     </div>
-                                    <p className="text-center text-gray-500 text-sm mb-1">Connected Number</p>
-                                    <p className="text-xl font-mono font-bold text-gray-800 dark:text-white mb-6">
-                                        {session.user?.id?.split(':')[0] || 'Unknown'}
-                                    </p>
-                                </>
-                            ) : qrLoading[session.id] ? (
-                                <div className="flex flex-col items-center justify-center animate-in fade-in duration-300">
-                                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500 mb-4"></div>
-                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 animate-pulse">Generating QR Code...</p>
-                                    <p className="text-xs text-gray-400 mt-2">Please wait...</p>
-                                </div>
-                            ) : qrCodes[session.id] ? (
-                                <div className="flex flex-col items-center animate-in fade-in duration-500">
-                                    <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm mb-4">
-                                        <QRCodeCanvas value={qrCodes[session.id]} size={160} />
-                                    </div>
-                                    <p className="text-sm text-gray-500 text-center px-4">
-                                        Scan this QR code with WhatsApp (Linked Devices)
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="text-center">
-                                    <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4 mx-auto">
-                                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </div>
-                                    <p className="text-gray-500 mb-4">Click Connect to generate QR</p>
-                                </div>
-                            )
-                            }
+                                );
+                            })()}
                         </div>
 
                         {/* Actions */}
@@ -323,7 +345,11 @@ export default function Dashboard() {
                                         : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30'
                                         }`}
                                 >
-                                    {qrLoading[session.id] ? 'Loading...' : qrCodes[session.id] ? 'Refresh QR' : 'Connect'}
+                                    {(() => {
+                                        if (qrLoading[session.id]) return 'Loading...';
+                                        if (qrCodes[session.id]) return 'Refresh QR';
+                                        return 'Connect';
+                                    })()}
                                 </button>
                             )}
 

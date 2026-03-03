@@ -3,6 +3,31 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+interface SidebarLinkProps {
+    href: string;
+    icon: string;
+    label: string;
+    isCollapsed: boolean;
+    isActive: boolean;
+    customClasses?: string;
+    title?: string;
+}
+
+const SidebarItem = ({ href, icon, label, isCollapsed, isActive, customClasses, title }: SidebarLinkProps) => (
+    <li>
+        <Link
+            href={href}
+            className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-all ${
+                customClasses || (isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white')
+            }`}
+            title={isCollapsed ? (title || label) : ""}
+        >
+            <span className="text-xl">{icon}</span>
+            {!isCollapsed && <span className="ml-3 font-medium">{label}</span>}
+        </Link>
+    </li>
+);
+
 export default function Sidebar() {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -13,7 +38,8 @@ export default function Sidebar() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || `/api`}/auth/me`, {
+            const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
+            fetch(`${apiBase}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -24,10 +50,14 @@ export default function Sidebar() {
         }
     }, []);
 
+    const logout = () => {
+        localStorage.removeItem('token');
+        globalThis.location.href = '/';
+    };
+
     return (
         <nav
-            className={`${isCollapsed ? 'w-20' : 'w-64'
-                } bg-gray-900 text-white p-4 h-screen hidden md:flex flex-col border-r border-gray-800 transition-all duration-300 relative z-50`}
+            className={`${isCollapsed ? 'w-20' : 'w-64'} bg-gray-900 text-white p-4 h-screen hidden md:flex flex-col border-r border-gray-800 transition-all duration-300 relative z-50`}
         >
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
@@ -45,107 +75,56 @@ export default function Sidebar() {
             </button>
 
             <div className={`mb-8 flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
-                <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? 'text-xl' : 'text-2xl'
-                    }`}>
+                <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? 'text-xl' : 'text-2xl'}`}>
                     {isCollapsed ? 'WS' : 'WhatsApp SaaS'}
                 </h1>
             </div>
 
             <ul className="space-y-2 flex-grow">
-                <li>
-                    <Link
-                        href="/dashboard"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            }`}
-                        title={isCollapsed ? "Connect Device" : ""}
-                    >
-                        <span className="text-xl">📱</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">Connect Device</span>}
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        href="/dashboard/chats"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/chats') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            }`}
-                        title={isCollapsed ? "Chats" : ""}
-                    >
-                        <span className="text-xl">💬</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">Chats</span>}
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        href="/dashboard/logs"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/logs') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            }`}
-                        title={isCollapsed ? "Logs & Activity" : ""}
-                    >
-                        <span className="text-xl">📊</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">Logs & Activity</span>}
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        href="/dashboard/playground"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-all font-mono text-sm border ${isActive('/dashboard/playground')
-                            ? 'bg-blue-900/40 text-blue-200 border-blue-500/50'
-                            : 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 text-blue-300 border-blue-900/50 hover:bg-blue-900/30'
-                            }`}
-                        title={isCollapsed ? "API Playground" : ""}
-                    >
-                        <span className="text-xl">🧪</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">API Playground</span>}
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        href="/dashboard/docs"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/docs') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            }`}
-                        title={isCollapsed ? "API Docs" : ""}
-                    >
-                        <span className="text-xl">📚</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">API Docs</span>}
-                    </Link>
-                </li>
+                <SidebarItem href="/dashboard" icon="📱" label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
+                <SidebarItem href="/dashboard/chats" icon="💬" label="Chats" isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
+                <SidebarItem href="/dashboard/logs" icon="📊" label="Logs & Activity" isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
+                
+                <SidebarItem 
+                    href="/dashboard/playground" 
+                    icon="🧪" 
+                    label="API Playground" 
+                    isCollapsed={isCollapsed} 
+                    isActive={isActive('/dashboard/playground')}
+                    customClasses={isActive('/dashboard/playground')
+                        ? 'bg-blue-900/40 text-blue-200 border-blue-500/50'
+                        : 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 text-blue-300 border-blue-900/50 hover:bg-blue-900/30'
+                    }
+                />
+
+                <SidebarItem href="/dashboard/docs" icon="📚" label="API Docs" isCollapsed={isCollapsed} isActive={isActive('/dashboard/docs')} />
 
                 {userRole === 'admin' && (
-                    <li>
-                        <Link
-                            href="/dashboard/admin"
-                            className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/admin') ? 'bg-purple-900/40 text-purple-200 border border-purple-500/30' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                                }`}
-                            title={isCollapsed ? "Administration" : ""}
-                        >
-                            <span className="text-xl">🛡️</span>
-                            {!isCollapsed && <span className="ml-3 font-medium">Administration</span>}
-                        </Link>
-                    </li>
+                    <SidebarItem 
+                        href="/dashboard/admin" 
+                        icon="🛡️" 
+                        label="Administration" 
+                        isCollapsed={isCollapsed} 
+                        isActive={isActive('/dashboard/admin')}
+                        customClasses={isActive('/dashboard/admin') 
+                            ? 'bg-purple-900/40 text-purple-200 border border-purple-500/30' 
+                            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                        }
+                    />
                 )}
 
-                <li>
-                    <Link
-                        href="/dashboard/settings"
-                        className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-colors ${isActive('/dashboard/settings') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                            }`}
-                        title={isCollapsed ? "Settings" : ""}
-                    >
-                        <span className="text-xl">⚙️</span>
-                        {!isCollapsed && <span className="ml-3 font-medium">Settings</span>}
-                    </Link>
-                </li>
+                <SidebarItem href="/dashboard/settings" icon="⚙️" label="Settings" isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
             </ul>
 
             <div className={`mt-auto border-t border-gray-800 pt-4 flex ${isCollapsed ? 'justify-center' : ''}`}>
-                <Link
-                    href="/"
-                    className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg hover:bg-red-900/20 text-red-400 transition-colors`}
+                <button
+                    onClick={logout}
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg hover:bg-red-900/20 text-red-400 transition-colors text-left`}
                     title={isCollapsed ? "Logout" : ""}
                 >
                     <span className="text-xl">🚪</span>
                     {!isCollapsed && <span className="ml-3 font-medium">Logout</span>}
-                </Link>
+                </button>
             </div>
         </nav>
     );
