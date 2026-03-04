@@ -42,11 +42,11 @@ const LoginForm = ({ onClose, onSwitch }: { onClose: () => void, onSwitch: () =>
                 <form onSubmit={handleLogin} className="space-y-4 text-left">
                     <div>
                         <label htmlFor="login-email" className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
-                        <input id="login-email" type="email" placeholder="Email" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={email} onChange={e => setEmail(e.target.value)} required />
+                        <input id="login-email" type="email" placeholder="Email" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="off" />
                     </div>
                     <div>
                         <label htmlFor="login-password" className="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
-                        <input id="login-password" type="password" placeholder="Password" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={password} onChange={e => setPassword(e.target.value)} required />
+                        <input id="login-password" type="password" placeholder="Password" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="new-password" />
                     </div>
                     <button type="submit" disabled={loading} className="w-full py-3.5 mt-2 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition">
                         {loading ? 'Logging in...' : 'Log In'}
@@ -96,15 +96,15 @@ const RegisterForm = ({ onClose, onSwitch }: { onClose: () => void, onSwitch: ()
                 <form onSubmit={handleRegister} className="space-y-4 text-left">
                     <div>
                         <label htmlFor="reg-username" className="block text-xs font-bold text-gray-400 uppercase mb-1">Nombre</label>
-                        <input id="reg-username" type="text" placeholder="Nombre" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={username} onChange={e => setUsername(e.target.value)} required />
+                        <input id="reg-username" type="text" placeholder="Nombre" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={username} onChange={e => setUsername(e.target.value)} required autoComplete="off" />
                     </div>
                     <div>
                         <label htmlFor="reg-email" className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
-                        <input id="reg-email" type="email" placeholder="Email" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={email} onChange={e => setEmail(e.target.value)} required />
+                        <input id="reg-email" type="email" placeholder="Email" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="off" />
                     </div>
                     <div>
                         <label htmlFor="reg-password" className="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
-                        <input id="reg-password" type="password" placeholder="Password" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={password} onChange={e => setPassword(e.target.value)} required />
+                        <input id="reg-password" type="password" placeholder="Password" className="w-full p-3.5 bg-zinc-800 border border-zinc-700 rounded-xl text-white" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="new-password" />
                     </div>
                     <button type="submit" disabled={loading} className="w-full py-3.5 mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
                         {loading ? 'Creating...' : 'Register'}

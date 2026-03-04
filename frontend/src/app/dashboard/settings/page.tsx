@@ -275,6 +275,7 @@ export default function SettingsPage() {
                                     className="w-full bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
                                     placeholder="Enter current password"
                                     required
+                                    autoComplete="current-password"
                                 />
                             </div>
                         </div>
@@ -289,6 +290,7 @@ export default function SettingsPage() {
                                     className="w-full bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
                                     placeholder="Enter new password"
                                     required
+                                    autoComplete="new-password"
                                 />
                             </div>
                             <div>
@@ -301,6 +303,7 @@ export default function SettingsPage() {
                                     className="w-full bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
                                     placeholder="Confirm new password"
                                     required
+                                    autoComplete="new-password"
                                 />
                             </div>
                         </div>
