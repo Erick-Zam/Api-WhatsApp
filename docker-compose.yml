@@ -210,11 +210,8 @@ services:
       # Frontend URL
       FRONTEND_URL: http://localhost:${FRONTEND_PORT}
     
-    ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
-    
     expose:
-      - "${FRONTEND_PORT}"
+      - "3000"
     
     depends_on:
       backend:
@@ -226,7 +223,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://localhost:'+process.env.FRONTEND_PORT+'/',(r)=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))",
+          "require('http').get('http://localhost:3000/',(r)=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))",
         ]
       interval: 30s
       timeout: 10s
