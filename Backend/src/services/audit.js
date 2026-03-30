@@ -3,7 +3,7 @@
  * Handles all audit event logging, data access tracking, and compliance recording
  */
 
-import { db } from '../db.js';
+import db from '../db.js';
 import { logger } from './logger.js';
 
 /**
