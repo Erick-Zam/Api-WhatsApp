@@ -5,8 +5,6 @@
 # DO NOT hardcode secrets in this file!
 # Use: docker-compose --env-file .env.local up
 
-version: '3.9'
-
 services:
   # ============================================================
   # 1. PostgreSQL Database
@@ -19,9 +17,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
-    
-    ports:
-      - "${POSTGRES_PORT}:5432"
     
     volumes:
       # Database persistence
@@ -237,34 +232,18 @@ volumes:
   # PostgreSQL database
   db_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/postgres
   
   # WhatsApp sessions (should be encrypted)
   whatsapp_sessions:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/sessions
   
   # Backups
   backups_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/backups
   
   # Logs
   logs_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/logs
 
 # ============================================================
 # Networks
