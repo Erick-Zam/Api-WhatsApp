@@ -6,6 +6,10 @@ import {
     issueJwtForUser,
     issueMfaPendingToken,
     verifyMfaPendingToken,
+    generateVerificationToken,
+    sendVerificationEmail,
+    verifyEmailToken,
+    setPasswordForUser,
 } from '../services/auth.js';
 import { logAudit, logError } from '../services/logger.js';
 import { verifyJwt } from '../middleware/jwtAuth.js';
@@ -22,6 +26,11 @@ import {
     verifyMfaSetup,
     verifyMfaLogin,
     disableMfa,
+    isTrustedDevice,
+    trustDevice,
+    getTrustedDevices,
+    removeTrustedDevice,
+    generateDeviceFingerprint,
 } from '../services/mfa.js';
 
 const router = express.Router();
@@ -81,6 +90,10 @@ router.post('/login', async (req, res) => {
 
         const result = await loginUser(email, password);
         logAudit(result.user.id, 'LOGIN', { email }, req.ip);
+        
+        // Add recommendation for MFA if user is admin and hasn't enabled it yet
+        result.recommendMfa = (user.role_name === 'admin' && !mfaStatus.enabled);
+        
         return res.json(result);
     } catch (error) {
         logError('Auth', error.message, error.stack, req.body);
@@ -90,13 +103,25 @@ router.post('/login', async (req, res) => {
 
 router.post('/mfa/login-verify', async (req, res) => {
     try {
-        const { mfaToken, code } = req.body;
+        const { mfaToken, code, deviceFingerprint, trustDevice: shouldTrustDevice } = req.body;
         if (!mfaToken || !code) {
             return res.status(400).json({ error: 'mfaToken and code are required' });
         }
 
         const pending = verifyMfaPendingToken(mfaToken);
+        
+        // Check if device is already trusted (optional: skip TOTP if trusted)
+        // For now, always require TOTP but allow trust device mark
+        const isTrusted = deviceFingerprint ? await isTrustedDevice(pending.id, deviceFingerprint) : false;
+        
+        // Verify MFA if device is not trusted or user needs to verify
         await verifyMfaLogin({ userId: pending.id, token: code });
+
+        // If user wants to trust this device, store it
+        if (shouldTrustDevice && deviceFingerprint) {
+            const deviceName = req.get('user-agent')?.substring(0, 100) || 'Unknown Device';
+            await trustDevice(pending.id, deviceFingerprint, deviceName);
+        }
 
         const userResult = await db.query(`
             SELECT u.id, u.username, u.email, u.api_key, r.name as role_name
@@ -112,7 +137,7 @@ router.post('/mfa/login-verify', async (req, res) => {
         const user = userResult.rows[0];
         const token = issueJwtForUser(user);
 
-        logAudit(user.id, 'LOGIN_MFA_VERIFIED', { email: user.email }, req.ip);
+        logAudit(user.id, 'LOGIN_MFA_VERIFIED', { email: user.email, trusted: shouldTrustDevice }, req.ip);
         return res.json({
             token,
             user: {
@@ -317,6 +342,82 @@ router.put('/profile', verifyJwt, async (req, res) => {
     } catch (error) {
         logError('Auth', error.message, error.stack, req.body);
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Email Verification Endpoints
+router.post('/send-verification-email', verifyJwt, async (req, res) => {
+    try {
+        const { id, email } = req.user;
+        const token = generateVerificationToken();
+        
+        await sendVerificationEmail(id, email, token);
+        logAudit(id, 'VERIFICATION_EMAIL_SENT', { email }, req.ip);
+        
+        res.json({ message: 'Verification email sent successfully' });
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.user);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.get('/verify-email/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+        const result = await verifyEmailToken(token);
+        
+        logAudit(result.user_id, 'EMAIL_VERIFIED', { email: result.email }, '');
+        
+        // Redirect to login/dashboard or return JSON
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        return res.redirect(302, `${frontendUrl}/login?verified=true`);
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.params);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        return res.redirect(302, `${frontendUrl}/login?verifyError=${encodeURIComponent(error.message)}`);
+    }
+});
+
+// Password Setup for OAuth users
+router.post('/set-password', verifyJwt, async (req, res) => {
+    try {
+        const { id, email } = req.user;
+        const { newPassword } = req.body;
+
+        if (!newPassword) {
+            return res.status(400).json({ error: 'newPassword is required' });
+        }
+
+        await setPasswordForUser(id, newPassword);
+        logAudit(id, 'PASSWORD_SET', { email }, req.ip);
+        
+        res.json({ message: 'Password set successfully' });
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.body);
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Trusted Devices Endpoints
+router.get('/mfa/trusted-devices', verifyJwt, async (req, res) => {
+    try {
+        const devices = await getTrustedDevices(req.user.id);
+        res.json({ devices });
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.user);
+        res.status(500).json({ error: 'Failed to retrieve trusted devices' });
+    }
+});
+
+router.delete('/mfa/trusted-devices/:deviceId', verifyJwt, async (req, res) => {
+    try {
+        const { deviceId } = req.params;
+        await removeTrustedDevice(req.user.id, deviceId);
+        logAudit(req.user.id, 'TRUSTED_DEVICE_REMOVED', { deviceId }, req.ip);
+        res.json({ message: 'Device removed from trusted list' });
+    } catch (error) {
+        logError('Auth', error.message, error.stack, req.params);
+        res.status(400).json({ error: error.message });
     }
 });
 

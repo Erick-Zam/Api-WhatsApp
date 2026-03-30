@@ -138,3 +138,55 @@ export const disableMfa = async ({ userId, token }) => {
 
     return { disabled: true };
 };
+
+// Trusted Devices Functions
+export const generateDeviceFingerprint = (userAgent, ip) => {
+    // Create a hash from UA + IP to identify device
+    const fingerprint = `${userAgent}-${ip}`;
+    return crypto.createHash('sha256').update(fingerprint).digest('hex');
+};
+
+export const isTrustedDevice = async (userId, deviceFingerprint) => {
+    const result = await db.query(`
+        SELECT id FROM trusted_devices 
+        WHERE user_id = $1 AND device_fingerprint = $2
+    `, [userId, deviceFingerprint]);
+
+    return result.rows.length > 0;
+};
+
+export const trustDevice = async (userId, deviceFingerprint, deviceName) => {
+    try {
+        const result = await db.query(`
+            INSERT INTO trusted_devices (user_id, device_fingerprint, device_name, trusted_at, last_used_at)
+            VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (user_id, device_fingerprint)
+            DO UPDATE SET last_used_at = CURRENT_TIMESTAMP
+            RETURNING id
+        `, [userId, deviceFingerprint, deviceName || 'Unknown Device']);
+
+        return { trusted: true, deviceId: result.rows[0].id };
+    } catch (error) {
+        throw new Error('Failed to trust device: ' + error.message);
+    }
+};
+
+export const getTrustedDevices = async (userId) => {
+    const result = await db.query(`
+        SELECT id, device_name, last_used_at, trusted_at
+        FROM trusted_devices
+        WHERE user_id = $1
+        ORDER BY last_used_at DESC
+    `, [userId]);
+
+    return result.rows;
+};
+
+export const removeTrustedDevice = async (userId, deviceId) => {
+    await db.query(`
+        DELETE FROM trusted_devices
+        WHERE id = $1 AND user_id = $2
+    `, [deviceId, userId]);
+
+    return { removed: true };
+};

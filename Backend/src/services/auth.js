@@ -157,3 +157,77 @@ export const loginUser = async (email, password) => {
 export const verifyToken = (token) => {
     return jwt.verify(token, SECRET_KEY);
 };
+
+// Email Verification Functions
+export const generateVerificationToken = () => {
+    return crypto.randomBytes(32).toString('hex');
+};
+
+export const sendVerificationEmail = async (userId, email, token) => {
+    try {
+        // Store token in database
+        await db.query(`
+            INSERT INTO email_verification (user_id, email, verification_token, created_at, expires_at)
+            VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '24 hours')
+        `, [userId, email, token]);
+
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const verificationLink = `${frontendUrl}/login?verify=${token}`;
+
+        // TODO: Integrate with email service (SendGrid, Mailgun, etc.)
+        console.log(`[EMAIL] Verification link for ${email}: ${verificationLink}`);
+        // In production, send actual email here
+        // const response = await fetch('email-service', { ... });
+
+        return { success: true, message: 'Verification email queued' };
+    } catch (error) {
+        console.error('Email sending failed:', error);
+        throw new Error('Failed to send verification email');
+    }
+};
+
+export const verifyEmailToken = async (token) => {
+    try {
+        // Find token in database and verify it's not expired
+        const result = await db.query(`
+            SELECT user_id, email, expires_at FROM email_verification 
+            WHERE verification_token = $1 AND expires_at > CURRENT_TIMESTAMP
+        `, [token]);
+
+        if (result.rows.length === 0) {
+            throw new Error('Invalid or expired verification token');
+        }
+
+        const { user_id, email } = result.rows[0];
+
+        // Mark user as email_verified
+        await db.query(`UPDATE api_users SET email_verified = TRUE WHERE id = $1`, [user_id]);
+
+        // Delete the used token
+        await db.query(`DELETE FROM email_verification WHERE verification_token = $1`, [token]);
+
+        return { success: true, user_id, email };
+    } catch (error) {
+        throw new Error(error.message || 'Token verification failed');
+    }
+};
+
+// Password Setup for OAuth users
+export const setPasswordForUser = async (userId, newPassword) => {
+    try {
+        // Validate password strength
+        if (!newPassword || newPassword.length < 8) {
+            throw new Error('Password must be at least 8 characters long');
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        await db.query(`
+            UPDATE api_users SET password_hash = $1 WHERE id = $2
+        `, [hashedPassword, userId]);
+
+        return { success: true, message: 'Password set successfully' };
+    } catch (error) {
+        throw new Error(error.message || 'Failed to set password');
+    }
+};
