@@ -40,8 +40,16 @@ router.post('/register', async (req, res) => {
         const { email, password, username } = req.body;
         const user = await registerUser(email, password, username);
 
+        // Send verification link after email/password registration (non-blocking).
+        try {
+            const verificationToken = generateVerificationToken();
+            await sendVerificationEmail(user.id, user.email, verificationToken);
+        } catch (sendError) {
+            logError('Auth', sendError.message, sendError.stack, { email, flow: 'register-verification' });
+        }
+
         logAudit(user.id, 'REGISTER', { email }, req.ip);
-        res.status(201).json({ message: 'User created', user });
+        res.status(201).json({ message: 'User created. Verification email sent.', user });
     } catch (error) {
         logError('Auth', error.message, error.stack, req.body);
         res.status(400).json({ error: error.message });
@@ -54,7 +62,8 @@ router.get('/me', verifyJwt, async (req, res) => {
     try {
         const { id } = req.user;
         const result = await db.query(`
-            SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at,
+             SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+                 (u.password_hash IS NOT NULL) as has_password,
                    COALESCE(ms.is_enabled, false) as mfa_enabled
             FROM api_users u 
             LEFT JOIN roles r ON u.role_id = r.id
@@ -75,12 +84,22 @@ router.get('/me', verifyJwt, async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, deviceFingerprint } = req.body;
         const user = await validateUserCredentials(email, password);
         const mfaStatus = await getMfaStatus(user.id);
         const requiresMfa = user.role_name === 'admin' || mfaStatus.enabled;
 
         if (requiresMfa) {
+            if (deviceFingerprint) {
+                const trusted = await isTrustedDevice(user.id, deviceFingerprint);
+                if (trusted) {
+                    const result = await loginUser(email, password);
+                    result.recommendMfa = (user.role_name === 'admin' && !mfaStatus.enabled);
+                    logAudit(result.user.id, 'LOGIN_TRUSTED_DEVICE', { email }, req.ip);
+                    return res.json(result);
+                }
+            }
+
             logAudit(user.id, 'LOGIN_MFA_REQUIRED', { email }, req.ip);
             return res.json({
                 requiresMfa: true,
@@ -104,21 +123,22 @@ router.post('/login', async (req, res) => {
 router.post('/mfa/login-verify', async (req, res) => {
     try {
         const { mfaToken, code, deviceFingerprint, trustDevice: shouldTrustDevice } = req.body;
-        if (!mfaToken || !code) {
+        if (!mfaToken || (!code && !deviceFingerprint)) {
             return res.status(400).json({ error: 'mfaToken and code are required' });
         }
 
         const pending = verifyMfaPendingToken(mfaToken);
-        
-        // Check if device is already trusted (optional: skip TOTP if trusted)
-        // For now, always require TOTP but allow trust device mark
-        const isTrusted = deviceFingerprint ? await isTrustedDevice(pending.id, deviceFingerprint) : false;
-        
-        // Verify MFA if device is not trusted or user needs to verify
-        await verifyMfaLogin({ userId: pending.id, token: code });
+
+        const trusted = deviceFingerprint ? await isTrustedDevice(pending.id, deviceFingerprint) : false;
+        if (!trusted) {
+            if (!code) {
+                return res.status(400).json({ error: 'code is required for untrusted devices' });
+            }
+            await verifyMfaLogin({ userId: pending.id, token: code });
+        }
 
         // If user wants to trust this device, store it
-        if (shouldTrustDevice && deviceFingerprint) {
+        if (!trusted && shouldTrustDevice && deviceFingerprint) {
             const deviceName = req.get('user-agent')?.substring(0, 100) || 'Unknown Device';
             await trustDevice(pending.id, deviceFingerprint, deviceName);
         }

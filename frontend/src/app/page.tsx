@@ -2,6 +2,7 @@
 import { useMemo, useState, SyntheticEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import EmailVerificationModal from '../components/EmailVerificationModal';
 
 type AuthMode = 'login' | 'register' | 'mfa';
 
@@ -9,10 +10,12 @@ const AuthModal = ({
     mode,
     onClose,
     onSwitchMode,
+    onRegistered,
 }: {
     mode: AuthMode;
     onClose: () => void;
     onSwitchMode: (nextMode: AuthMode) => void;
+    onRegistered: (email: string) => void;
 }) => {
     const router = useRouter();
     const [loginEmail, setLoginEmail] = useState('');
@@ -26,6 +29,16 @@ const AuthModal = ({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [trustDevice, setTrustDevice] = useState(true);
+
+    const getDeviceFingerprint = () => {
+        if (typeof window === 'undefined') return '';
+        const ua = navigator.userAgent || '';
+        const lang = navigator.language || '';
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const raw = `${ua}|${lang}|${tz}`;
+        return btoa(raw).slice(0, 120);
+    };
 
     const title = useMemo(() => {
         if (mode === 'register') return 'Create your workspace';
@@ -66,18 +79,22 @@ const AuthModal = ({
             const res = await fetch(`${apiBase}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+                body: JSON.stringify({ email: loginEmail, password: loginPassword, deviceFingerprint: getDeviceFingerprint() }),
             });
 
             if (res.ok) {
                 const data = await res.json();
                 if (data.requiresMfa) {
                     setMfaToken(data.mfaToken);
+                    setMfaCode('');
                     onSwitchMode('mfa');
                     return;
                 }
 
                 localStorage.setItem('token', data.token);
+                if (data.recommendMfa) {
+                    localStorage.setItem('recommendMfa', 'true');
+                }
                 router.push('/dashboard');
             } else {
                 const data = await res.json().catch(() => ({}));
@@ -127,8 +144,9 @@ const AuthModal = ({
             });
 
             if (res.ok) {
-                setSuccess('Account created. You can now sign in.');
-                onSwitchMode('login');
+                setSuccess('Account created. Check your email for verification.');
+                onRegistered(registerEmail);
+                onClose();
             } else {
                 const data = await res.json();
                 setError(data.error || 'Registration failed');
@@ -151,7 +169,12 @@ const AuthModal = ({
             const res = await fetch(`${apiBase}/auth/mfa/login-verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mfaToken, code: mfaCode }),
+                body: JSON.stringify({
+                    mfaToken,
+                    code: mfaCode,
+                    trustDevice,
+                    deviceFingerprint: getDeviceFingerprint(),
+                }),
             });
 
             if (res.ok) {
@@ -348,6 +371,15 @@ const AuthModal = ({
                         >
                             {loading ? 'Verifying...' : 'Verify and continue'}
                         </button>
+                        <label className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300">
+                            <input
+                                type="checkbox"
+                                checked={trustDevice}
+                                onChange={(e) => setTrustDevice(e.target.checked)}
+                                className="h-4 w-4"
+                            />
+                            Trust this device for next logins
+                        </label>
                         <button
                             type="button"
                             onClick={() => onSwitchMode('login')}
@@ -366,6 +398,8 @@ const AuthModal = ({
 export default function Home() {
     const [modalOpen, setModalOpen] = useState(false);
     const [authMode, setAuthMode] = useState<AuthMode>('login');
+    const [verificationEmail, setVerificationEmail] = useState('');
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
 
     const openModal = (mode: AuthMode) => {
         setAuthMode(mode);
@@ -374,7 +408,23 @@ export default function Home() {
 
     return (
         <main className="relative min-h-screen overflow-hidden bg-[#050913] text-white">
-            {modalOpen && <AuthModal mode={authMode} onClose={() => setModalOpen(false)} onSwitchMode={setAuthMode} />}
+            {modalOpen && (
+                <AuthModal
+                    mode={authMode}
+                    onClose={() => setModalOpen(false)}
+                    onSwitchMode={setAuthMode}
+                    onRegistered={(email) => {
+                        setVerificationEmail(email);
+                        setShowVerificationModal(true);
+                    }}
+                />
+            )}
+            {showVerificationModal && (
+                <EmailVerificationModal
+                    email={verificationEmail}
+                    onClose={() => setShowVerificationModal(false)}
+                />
+            )}
 
             <div className="pointer-events-none absolute -left-24 top-[-80px] h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
             <div className="pointer-events-none absolute right-[-120px] top-44 h-96 w-96 rounded-full bg-emerald-400/10 blur-3xl" />

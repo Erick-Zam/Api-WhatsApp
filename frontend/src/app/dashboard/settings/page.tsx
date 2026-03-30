@@ -1,8 +1,9 @@
 'use client';
+
+import { useCallback, useEffect, useState } from 'react';
 import type { SyntheticEvent } from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 
 interface SettingsSession {
@@ -11,40 +12,54 @@ interface SettingsSession {
     apiKey?: string;
 }
 
-const StatusBadge = ({ status }: { status: string }) => {
-    const isConnected = status === 'CONNECTED';
-    return (
-        <span className={`text-xs px-2 py-0.5 rounded border ${isConnected
-            ? 'bg-green-500/10 text-green-500 border-green-500/20'
-            : 'bg-red-500/10 text-red-500 border-red-500/20'
-            }`}>
-            {status}
-        </span>
-    );
-};
+interface TrustedDevice {
+    id: string;
+    device_name: string;
+    trusted_at: string;
+    last_used_at: string;
+}
+
+interface MeUser {
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+    api_key: string;
+    mfa_enabled: boolean;
+    email_verified: boolean;
+    has_password: boolean;
+}
+
+const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export default function SettingsPage() {
     const router = useRouter();
+
+    const [loading, setLoading] = useState(true);
+    const [sessions, setSessions] = useState<SettingsSession[]>([]);
+    const [trustedDevices, setTrustedDevices] = useState<TrustedDevice[]>([]);
+
+    const [user, setUser] = useState<MeUser | null>(null);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [sessions, setSessions] = useState<SettingsSession[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    // Profile Edit State
     const [editProfile, setEditProfile] = useState(false);
     const [profileLoading, setProfileLoading] = useState(false);
     const [profileError, setProfileError] = useState('');
     const [profileSuccess, setProfileSuccess] = useState('');
 
-    // Password Change State
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordLoading, setChangePasswordLoading] = useState(false);
     const [passwordError, setPasswordError] = useState('');
     const [passwordSuccess, setPasswordSuccess] = useState('');
 
-    // MFA State
+    const [setPasswordValue, setSetPasswordValue] = useState('');
+    const [setPasswordConfirm, setSetPasswordConfirm] = useState('');
+    const [setPasswordFormLoading, setSetPasswordFormLoading] = useState(false);
+    const [setPasswordMsg, setSetPasswordMsg] = useState('');
+
     const [mfaEnabled, setMfaEnabled] = useState(false);
     const [mfaSetupSecret, setMfaSetupSecret] = useState('');
     const [mfaSetupUri, setMfaSetupUri] = useState('');
@@ -52,7 +67,98 @@ export default function SettingsPage() {
     const [mfaLoading, setMfaLoading] = useState(false);
     const [mfaMessage, setMfaMessage] = useState('');
     const [mfaError, setMfaError] = useState('');
-    const [copiedMfaField, setCopiedMfaField] = useState('');
+
+    const [verificationLoading, setVerificationLoading] = useState(false);
+    const [verificationMessage, setVerificationMessage] = useState('');
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+    const authHeaders = () => ({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+    });
+
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch {
+            // no-op
+        }
+    };
+
+    const fetchUserData = useCallback(async () => {
+        if (!token) {
+            router.push('/login');
+            return;
+        }
+
+        try {
+            const [meRes, sessionsRes, trustedRes] = await Promise.all([
+                fetch(`${apiBase}/auth/me`, { headers: { Authorization: `Bearer ${token}` } }),
+                fetch(`${apiBase}/sessions`, { headers: { Authorization: `Bearer ${token}` } }),
+                fetch(`${apiBase}/auth/mfa/trusted-devices`, { headers: { Authorization: `Bearer ${token}` } }),
+            ]);
+
+            if (!meRes.ok) {
+                localStorage.removeItem('token');
+                router.push('/login');
+                return;
+            }
+
+            const meData = await meRes.json();
+            setUser(meData.user);
+            setUsername(meData.user.username || '');
+            setEmail(meData.user.email || '');
+            setMfaEnabled(Boolean(meData.user.mfa_enabled));
+
+            if (sessionsRes.ok) {
+                const sessionsData = await sessionsRes.json();
+                if (Array.isArray(sessionsData)) {
+                    setSessions(sessionsData);
+                }
+            }
+
+            if (trustedRes.ok) {
+                const trustedData = await trustedRes.json();
+                setTrustedDevices(trustedData.devices || []);
+            }
+        } catch {
+            setProfileError('Unable to load settings.');
+        } finally {
+            setLoading(false);
+        }
+    }, [router, token]);
+
+    useEffect(() => {
+        fetchUserData();
+    }, [fetchUserData]);
+
+    const handleProfileUpdate = async (e: SyntheticEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setProfileError('');
+        setProfileSuccess('');
+        setProfileLoading(true);
+
+        try {
+            const res = await fetch(`${apiBase}/auth/profile`, {
+                method: 'PUT',
+                headers: authHeaders(),
+                body: JSON.stringify({ username, email }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setProfileError(data.error || 'Failed to update profile');
+            } else {
+                setProfileSuccess('Profile updated successfully');
+                setEditProfile(false);
+                fetchUserData();
+            }
+        } catch {
+            setProfileError('Unable to update profile');
+        } finally {
+            setProfileLoading(false);
+        }
+    };
 
     const handlePasswordChange = async (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -63,172 +169,110 @@ export default function SettingsPage() {
             setPasswordError("New passwords don't match");
             return;
         }
-
-        if (newPassword.length < 6) {
-            setPasswordError("Password must be at least 6 characters");
+        if (newPassword.length < 8) {
+            setPasswordError('Password must be at least 8 characters');
             return;
         }
 
-        setPasswordLoading(true);
-        const token = localStorage.getItem('token');
-
+        setChangePasswordLoading(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/change-password`, {
+            const res = await fetch(`${apiBase}/auth/change-password`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ currentPassword, newPassword })
+                headers: authHeaders(),
+                body: JSON.stringify({ currentPassword, newPassword }),
             });
-
             const data = await res.json();
-
-            if (res.ok) {
-                setPasswordSuccess('Password updated successfully!');
+            if (!res.ok) {
+                setPasswordError(data.error || 'Failed to update password');
+            } else {
+                setPasswordSuccess('Password updated successfully');
                 setCurrentPassword('');
                 setNewPassword('');
                 setConfirmPassword('');
-            } else {
-                setPasswordError(data.error || 'Failed to update password');
             }
-        } catch (err) {
-            console.error('Password change error:', err);
-            setPasswordError('An error occurred. Please try again.');
+        } catch {
+            setPasswordError('Unable to update password');
         } finally {
-            setPasswordLoading(false);
+            setChangePasswordLoading(false);
         }
     };
 
-    const handleProfileUpdate = async (e: SyntheticEvent<HTMLFormElement>) => {
+    const handleSetPassword = async (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setProfileError('');
-        setProfileSuccess('');
-        setProfileLoading(true);
+        setSetPasswordMsg('');
 
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ username, email })
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                setProfileSuccess('Profile updated successfully!');
-                setEditProfile(false);
-            } else {
-                setProfileError(data.error || 'Failed to update profile');
-            }
-        } catch (error) {
-            console.error('Profile update error:', error);
-            setProfileError('An error occurred. Please try again.');
-        } finally {
-            setProfileLoading(false);
+        if (setPasswordValue.length < 8) {
+            setSetPasswordMsg('Password must be at least 8 characters');
+            return;
         }
-    };
-
-    const fetchUserData = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            router.push('/login');
+        if (setPasswordValue !== setPasswordConfirm) {
+            setSetPasswordMsg('Passwords do not match');
             return;
         }
 
+        setSetPasswordFormLoading(true);
         try {
-            // Fetch User Profile
-            const resUser = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/me`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const res = await fetch(`${apiBase}/auth/set-password`, {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({ newPassword: setPasswordValue }),
             });
-
-            if (resUser.ok) {
-                const data = await resUser.json();
-                setUsername(data.user.username);
-                setEmail(data.user.email);
-                setMfaEnabled(Boolean(data.user.mfa_enabled));
+            const data = await res.json();
+            if (!res.ok) {
+                setSetPasswordMsg(data.error || 'Failed to set password');
             } else {
-                localStorage.removeItem('token');
-                router.push('/login');
-                return;
+                setSetPasswordMsg('Password set successfully. You can now login with email + password.');
+                setSetPasswordValue('');
+                setSetPasswordConfirm('');
+                fetchUserData();
             }
-
-            const mfaStatusRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/status`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (mfaStatusRes.ok) {
-                const mfaStatusData = await mfaStatusRes.json();
-                setMfaEnabled(Boolean(mfaStatusData.enabled));
-            }
-
-            // Fetch Sessions
-            const resSessions = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (resSessions.ok) {
-                const sessionData = await resSessions.json();
-                setSessions(sessionData);
-            }
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
+        } catch {
+            setSetPasswordMsg('Unable to set password');
         } finally {
-            setLoading(false);
+            setSetPasswordFormLoading(false);
         }
-    }, [router]);
-
-    useEffect(() => {
-        fetchUserData();
-    }, [fetchUserData]);
-
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        alert('Copied!');
     };
 
-    const copyMfaValue = async (value: string, field: string) => {
+    const sendVerificationEmail = async () => {
+        setVerificationLoading(true);
+        setVerificationMessage('');
         try {
-            await navigator.clipboard.writeText(value);
-            setCopiedMfaField(field);
-            setTimeout(() => setCopiedMfaField(''), 1500);
+            const res = await fetch(`${apiBase}/auth/send-verification-email`, {
+                method: 'POST',
+                headers: authHeaders(),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setVerificationMessage(data.error || 'Failed to send verification email');
+            } else {
+                setVerificationMessage('Verification email sent. Check inbox/spam.');
+            }
         } catch {
-            setMfaError('Unable to copy. Please copy it manually.');
+            setVerificationMessage('Unable to send verification email');
+        } finally {
+            setVerificationLoading(false);
         }
     };
 
     const startMfaSetup = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setMfaError('');
         setMfaMessage('');
         setMfaLoading(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/setup`, {
+            const res = await fetch(`${apiBase}/auth/mfa/setup`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
+                headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error || 'Failed to initialize MFA setup');
+                setMfaError(data.error || 'Failed to start MFA setup');
+            } else {
+                setMfaSetupSecret(data.secret || '');
+                setMfaSetupUri(data.otpauthUrl || '');
+                setMfaMessage('Scan the QR and verify with your 6-digit code.');
             }
-
-            setMfaSetupSecret(data.secret || '');
-            setMfaSetupUri(data.otpauthUrl || '');
-            setMfaMessage('MFA secret generated. Add it to your authenticator app and verify with a code.');
-        } catch (err) {
-            setMfaError(err instanceof Error ? err.message : 'Failed to start MFA setup');
+        } catch {
+            setMfaError('Unable to start MFA setup');
         } finally {
             setMfaLoading(false);
         }
@@ -236,409 +280,283 @@ export default function SettingsPage() {
 
     const verifyMfa = async (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setMfaError('');
         setMfaMessage('');
         setMfaLoading(true);
+
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/verify`, {
+            const res = await fetch(`${apiBase}/auth/mfa/verify`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ code: mfaCode })
+                headers: authHeaders(),
+                body: JSON.stringify({ code: mfaCode }),
             });
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error || 'Failed to verify MFA code');
+                setMfaError(data.error || 'Failed to verify MFA code');
+            } else {
+                setMfaEnabled(true);
+                setMfaCode('');
+                setMfaSetupSecret('');
+                setMfaSetupUri('');
+                setMfaMessage('MFA enabled successfully');
+                fetchUserData();
             }
-
-            setMfaEnabled(true);
-            setMfaCode('');
-            setMfaSetupSecret('');
-            setMfaSetupUri('');
-            setMfaMessage('MFA enabled successfully.');
-        } catch (err) {
-            setMfaError(err instanceof Error ? err.message : 'Failed to verify MFA');
+        } catch {
+            setMfaError('Unable to verify MFA');
         } finally {
             setMfaLoading(false);
         }
     };
 
-    const disableMfaAction = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
+    const disableMfa = async () => {
         if (!mfaCode) {
-            setMfaError('Enter current MFA code to disable MFA.');
+            setMfaError('Enter your current MFA code to disable MFA');
             return;
         }
 
         setMfaError('');
         setMfaMessage('');
         setMfaLoading(true);
+
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/disable`, {
+            const res = await fetch(`${apiBase}/auth/mfa/disable`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ code: mfaCode })
+                headers: authHeaders(),
+                body: JSON.stringify({ code: mfaCode }),
             });
             const data = await res.json();
             if (!res.ok) {
-                throw new Error(data.error || 'Failed to disable MFA');
+                setMfaError(data.error || 'Failed to disable MFA');
+            } else {
+                setMfaEnabled(false);
+                setMfaCode('');
+                setMfaMessage('MFA disabled successfully');
+                fetchUserData();
             }
-
-            setMfaEnabled(false);
-            setMfaCode('');
-            setMfaMessage('MFA disabled successfully.');
-        } catch (err) {
-            setMfaError(err instanceof Error ? err.message : 'Failed to disable MFA');
+        } catch {
+            setMfaError('Unable to disable MFA');
         } finally {
             setMfaLoading(false);
         }
     };
 
-    return (
-        <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-8 text-black dark:text-white">Settings</h2>
+    const removeTrusted = async (deviceId: string) => {
+        try {
+            await fetch(`${apiBase}/auth/mfa/trusted-devices/${deviceId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTrustedDevices((prev) => prev.filter((d) => d.id !== deviceId));
+        } catch {
+            // ignore
+        }
+    };
 
-            <div className="grid gap-8">
-                {/* Profile Card */}
-                <div className="bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                            <span>👤</span> Profile Information
-                        </h3>
+    if (loading) {
+        return <div className="mx-auto max-w-4xl text-zinc-400">Loading settings...</div>;
+    }
+
+    return (
+        <div className="mx-auto max-w-5xl">
+            <h2 className="mb-8 text-3xl font-bold text-black dark:text-white">Settings</h2>
+
+            <div className="grid gap-6">
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                    <h3 className="mb-3 text-lg font-bold text-gray-800 dark:text-white">Email Verification</h3>
+                    <p className="mb-4 text-sm text-gray-500 dark:text-zinc-400">
+                        Status:{' '}
+                        <strong className={user?.email_verified ? 'text-emerald-500' : 'text-orange-500'}>
+                            {user?.email_verified ? 'Verified' : 'Not verified'}
+                        </strong>
+                    </p>
+                    {!user?.email_verified && (
+                        <button
+                            onClick={sendVerificationEmail}
+                            disabled={verificationLoading}
+                            className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
+                        >
+                            {verificationLoading ? 'Sending...' : 'Send verification email'}
+                        </button>
+                    )}
+                    {verificationMessage && <p className="mt-3 text-sm text-zinc-400">{verificationMessage}</p>}
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Profile</h3>
                         {!editProfile && (
-                            <button
-                                onClick={() => setEditProfile(true)}
-                                className="text-sm font-bold text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-lg transition"
-                            >
-                                Edit Profile
+                            <button className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-white" onClick={() => setEditProfile(true)}>
+                                Edit
                             </button>
                         )}
                     </div>
 
                     {editProfile ? (
-                        <form onSubmit={handleProfileUpdate} className="space-y-6">
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor="username">Username</label>
-                                    <input
-                                        id="username"
-                                        type="text"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        className="w-full bg-gray-50 dark:bg-black p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor="email">Email Address</label>
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full bg-gray-50 dark:bg-black p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            {profileError && <p className="text-red-500 text-sm">{profileError}</p>}
-                            <div className="flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setEditProfile(false);
-                                        fetchUserData(); // Reset to current data
-                                    }}
-                                    className="px-6 py-2 rounded-lg font-bold text-gray-500 hover:bg-gray-100 transition"
-                                >
-                                    Cancel
+                        <form onSubmit={handleProfileUpdate} className="space-y-3">
+                            <input className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" value={username} onChange={(e) => setUsername(e.target.value)} />
+                            <input className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" value={email} onChange={(e) => setEmail(e.target.value)} />
+                            {profileError && <p className="text-sm text-red-500">{profileError}</p>}
+                            <div className="flex gap-2">
+                                <button type="submit" disabled={profileLoading} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
+                                    {profileLoading ? 'Saving...' : 'Save'}
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={profileLoading}
-                                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition shadow-lg hover:shadow-green-500/20 disabled:opacity-50"
-                                >
-                                    {profileLoading ? 'Saving...' : 'Save Changes'}
+                                <button type="button" onClick={() => setEditProfile(false)} className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white">
+                                    Cancel
                                 </button>
                             </div>
                         </form>
                     ) : (
-                        <div>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="bg-gray-50 dark:bg-black/50 p-4 rounded-lg border border-gray-100 dark:border-zinc-800">
-                                    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Username</span>
-                                    <p className="text-gray-800 dark:text-gray-200 font-medium text-lg">{username}</p>
-                                </div>
-                                <div className="bg-gray-50 dark:bg-black/50 p-4 rounded-lg border border-gray-100 dark:border-zinc-800">
-                                    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email</span>
-                                    <p className="text-gray-800 dark:text-gray-200 font-medium text-lg">{email}</p>
-                                </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+                                <p className="text-xs text-zinc-400">Username</p>
+                                <p className="font-semibold text-zinc-100">{user?.username}</p>
                             </div>
-                            {profileSuccess && <p className="mt-4 text-green-500 text-sm font-medium">✓ {profileSuccess}</p>}
+                            <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+                                <p className="text-xs text-zinc-400">Email</p>
+                                <p className="font-semibold text-zinc-100">{user?.email}</p>
+                            </div>
+                            {profileSuccess && <p className="text-sm text-emerald-500">{profileSuccess}</p>}
                         </div>
                     )}
                 </div>
 
-                {/* Change Password Card */}
-                <div className="bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
-                    <h3 className="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
-                        <span>🔒</span> Change Password
-                    </h3>
-                    <form onSubmit={handlePasswordChange} className="space-y-4">
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor="currentPassword">Current Password</label>
-                                <input
-                                    id="currentPassword"
-                                    type="password"
-                                    value={currentPassword}
-                                    onChange={(e) => setCurrentPassword(e.target.value)}
-                                    className="w-full bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
-                                    placeholder="Enter current password"
-                                    required
-                                    autoComplete="current-password"
-                                />
-                            </div>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor="newPassword">New Password</label>
-                                <input
-                                    id="newPassword"
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    className="w-full bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
-                                    placeholder="Enter new password"
-                                    required
-                                    autoComplete="new-password"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor="confirmPassword">Confirm Password</label>
-                                <input
-                                    id="confirmPassword"
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
-                                    placeholder="Confirm new password"
-                                    required
-                                    autoComplete="new-password"
-                                />
-                            </div>
-                        </div>
-
-                        {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
-                        {passwordSuccess && <p className="text-green-500 text-sm">{passwordSuccess}</p>}
-
-                        <div className="flex justify-end pt-4">
-                            <button
-                                type="submit"
-                                disabled={passwordLoading}
-                                className={`px-6 py-2 rounded-lg font-bold text-white transition ${passwordLoading ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-green-500/20'
-                                    }`}
-                            >
-                                {passwordLoading ? 'Updating...' : 'Update Password'}
+                {!user?.has_password && (
+                    <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-6 dark:border-cyan-800/40 dark:bg-cyan-950/20">
+                        <h3 className="mb-2 text-lg font-bold text-cyan-800 dark:text-cyan-200">Set Password (OAuth Account)</h3>
+                        <p className="mb-4 text-sm text-cyan-700 dark:text-cyan-300">You signed up with social login. Set a password to also login with email/password.</p>
+                        <form onSubmit={handleSetPassword} className="space-y-3">
+                            <input
+                                type="password"
+                                placeholder="New password"
+                                value={setPasswordValue}
+                                onChange={(e) => setSetPasswordValue(e.target.value)}
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"
+                            />
+                            <input
+                                type="password"
+                                placeholder="Confirm password"
+                                value={setPasswordConfirm}
+                                onChange={(e) => setSetPasswordConfirm(e.target.value)}
+                                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"
+                            />
+                            <button disabled={setPasswordFormLoading} className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500">
+                                {setPasswordFormLoading ? 'Saving...' : 'Set password'}
                             </button>
-                        </div>
-                    </form>
-                </div>
-
-                {/* API & Sessions Configuration */}
-                <div className="bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
-                    <h3 className="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
-                        <span>🔑</span> Session API Keys
-                    </h3>
-
-                    {(() => {
-                        if (loading) {
-                            return <p className="text-gray-500">Loading sessions...</p>;
-                        }
-                        
-                        if (sessions.length > 0) {
-                            return (
-                                <div className="space-y-6">
-                                    {sessions.map((session) => (
-                                        <div key={session.id} className="border border-gray-100 dark:border-zinc-800 rounded-lg p-6 bg-gray-50/50 dark:bg-zinc-950/50">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-2 h-2 rounded-full ${session.status === 'CONNECTED' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                                    <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">{session.id}</h4>
-                                                    <StatusBadge status={session.status} />
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor={`api-key-${session.id}`}>API Key</label>
-                                                <div className="flex gap-2">
-                                                    <div id={`api-key-${session.id}`} className="flex-1 bg-white dark:bg-black p-3 rounded border border-gray-200 dark:border-zinc-700 font-mono text-sm text-gray-600 dark:text-gray-300 break-all">
-                                                        {session.apiKey || 'No Key Generated'}
-                                                    </div>
-                                                    {session.apiKey && (
-                                                        <button
-                                                            onClick={() => copyToClipboard(session.apiKey || '')}
-                                                            className="bg-gray-200 dark:bg-zinc-800 hover:bg-gray-300 dark:hover:bg-zinc-700 px-4 py-2 rounded text-gray-700 dark:text-white transition font-medium text-sm"
-                                                        >
-                                                            Copy
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <div className="text-center py-8">
-                                <p className="text-gray-500 mb-4">No active sessions found.</p>
-                                <Link
-                                    href="/dashboard"
-                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold transition inline-block text-sm"
-                                >
-                                    Connect a Device
-                                </Link>
-                            </div>
-                        );
-                    })()}
-
-                    <div className="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800">
-                        <p className="text-xs text-gray-400">
-                            Use these keys in the <code className="text-purple-400">x-api-key</code> header to specify which session (device) to use for sending messages.
-                        </p>
+                            {setPasswordMsg && <p className="text-sm text-zinc-200">{setPasswordMsg}</p>}
+                        </form>
                     </div>
-                </div>
+                )}
 
-                {/* MFA Configuration */}
-                <div className="bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
-                    <h3 className="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
-                        <span>🛡️</span> Multi-Factor Authentication
-                    </h3>
+                {user?.has_password && (
+                    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                        <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Change Password</h3>
+                        <form onSubmit={handlePasswordChange} className="space-y-3">
+                            <input type="password" placeholder="Current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                            <input type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                            <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                            {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
+                            {passwordSuccess && <p className="text-sm text-emerald-500">{passwordSuccess}</p>}
+                            <button disabled={passwordLoading} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
+                                {passwordLoading ? 'Updating...' : 'Update password'}
+                            </button>
+                        </form>
+                    </div>
+                )}
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        Status: <strong className={mfaEnabled ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>{mfaEnabled ? 'Enabled' : 'Disabled'}</strong>
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                    <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Multi-Factor Authentication</h3>
+                    <p className="mb-4 text-sm text-zinc-400">
+                        Status: <strong className={mfaEnabled ? 'text-emerald-500' : 'text-orange-500'}>{mfaEnabled ? 'Enabled' : 'Disabled'}</strong>
                     </p>
 
                     {!mfaEnabled && (
-                        <button
-                            onClick={startMfaSetup}
-                            disabled={mfaLoading}
-                            className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition disabled:opacity-50"
-                        >
-                            {mfaLoading ? 'Generating...' : 'Start MFA Setup'}
+                        <button onClick={startMfaSetup} disabled={mfaLoading} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50">
+                            {mfaLoading ? 'Generating...' : 'Start MFA setup'}
                         </button>
                     )}
 
                     {mfaSetupSecret && (
-                        <div className="mt-4 p-4 rounded-xl border border-cyan-200/60 bg-cyan-50 dark:bg-cyan-950/20 dark:border-cyan-800/40">
-                            <h4 className="text-sm font-bold text-cyan-900 dark:text-cyan-200 mb-3">Set up authenticator app</h4>
-                            <div className="grid gap-4 md:grid-cols-[200px_1fr] items-start">
-                                <div className="rounded-lg bg-white dark:bg-zinc-900 p-3 border border-cyan-200/70 dark:border-cyan-800/40 flex items-center justify-center">
-                                    {mfaSetupUri ? (
-                                        <QRCodeSVG
-                                            value={mfaSetupUri}
-                                            size={170}
-                                            bgColor="#ffffff"
-                                            fgColor="#111827"
-                                            level="M"
-                                            includeMargin
-                                        />
-                                    ) : (
-                                        <p className="text-xs text-gray-500 text-center">QR unavailable. Use secret manually.</p>
-                                    )}
+                        <div className="mt-4 grid gap-4 lg:grid-cols-[200px_1fr]">
+                            <div className="rounded-lg border border-cyan-700/30 bg-white p-3">
+                                {mfaSetupUri ? <QRCodeSVG value={mfaSetupUri} size={170} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin /> : <p className="text-xs text-zinc-500">QR unavailable</p>}
+                            </div>
+                            <div className="space-y-3">
+                                <div className="rounded-lg border border-cyan-700/30 bg-cyan-950/20 p-3">
+                                    <p className="text-xs text-cyan-200">Manual secret</p>
+                                    <p className="mt-1 break-all font-mono text-xs text-cyan-100">{mfaSetupSecret}</p>
+                                    <button type="button" onClick={() => copyToClipboard(mfaSetupSecret)} className="mt-2 rounded bg-cyan-600 px-2 py-1 text-xs font-semibold text-white">
+                                        Copy secret
+                                    </button>
                                 </div>
-
-                                <div className="space-y-3">
-                                    <p className="text-sm text-cyan-900 dark:text-cyan-200">
-                                        1. Scan the QR with Google Authenticator, Authy, or Microsoft Authenticator.
-                                    </p>
-                                    <p className="text-sm text-cyan-900 dark:text-cyan-200">
-                                        2. Enter the 6-digit code below to enable MFA.
-                                    </p>
-
-                                    <div className="rounded-lg bg-white/70 dark:bg-zinc-900/60 border border-cyan-200 dark:border-cyan-800/40 p-3">
-                                        <p className="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300 mb-2">Manual secret</p>
-                                        <div className="font-mono text-xs break-all text-cyan-900 dark:text-cyan-100">{mfaSetupSecret}</div>
-                                        <button
-                                            type="button"
-                                            onClick={() => copyMfaValue(mfaSetupSecret, 'secret')}
-                                            className="mt-2 px-3 py-1.5 rounded-md text-xs font-semibold bg-cyan-600 hover:bg-cyan-700 text-white transition"
-                                        >
-                                            {copiedMfaField === 'secret' ? 'Copied' : 'Copy secret'}
-                                        </button>
-                                    </div>
-
-                                    {mfaSetupUri && (
-                                        <details className="rounded-lg bg-white/70 dark:bg-zinc-900/60 border border-cyan-200 dark:border-cyan-800/40 p-3">
-                                            <summary className="cursor-pointer text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">Advanced: otpauth URI</summary>
-                                            <p className="mt-2 font-mono text-[11px] break-all text-cyan-900 dark:text-cyan-100">{mfaSetupUri}</p>
-                                            <button
-                                                type="button"
-                                                onClick={() => copyMfaValue(mfaSetupUri, 'uri')}
-                                                className="mt-2 px-3 py-1.5 rounded-md text-xs font-semibold bg-cyan-600 hover:bg-cyan-700 text-white transition"
-                                            >
-                                                {copiedMfaField === 'uri' ? 'Copied' : 'Copy URI'}
-                                            </button>
-                                        </details>
-                                    )}
-                                </div>
+                                <form onSubmit={verifyMfa} className="space-y-2">
+                                    <input value={mfaCode} onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Enter 6-digit code" className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                                    <button disabled={mfaLoading} className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500">Verify and enable</button>
+                                </form>
                             </div>
                         </div>
                     )}
 
-                    <form onSubmit={verifyMfa} className="mt-4 space-y-3">
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor="mfaCode">Authenticator Code</label>
-                            <input
-                                id="mfaCode"
-                                type="text"
-                                value={mfaCode}
-                                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                className="w-full md:w-64 bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
-                                placeholder="123456"
-                                inputMode="numeric"
-                                maxLength={6}
-                            />
+                    {mfaEnabled && (
+                        <div className="mt-4 space-y-3">
+                            <input value={mfaCode} onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Current MFA code (for disable)" className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                            <button onClick={disableMfa} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">Disable MFA</button>
                         </div>
+                    )}
 
-                        <div className="flex gap-3">
-                            {!mfaEnabled && (
-                                <button
-                                    type="submit"
-                                    disabled={mfaLoading || !mfaCode}
-                                    className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition disabled:opacity-50"
-                                >
-                                    Verify and Enable
-                                </button>
-                            )}
+                    {mfaMessage && <p className="mt-3 text-sm text-emerald-500">{mfaMessage}</p>}
+                    {mfaError && <p className="mt-3 text-sm text-red-500">{mfaError}</p>}
+                </div>
 
-                            {mfaEnabled && (
-                                <button
-                                    type="button"
-                                    onClick={disableMfaAction}
-                                    disabled={mfaLoading}
-                                    className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition disabled:opacity-50"
-                                >
-                                    Disable MFA
-                                </button>
-                            )}
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                    <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Trusted Devices</h3>
+                    {trustedDevices.length === 0 ? (
+                        <p className="text-sm text-zinc-500">No trusted devices yet.</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {trustedDevices.map((d) => (
+                                <div key={d.id} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+                                    <div>
+                                        <p className="text-sm font-semibold text-zinc-200">{d.device_name || 'Device'}</p>
+                                        <p className="text-xs text-zinc-500">Last used: {new Date(d.last_used_at).toLocaleString()}</p>
+                                    </div>
+                                    <button onClick={() => removeTrusted(d.id)} className="rounded bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-600/30">
+                                        Remove
+                                    </button>
+                                </div>
+                            ))}
                         </div>
-                    </form>
+                    )}
+                </div>
 
-                    {mfaMessage && <p className="mt-3 text-sm text-green-600 dark:text-green-400">{mfaMessage}</p>}
-                    {mfaError && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{mfaError}</p>}
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                    <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Session API Keys</h3>
+                    {sessions.length === 0 ? (
+                        <div className="text-sm text-zinc-500">
+                            No active sessions found. <Link href="/dashboard" className="text-cyan-400">Connect a device</Link>.
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {sessions.map((session) => (
+                                <div key={session.id} className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <div className={`h-2 w-2 rounded-full ${session.status === 'CONNECTED' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                        <p className="font-semibold text-zinc-100">{session.id}</p>
+                                        <span className="text-xs text-zinc-500">{session.status}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <div className="flex-1 rounded border border-zinc-700 bg-black p-2 font-mono text-xs text-zinc-300 break-all">
+                                            {session.apiKey || 'No key'}
+                                        </div>
+                                        {session.apiKey && (
+                                            <button onClick={() => copyToClipboard(session.apiKey || '')} className="rounded bg-zinc-800 px-3 text-xs font-semibold text-zinc-200 hover:bg-zinc-700">
+                                                Copy
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
