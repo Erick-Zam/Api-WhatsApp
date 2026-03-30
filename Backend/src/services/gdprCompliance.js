@@ -3,7 +3,7 @@
  * Handles user rights: Right to be forgotten, data portability, consent management, etc.
  */
 
-import { db } from '../db.js';
+import db from '../db.js';
 import { logger } from './logger.js';
 import auditService from './audit.js';
 import crypto from 'crypto';
