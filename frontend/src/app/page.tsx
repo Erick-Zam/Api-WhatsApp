@@ -170,24 +170,28 @@ const AuthModal = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-black/65 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 grid place-items-center p-3 sm:p-4 bg-black/65 backdrop-blur-md">
             <button
                 aria-label="Close"
                 onClick={onClose}
                 className="absolute inset-0"
             />
-            <div className="relative z-10 w-full max-w-lg rounded-3xl border border-cyan-500/20 bg-zinc-950/90 p-8 shadow-[0_24px_90px_rgba(0,0,0,0.65)]">
-                <div className="mb-6">
+            <div className="relative z-10 flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-cyan-500/20 bg-zinc-950/90 shadow-[0_24px_90px_rgba(0,0,0,0.65)]">
+                <div className="border-b border-zinc-800/80 px-6 pb-4 pt-6 sm:px-8 sm:pt-7">
                     <p className="text-xs uppercase tracking-[0.18em] text-cyan-300/70">Access Portal</p>
-                    <h2 className="mt-2 text-4xl font-bold text-white">{title}</h2>
+                    <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">{title}</h2>
                     <p className="mt-2 text-sm text-zinc-400">{subtitle}</p>
+                    <button onClick={onClose} className="absolute right-4 top-4 rounded-full bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:text-white">
+                        Close
+                    </button>
                 </div>
 
-                {error && <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</div>}
-                {success && <div className="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">{success}</div>}
+                <div className="modal-scroll min-h-0 space-y-5 overflow-y-auto px-6 pb-6 pt-5 sm:px-8 sm:pb-8">
+                    {error && <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</div>}
+                    {success && <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">{success}</div>}
 
-                {mode === 'login' && (
-                    <>
+                    {mode === 'login' && (
+                        <>
                         <form onSubmit={handleLogin} className="space-y-4">
                             <label className="block">
                                 <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Work email</span>
@@ -220,7 +224,7 @@ const AuthModal = ({
                             </button>
                         </form>
 
-                        <div className="my-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs uppercase tracking-wide text-zinc-500">
+                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs uppercase tracking-wide text-zinc-500">
                             <span className="h-px bg-zinc-800" />
                             Or continue with
                             <span className="h-px bg-zinc-800" />
@@ -241,11 +245,11 @@ const AuthModal = ({
                                 Create account
                             </button>
                         </p>
-                    </>
-                )}
+                        </>
+                    )}
 
-                {mode === 'register' && (
-                    <>
+                    {mode === 'register' && (
+                        <>
                         <form onSubmit={handleRegister} className="space-y-4">
                             <label className="block">
                                 <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Workspace name</span>
@@ -321,11 +325,11 @@ const AuthModal = ({
                                 Sign in
                             </button>
                         </p>
-                    </>
-                )}
+                        </>
+                    )}
 
-                {mode === 'mfa' && (
-                    <form onSubmit={handleMfa} className="space-y-4">
+                    {mode === 'mfa' && (
+                        <form onSubmit={handleMfa} className="space-y-4">
                         <label className="block">
                             <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Authenticator code</span>
                             <input
@@ -351,12 +355,9 @@ const AuthModal = ({
                         >
                             Back to sign in
                         </button>
-                    </form>
-                )}
-
-                <button onClick={onClose} className="absolute right-4 top-4 rounded-full bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:text-white">
-                    Close
-                </button>
+                        </form>
+                    )}
+                </div>
             </div>
         </div>
     );
