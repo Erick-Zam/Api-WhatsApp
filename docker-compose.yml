@@ -52,6 +52,7 @@ services:
       BACKEND_PORT: ${BACKEND_PORT}
       BACKEND_HOST: ${BACKEND_HOST}
       BACKEND_URL: http://localhost:${BACKEND_PORT}
+      FRONTEND_URL: ${FRONTEND_URL}
       
       # Database
       DATABASE_URL: ${DATABASE_URL}
@@ -188,10 +189,10 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.whatsapp-backend.rule=Host(`ws-api.erickvillon.dev`)
-      - traefik.http.routers.whatsapp-backend.entrypoints=websecure
-      - traefik.http.routers.whatsapp-backend.tls.certresolver=letsencrypt
-      - traefik.http.services.whatsapp-backend.loadbalancer.server.port=${BACKEND_PORT}
+      - traefik.http.routers.whatsapp-api-ws-wbkwmt-backend.rule=Host(`ws-api.erickvillon.dev`)
+      - traefik.http.routers.whatsapp-api-ws-wbkwmt-backend.entrypoints=websecure
+      - traefik.http.routers.whatsapp-api-ws-wbkwmt-backend.tls.certresolver=letsencrypt
+      - traefik.http.services.whatsapp-api-ws-wbkwmt-backend.loadbalancer.server.port=${BACKEND_PORT}
     networks:
       - dokploy-network
       - whatsapp-network
@@ -242,10 +243,10 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.whatsapp-frontend.rule=Host(`ws.erickvillon.dev`)
-      - traefik.http.routers.whatsapp-frontend.entrypoints=websecure
-      - traefik.http.routers.whatsapp-frontend.tls.certresolver=letsencrypt
-      - traefik.http.services.whatsapp-frontend.loadbalancer.server.port=3000
+      - traefik.http.routers.whatsapp-api-ws-wbkwmt-frontend.rule=Host(`ws.erickvillon.dev`)
+      - traefik.http.routers.whatsapp-api-ws-wbkwmt-frontend.entrypoints=websecure
+      - traefik.http.routers.whatsapp-api-ws-wbkwmt-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.whatsapp-api-ws-wbkwmt-frontend.loadbalancer.server.port=3000
     networks:
       - dokploy-network
       - whatsapp-network

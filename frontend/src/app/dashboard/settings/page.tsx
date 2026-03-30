@@ -43,6 +43,15 @@ export default function SettingsPage() {
     const [passwordError, setPasswordError] = useState('');
     const [passwordSuccess, setPasswordSuccess] = useState('');
 
+    // MFA State
+    const [mfaEnabled, setMfaEnabled] = useState(false);
+    const [mfaSetupSecret, setMfaSetupSecret] = useState('');
+    const [mfaSetupUri, setMfaSetupUri] = useState('');
+    const [mfaCode, setMfaCode] = useState('');
+    const [mfaLoading, setMfaLoading] = useState(false);
+    const [mfaMessage, setMfaMessage] = useState('');
+    const [mfaError, setMfaError] = useState('');
+
     const handlePasswordChange = async (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         setPasswordError('');
@@ -140,10 +149,21 @@ export default function SettingsPage() {
                 const data = await resUser.json();
                 setUsername(data.user.username);
                 setEmail(data.user.email);
+                setMfaEnabled(Boolean(data.user.mfa_enabled));
             } else {
                 localStorage.removeItem('token');
                 router.push('/login');
                 return;
+            }
+
+            const mfaStatusRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/status`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (mfaStatusRes.ok) {
+                const mfaStatusData = await mfaStatusRes.json();
+                setMfaEnabled(Boolean(mfaStatusData.enabled));
             }
 
             // Fetch Sessions
@@ -171,6 +191,105 @@ export default function SettingsPage() {
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
         alert('Copied!');
+    };
+
+    const startMfaSetup = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        setMfaError('');
+        setMfaMessage('');
+        setMfaLoading(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/setup`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to initialize MFA setup');
+            }
+
+            setMfaSetupSecret(data.secret || '');
+            setMfaSetupUri(data.otpauthUrl || '');
+            setMfaMessage('MFA secret generated. Add it to your authenticator app and verify with a code.');
+        } catch (err) {
+            setMfaError(err instanceof Error ? err.message : 'Failed to start MFA setup');
+        } finally {
+            setMfaLoading(false);
+        }
+    };
+
+    const verifyMfa = async (e: SyntheticEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        setMfaError('');
+        setMfaMessage('');
+        setMfaLoading(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ code: mfaCode })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to verify MFA code');
+            }
+
+            setMfaEnabled(true);
+            setMfaCode('');
+            setMfaSetupSecret('');
+            setMfaSetupUri('');
+            setMfaMessage('MFA enabled successfully.');
+        } catch (err) {
+            setMfaError(err instanceof Error ? err.message : 'Failed to verify MFA');
+        } finally {
+            setMfaLoading(false);
+        }
+    };
+
+    const disableMfaAction = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        if (!mfaCode) {
+            setMfaError('Enter current MFA code to disable MFA.');
+            return;
+        }
+
+        setMfaError('');
+        setMfaMessage('');
+        setMfaLoading(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/auth/mfa/disable`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ code: mfaCode })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to disable MFA');
+            }
+
+            setMfaEnabled(false);
+            setMfaCode('');
+            setMfaMessage('MFA disabled successfully.');
+        } catch (err) {
+            setMfaError(err instanceof Error ? err.message : 'Failed to disable MFA');
+        } finally {
+            setMfaLoading(false);
+        }
     };
 
     return (
@@ -388,6 +507,77 @@ export default function SettingsPage() {
                             Use these keys in the <code className="text-purple-400">x-api-key</code> header to specify which session (device) to use for sending messages.
                         </p>
                     </div>
+                </div>
+
+                {/* MFA Configuration */}
+                <div className="bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
+                    <h3 className="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
+                        <span>🛡️</span> Multi-Factor Authentication
+                    </h3>
+
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Status: <strong className={mfaEnabled ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>{mfaEnabled ? 'Enabled' : 'Disabled'}</strong>
+                    </p>
+
+                    {!mfaEnabled && (
+                        <button
+                            onClick={startMfaSetup}
+                            disabled={mfaLoading}
+                            className="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition disabled:opacity-50"
+                        >
+                            {mfaLoading ? 'Generating...' : 'Start MFA Setup'}
+                        </button>
+                    )}
+
+                    {mfaSetupSecret && (
+                        <div className="mt-4 p-4 rounded-lg border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/40">
+                            <p className="text-sm mb-2 text-amber-900 dark:text-amber-200">Add this secret to your authenticator app:</p>
+                            <div className="font-mono text-xs break-all text-amber-900 dark:text-amber-100">{mfaSetupSecret}</div>
+                            {mfaSetupUri && (
+                                <p className="text-xs mt-2 text-amber-700 dark:text-amber-300 break-all">{mfaSetupUri}</p>
+                            )}
+                        </div>
+                    )}
+
+                    <form onSubmit={verifyMfa} className="mt-4 space-y-3">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2" htmlFor="mfaCode">Authenticator Code</label>
+                            <input
+                                id="mfaCode"
+                                type="text"
+                                value={mfaCode}
+                                onChange={(e) => setMfaCode(e.target.value)}
+                                className="w-full md:w-64 bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
+                                placeholder="123456"
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            {!mfaEnabled && (
+                                <button
+                                    type="submit"
+                                    disabled={mfaLoading || !mfaCode}
+                                    className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition disabled:opacity-50"
+                                >
+                                    Verify and Enable
+                                </button>
+                            )}
+
+                            {mfaEnabled && (
+                                <button
+                                    type="button"
+                                    onClick={disableMfaAction}
+                                    disabled={mfaLoading}
+                                    className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition disabled:opacity-50"
+                                >
+                                    Disable MFA
+                                </button>
+                            )}
+                        </div>
+                    </form>
+
+                    {mfaMessage && <p className="mt-3 text-sm text-green-600 dark:text-green-400">{mfaMessage}</p>}
+                    {mfaError && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{mfaError}</p>}
                 </div>
             </div>
         </div>
