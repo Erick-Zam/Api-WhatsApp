@@ -403,7 +403,7 @@ export default function Home() {
                         Technical docs
                     </Link>
                 </div>
-            </div>
+            </section>
 
             <section className="mx-auto grid max-w-6xl gap-4 px-6 md:grid-cols-3 md:px-10">
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-6">
