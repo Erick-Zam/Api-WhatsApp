@@ -27,7 +27,7 @@ export default function AdminPage() {
     const authorizedFetch = useCallback(async (url: string, options: RequestInit = {}) => {
         const token = localStorage.getItem('token');
         if (!token) {
-            router.push('/login');
+            router.replace('/?auth=login');
             throw new Error('No token');
         }
 
@@ -42,7 +42,7 @@ export default function AdminPage() {
 
         if (res.status === 401) {
             localStorage.removeItem('token');
-            router.push('/login');
+            router.replace('/?auth=login');
             throw new Error('Unauthorized');
         }
 

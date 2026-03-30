@@ -88,7 +88,7 @@ export default function SettingsPage() {
 
     const fetchUserData = useCallback(async () => {
         if (!token) {
-            router.push('/login');
+            router.replace('/?auth=login');
             return;
         }
 
@@ -101,7 +101,7 @@ export default function SettingsPage() {
 
             if (!meRes.ok) {
                 localStorage.removeItem('token');
-                router.push('/login');
+                router.replace('/?auth=login');
                 return;
             }
 

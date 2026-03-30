@@ -23,7 +23,7 @@ export default function Dashboard() {
     useEffect(() => {
         const t = localStorage.getItem('token');
         if (t === null) {
-            globalThis.location.href = '/login';
+            globalThis.location.href = '/?auth=login';
         } else {
             setToken(t);
         }
@@ -42,7 +42,7 @@ export default function Dashboard() {
 
         if (res.status === 401) {
             localStorage.removeItem('token');
-            globalThis.location.href = '/login';
+            globalThis.location.href = '/?auth=login';
             throw new Error('Unauthorized');
         }
         return res;

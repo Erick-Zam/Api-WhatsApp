@@ -92,10 +92,21 @@ const AuthModal = ({
                 }
 
                 localStorage.setItem('token', data.token);
+                const notices: string[] = [];
                 if (data.recommendMfa) {
                     localStorage.setItem('recommendMfa', 'true');
+                    notices.push('Security tip: enable MFA in Settings to better protect your account.');
                 }
-                router.push('/dashboard');
+                if (data.user?.email_verified === false) {
+                    notices.push('Your email is not verified yet. You can continue now and verify later from Settings.');
+                }
+
+                if (notices.length > 0) {
+                    setSuccess(notices.join(' '));
+                    setTimeout(() => router.push('/dashboard'), 1200);
+                } else {
+                    router.push('/dashboard');
+                }
             } else {
                 const data = await res.json().catch(() => ({}));
                 setError(data.error || 'Login failed');
@@ -180,7 +191,21 @@ const AuthModal = ({
             if (res.ok) {
                 const data = await res.json();
                 localStorage.setItem('token', data.token);
-                router.push('/dashboard');
+                const notices: string[] = [];
+                if (data.recommendMfa) {
+                    localStorage.setItem('recommendMfa', 'true');
+                    notices.push('Security tip: enable MFA in Settings to better protect your account.');
+                }
+                if (data.user?.email_verified === false) {
+                    notices.push('Your email is not verified yet. You can continue now and verify later from Settings.');
+                }
+
+                if (notices.length > 0) {
+                    setSuccess(notices.join(' '));
+                    setTimeout(() => router.push('/dashboard'), 1200);
+                } else {
+                    router.push('/dashboard');
+                }
             } else {
                 const data = await res.json().catch(() => ({}));
                 setError(data.error || 'Invalid MFA code');

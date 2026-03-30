@@ -24,7 +24,7 @@ export default function LogsPage() {
     const fetchLogs = useCallback(async () => {
         const token = localStorage.getItem('token');
         if (!token) {
-            router.push('/login');
+            router.replace('/?auth=login');
             return;
         }
 
@@ -40,7 +40,7 @@ export default function LogsPage() {
                 setLogs(data);
             } else if (res.status === 401 || res.status === 403) {
                 localStorage.removeItem('token');
-                router.push('/login');
+                router.replace('/?auth=login');
             }
         } catch (error) {
             console.error('Error fetching logs:', error);
