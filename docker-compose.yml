@@ -1,51 +1,274 @@
+# ==============================================================================
+# Docker Compose Configuration - Development
+# ==============================================================================
+# Copy .env.example to .env.local and fill in actual values before running
+# DO NOT hardcode secrets in this file!
+# Use: docker-compose --env-file .env.local up
+
+version: '3.9'
+
 services:
+  # ============================================================
   # 1. PostgreSQL Database
+  # ============================================================
   db:
     image: postgres:15-alpine
-    container_name: whatsapp-db
+    container_name: ${COMPOSE_PROJECT_NAME}-db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: whatsapp_saas
-    expose:
-      - "5432"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    
     volumes:
+      # Database persistence
       - db_data:/var/lib/postgresql/data
-      # Initialize tables automatically on first run
-      - ./docs/database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      # Auto-initialize schema on first run
+      - ./docs/database/schema.sql:/docker-entrypoint-initdb.d/01-init.sql
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    restart: unless-stopped
+    networks:
+      - whatsapp-network
 
-  # 2. Backend API
+  # ============================================================
+  # 2. Backend API (Node.js + Express)
+  # ============================================================
   backend:
-    build: ./Backend
-    container_name: whatsapp-backend
-    expose:
-      - "3001"
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}-backend
+    
     environment:
-      PORT: 3001
-      DATABASE_URL: postgres://admin:password@db:5432/whatsapp_saas
-      JWT_SECRET: docker-secret-key
+      # Node
+      NODE_ENV: ${NODE_ENV}
+      DEBUG: ${DEBUG}
+      
+      # Server config
+      BACKEND_PORT: ${BACKEND_PORT}
+      BACKEND_HOST: ${BACKEND_HOST}
+      BACKEND_URL: http://localhost:${BACKEND_PORT}
+      
+      # Database
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRY: ${JWT_EXPIRY}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY}
+      
+      # Rate limiting
+      API_RATE_LIMIT_WINDOW_MS: ${API_RATE_LIMIT_WINDOW_MS}
+      API_RATE_LIMIT_MAX_REQUESTS: ${API_RATE_LIMIT_MAX_REQUESTS}
+      API_RATE_LIMIT_AUTH_WINDOW_MS: ${API_RATE_LIMIT_AUTH_WINDOW_MS}
+      API_RATE_LIMIT_AUTH_MAX_REQUESTS: ${API_RATE_LIMIT_AUTH_MAX_REQUESTS}
+      
+      # CORS
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      CORS_CREDENTIALS: ${CORS_CREDENTIALS}
+      CORS_METHODS: ${CORS_METHODS}
+      CORS_ALLOWED_HEADERS: ${CORS_ALLOWED_HEADERS}
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FORMAT: ${LOG_FORMAT}
+      PINO_LOG_LEVEL: ${PINO_LOG_LEVEL}
+      
+      # Encryption
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY}
+      SESSION_ENCRYPTION_ENABLED: ${SESSION_ENCRYPTION_ENABLED}
+      
+      # WhatsApp/Baileys
+      BAILEYS_DEBUG: ${BAILEYS_DEBUG}
+      BAILEYS_LOG_LEVEL: ${BAILEYS_LOG_LEVEL}
+      WHATSAPP_MESSAGE_RATE_LIMIT: ${WHATSAPP_MESSAGE_RATE_LIMIT}
+      WHATSAPP_RETRY_MAX_ATTEMPTS: ${WHATSAPP_RETRY_MAX_ATTEMPTS}
+      WHATSAPP_SESSION_IDLE_TIMEOUT: ${WHATSAPP_SESSION_IDLE_TIMEOUT}
+      
+      # Email
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME}
+      SMTP_TLS_ENABLED: ${SMTP_TLS_ENABLED}
+      MOCK_EMAIL_SENDING: ${MOCK_EMAIL_SENDING}
+      
+      # OAuth
+      GOOGLE_OAUTH_ENABLED: ${GOOGLE_OAUTH_ENABLED}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+      
+      GITHUB_OAUTH_ENABLED: ${GITHUB_OAUTH_ENABLED}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_CALLBACK_URL: ${GITHUB_CALLBACK_URL}
+      
+      MICROSOFT_OAUTH_ENABLED: ${MICROSOFT_OAUTH_ENABLED}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
+      MICROSOFT_CALLBACK_URL: ${MICROSOFT_CALLBACK_URL}
+      
+      # MFA
+      MFA_ENABLED: ${MFA_ENABLED}
+      TOTP_ISSUER: ${TOTP_ISSUER}
+      TOTP_WINDOW: ${TOTP_WINDOW}
+      
+      # Audit
+      AUDIT_LOG_ENABLED: ${AUDIT_LOG_ENABLED}
+      AUDIT_LOG_SENSITIVE_ACTIONS: ${AUDIT_LOG_SENSITIVE_ACTIONS}
+      GDPR_ENABLED: ${GDPR_ENABLED}
+      DATA_RETENTION_DAYS: ${DATA_RETENTION_DAYS}
+      AUTO_DELETE_AUDIT_LOGS_DAYS: ${AUTO_DELETE_AUDIT_LOGS_DAYS}
+      
+      # Backups
+      BACKUP_ENABLED: ${BACKUP_ENABLED}
+      BACKUP_SCHEDULE_CRON: ${BACKUP_SCHEDULE_CRON}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS}
+      BACKUP_COMPRESS: ${BACKUP_COMPRESS}
+      BACKUP_UPLOAD_S3: ${BACKUP_UPLOAD_S3}
+      
+      # Monitoring
+      SENTRY_ENABLED: ${SENTRY_ENABLED}
+      SENTRY_DSN: ${SENTRY_DSN}
+      
+      # Feature flags
+      FEATURE_MFA: ${FEATURE_MFA}
+      FEATURE_OAUTH: ${FEATURE_OAUTH}
+      FEATURE_WEBHOOKS: ${FEATURE_WEBHOOKS}
+      FEATURE_SCHEDULER: ${FEATURE_SCHEDULER}
+      FEATURE_TEMPLATES: ${FEATURE_TEMPLATES}
+      FEATURE_AUDIT_LOGS: ${FEATURE_AUDIT_LOGS}
+      
+      # Development
+      SEED_DATABASE: ${SEED_DATABASE}
+    
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    
     volumes:
-      # Persist WhatsApp session data
+      # Persist WhatsApp sessions (encrypted)
       - whatsapp_sessions:/app/auth_info_baileys
+      # Persist backups
+      - backups_data:/app/backups
+      # Persist logs
+      - logs_data:/app/logs
+    
     depends_on:
-      - db
-    restart: always
+      db:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    
+    restart: unless-stopped
+    networks:
+      - whatsapp-network
 
-  # 3. Frontend Dashboard
+  # ============================================================
+  # 3. Frontend Dashboard (Next.js)
+  # ============================================================
   frontend:
-    build: ./frontend
-    container_name: whatsapp-frontend
-    expose:
-      - "3000"
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}-frontend
+    
     environment:
-      # URL base del proxy
-      NEXT_PUBLIC_API_URL: /api
-      # URL interna del backend dentro de la red docker para el rewrite de Next.js
-      BACKEND_INTERNAL_URL: http://backend:3001
+      # Next.js
+      NODE_ENV: ${NODE_ENV}
+      
+      # API configuration (public)
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      
+      # Backend internal URL (server-side only)
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL}
+      
+      # Frontend URL
+      FRONTEND_URL: http://localhost:${FRONTEND_PORT}
+    
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    
+    expose:
+      - "${FRONTEND_PORT}"
+    
     depends_on:
-      - backend
-    restart: always
+      backend:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    
+    restart: unless-stopped
+    networks:
+      - whatsapp-network
 
+# ============================================================
+# Volumes (Data Persistence)
+# ============================================================
 volumes:
+  # PostgreSQL database
   db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/postgres
+  
+  # WhatsApp sessions (should be encrypted)
   whatsapp_sessions:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/sessions
+  
+  # Backups
+  backups_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/backups
+  
+  # Logs
+  logs_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/logs
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  whatsapp-network:
+    driver: bridge

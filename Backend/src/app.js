@@ -16,6 +16,14 @@ import * as db from './db.js'; // Import DB to check ownership
 import { activityLogger } from './middleware/activityLogger.js';
 import adminRoutes from './routes/admin.js';
 
+// --- FASE 3: Audit & Compliance Middleware ---
+import {
+  auditMiddleware,
+  auditLogger,
+  securityMonitoringMiddleware,
+} from './middleware/auditLog.js';
+import gdprRoutes from './routes/gdpr.js';
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -24,6 +32,10 @@ app.use(helmet()); // Set secure HTTP headers
 app.use(cors()); // Configure CORS (restrict in production!)
 app.use(express.json());
 app.use(express.static('public')); // Serve static files (Dashboard)
+
+// --- FASE 3: Audit & Security Monitoring Middleware ---
+app.use(auditMiddleware); // Generate request ID and capture metadata
+app.use(securityMonitoringMiddleware); // Monitor for suspicious access patterns
 
 // Global Rate Limiting
 const limiter = rateLimit({
@@ -61,6 +73,9 @@ app.use('/auth', authRoutes);
 // let's update routes to use verifyJwt for management endpoints.
 
 import { verifyJwt } from './middleware/jwtAuth.js';
+
+// --- GDPR & Compliance Routes (Protected by JWT) ---
+app.use('/api/gdpr', gdprRoutes);
 
 // --- Session Management Routes (Protected by JWT) ---
 
@@ -222,6 +237,10 @@ app.use('/scheduler', authenticate, schedulerRoutes);
 app.use('/templates', authenticate, templateRoutes);
 app.use('/webhooks', authenticate, webhookRoutes);
 app.use('/chats', authenticate, chatRoutes);
+
+// --- FASE 3: Post-Request Audit Logging Middleware ---
+// Must be placed after routes to capture response status and time
+app.use(auditLogger);
 
 // Start the server
 app.listen(PORT, async () => {

@@ -1,0 +1,29 @@
+{
+  "name": "@whatsapp/cli",
+  "version": "1.0.0",
+  "description": "CLI tools for WhatsApp API SaaS - Setup, migration, and utilities",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "whatsapp-cli": "./src/index.js"
+  },
+  "scripts": {
+    "dev": "node src/index.js",
+    "build": "echo 'CLI is ESM, no build step needed'",
+    "type-check": "echo 'Checking types...'"
+  },
+  "dependencies": {
+    "@types/node": "^20",
+    "@whatsapp/shared": "file:../shared",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.0",
+    "pg": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

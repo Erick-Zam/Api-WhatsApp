@@ -27,3 +27,35 @@ yarn-error.log*
 auth_info_baileys/
 auth_info_baileys_*/
 sessions/
+store_baileys/
+store_baileys_*/
+
+# Docker & Volumes
+data/
+backups/
+logs/
+docker-compose.override.yml
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.code-workspace
+
+# Backups & Temporal
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# SSL/Certificates
+*.pem
+*.key
+*.cert
+*.csr
+
+# OS
+Thumbs.db
+ehthumbs.db

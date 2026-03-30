@@ -1,0 +1,32 @@
+{
+  "name": "whatsapp-api-saas",
+  "version": "1.0.0",
+  "description": "Multi-user SaaS Platform for WhatsApp Automation",
+  "private": true,
+  "workspaces": [
+    "Backend",
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,md,json}\"",
+    "setup": "npm install && npm run build",
+    "db:migrate": "turbo run migrate --filter=@whatsapp/backend",
+    "backup": "turbo run backup --filter=@whatsapp/backend",
+    "audit": "npm audit --depth=10"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

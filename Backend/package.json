@@ -1,13 +1,22 @@
 {
-  "name": "backend",
+  "name": "@whatsapp/backend",
   "private": true,
   "version": "1.0.0",
+  "description": "WhatsApp API SaaS Backend - Express.js API",
   "type": "module",
+  "main": "src/app.js",
   "scripts": {
+    "dev": "node --watch src/app.js",
     "start": "node src/app.js",
-    "dev": "node --watch src/app.js"
+    "build": "echo 'Backend is ESM, no build step needed'",
+    "type-check": "echo 'Checking types...'",
+    "lint": "eslint src/",
+    "migrate": "node src/scripts/migrate.js",
+    "setup": "node src/scripts/setup_admin_db.js",
+    "backup": "node src/scripts/backup.js"
   },
   "dependencies": {
+    "@whatsapp/shared": "file:../packages/shared",
     "@whiskeysockets/baileys": "^6.7.21",
     "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
@@ -20,6 +29,13 @@
     "node-cron": "^4.2.1",
     "pg": "^8.18.0",
     "pino": "^10.3.0",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

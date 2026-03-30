@@ -1,0 +1,305 @@
+# ==============================================================================
+# Docker Compose Configuration - Production (with Traefik)
+# ==============================================================================
+# Used in production with Dokploy
+# All variables MUST be set in Dokploy environment tab
+# This file inherits Dokploy's Traefik networking
+
+version: '3.9'
+
+services:
+  # ============================================================
+  # 1. PostgreSQL Database
+  # ============================================================
+  db:
+    image: postgres:15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}-db-prod
+    
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    
+    volumes:
+      # Database persistence with encryption labels
+      - db_data_prod:/var/lib/postgresql/data
+      - ./docs/database/schema.sql:/docker-entrypoint-initdb.d/01-init.sql
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    restart: always
+    networks:
+      - dokploy-network
+      - whatsapp-network
+    
+    # Security: Don't expose port in production
+    # Only accessible from within Docker network
+
+  # ============================================================
+  # 2. Backend API (Node.js + Express)
+  # ============================================================
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    
+    container_name: ${COMPOSE_PROJECT_NAME}-backend-prod
+    
+    environment:
+      # Node
+      NODE_ENV: production
+      DEBUG: "false"
+      
+      # Server config
+      BACKEND_PORT: ${BACKEND_PORT}
+      BACKEND_HOST: 0.0.0.0
+      BACKEND_URL: https://ws-api.erickvillon.dev
+      
+      # Database
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRY: ${JWT_EXPIRY}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY}
+      
+      # Rate limiting (stricter in production)
+      API_RATE_LIMIT_WINDOW_MS: 900000
+      API_RATE_LIMIT_MAX_REQUESTS: 2000
+      API_RATE_LIMIT_AUTH_WINDOW_MS: 3600000
+      API_RATE_LIMIT_AUTH_MAX_REQUESTS: 5
+      
+      # CORS (only production domains)
+      CORS_ALLOWED_ORIGINS: https://ws.erickvillon.dev,https://ws-api.erickvillon.dev
+      CORS_CREDENTIALS: "true"
+      CORS_METHODS: GET,POST,PUT,PATCH,DELETE,OPTIONS
+      CORS_ALLOWED_HEADERS: Content-Type,Authorization,X-API-Key
+      
+      # Logging (minimal in production)
+      LOG_LEVEL: warn
+      LOG_FORMAT: json
+      PINO_LOG_LEVEL: warn
+      
+      # Encryption
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY}
+      SESSION_ENCRYPTION_ENABLED: "true"
+      
+      # WhatsApp/Baileys
+      BAILEYS_DEBUG: "false"
+      BAILEYS_LOG_LEVEL: error
+      WHATSAPP_MESSAGE_RATE_LIMIT: 10
+      WHATSAPP_RETRY_MAX_ATTEMPTS: 5
+      WHATSAPP_SESSION_IDLE_TIMEOUT: 3600
+      
+      # Email
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME}
+      SMTP_TLS_ENABLED: "true"
+      MOCK_EMAIL_SENDING: "false"
+      
+      # OAuth
+      GOOGLE_OAUTH_ENABLED: ${GOOGLE_OAUTH_ENABLED}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: https://ws-api.erickvillon.dev/auth/oauth/google/callback
+      
+      GITHUB_OAUTH_ENABLED: ${GITHUB_OAUTH_ENABLED}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_CALLBACK_URL: https://ws-api.erickvillon.dev/auth/oauth/github/callback
+      
+      MICROSOFT_OAUTH_ENABLED: ${MICROSOFT_OAUTH_ENABLED}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
+      MICROSOFT_CALLBACK_URL: https://ws-api.erickvillon.dev/auth/oauth/microsoft/callback
+      
+      # MFA
+      MFA_ENABLED: "true"
+      TOTP_ISSUER: WhatsApp API SaaS
+      TOTP_WINDOW: 1
+      
+      # Audit
+      AUDIT_LOG_ENABLED: "true"
+      AUDIT_LOG_SENSITIVE_ACTIONS: "true"
+      GDPR_ENABLED: "true"
+      DATA_RETENTION_DAYS: 365
+      AUTO_DELETE_AUDIT_LOGS_DAYS: 2555
+      
+      # Backups
+      BACKUP_ENABLED: "true"
+      BACKUP_SCHEDULE_CRON: "0 2 * * *"
+      BACKUP_RETENTION_DAYS: 30
+      BACKUP_COMPRESS: "true"
+      BACKUP_UPLOAD_S3: ${BACKUP_UPLOAD_S3}
+      
+      # Monitoring
+      SENTRY_ENABLED: ${SENTRY_ENABLED}
+      SENTRY_DSN: ${SENTRY_DSN}
+    
+    volumes:
+      # Persist WhatsApp sessions (encrypted)
+      - whatsapp_sessions_prod:/app/auth_info_baileys
+      # Persist backups
+      - backups_data_prod:/app/backups
+      # Persist logs
+      - logs_data_prod:/app/logs
+    
+    depends_on:
+      db:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    
+    restart: always
+    
+    # Dokploy labels (Traefik routing)
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      
+      # HTTP endpoint (redirect to HTTPS)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-web.rule=Host(`ws-api.erickvillon.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-web.entrypoints=web
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-web.middlewares=redirect-to-https@file
+      
+      # HTTPS endpoint
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-websecure.rule=Host(`ws-api.erickvillon.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-websecure.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-websecure.tls.certresolver=letsencrypt
+      
+      # Service and port
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}-backend-service.loadbalancer.server.port=${BACKEND_PORT}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-web.service=${COMPOSE_PROJECT_NAME}-backend-service
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-backend-websecure.service=${COMPOSE_PROJECT_NAME}-backend-service
+      
+      # Security headers
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-backend-headers.headers.referrerPolicy=strict-origin-when-cross-origin
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-backend-headers.headers.stsSeconds=63072000
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-backend-headers.headers.stsIncludeSubdomains=true
+    
+    networks:
+      - dokploy-network
+      - whatsapp-network
+
+  # ============================================================
+  # 3. Frontend Dashboard (Next.js)
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    
+    container_name: ${COMPOSE_PROJECT_NAME}-frontend-prod
+    
+    environment:
+      # Next.js
+      NODE_ENV: production
+      
+      # API configuration
+      NEXT_PUBLIC_API_URL: https://ws-api.erickvillon.dev
+      
+      # Backend internal URL
+      BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT}
+      
+      # Frontend URL
+      FRONTEND_URL: https://ws.erickvillon.dev
+    
+    depends_on:
+      backend:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    
+    restart: always
+    
+    # Dokploy labels (Traefik routing)
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      
+      # HTTP endpoint (redirect to HTTPS)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-web.rule=Host(`ws.erickvillon.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-web.entrypoints=web
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-web.middlewares=redirect-to-https@file
+      
+      # HTTPS endpoint
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-websecure.rule=Host(`ws.erickvillon.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-websecure.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-websecure.tls.certresolver=letsencrypt
+      
+      # Service and port
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}-frontend-service.loadbalancer.server.port=3000
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-web.service=${COMPOSE_PROJECT_NAME}-frontend-service
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-frontend-websecure.service=${COMPOSE_PROJECT_NAME}-frontend-service
+      
+      # Security headers
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-frontend-headers.headers.referrerPolicy=strict-origin-when-cross-origin
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-frontend-headers.headers.stsSeconds=63072000
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-frontend-headers.headers.stsIncludeSubdomains=true
+    
+    networks:
+      - dokploy-network
+      - whatsapp-network
+
+# ============================================================
+# Volumes (Data Persistence - Production)
+# ============================================================
+volumes:
+  # PostgreSQL database (encrypted)
+  db_data_prod:
+    driver: local
+
+  # WhatsApp sessions (encrypted)
+  whatsapp_sessions_prod:
+    driver: local
+
+  # Backups (encrypted)
+  backups_data_prod:
+    driver: local
+
+  # Logs (encrypted)
+  logs_data_prod:
+    driver: local
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  # Dokploy's Traefik network
+  dokploy-network:
+    external: true
+  
+  # Internal network
+  whatsapp-network:
+    driver: bridge
+    internal: false
