@@ -185,7 +185,15 @@ services:
       start_period: 40s
     
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.whatsapp-backend.rule=Host(`ws-api.erickvillon.dev`)
+      - traefik.http.routers.whatsapp-backend.entrypoints=websecure
+      - traefik.http.routers.whatsapp-backend.tls.certresolver=letsencrypt
+      - traefik.http.services.whatsapp-backend.loadbalancer.server.port=${BACKEND_PORT}
     networks:
+      - dokploy-network
       - whatsapp-network
 
   # ============================================================
@@ -231,7 +239,15 @@ services:
       start_period: 40s
     
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.whatsapp-frontend.rule=Host(`ws.erickvillon.dev`)
+      - traefik.http.routers.whatsapp-frontend.entrypoints=websecure
+      - traefik.http.routers.whatsapp-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.whatsapp-frontend.loadbalancer.server.port=3000
     networks:
+      - dokploy-network
       - whatsapp-network
 
 # ============================================================
@@ -258,5 +274,7 @@ volumes:
 # Networks
 # ============================================================
 networks:
+  dokploy-network:
+    external: true
   whatsapp-network:
     driver: bridge
