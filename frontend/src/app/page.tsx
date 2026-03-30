@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState, SyntheticEvent } from 'react';
+import { useEffect, useMemo, useState, SyntheticEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import EmailVerificationModal from '../components/EmailVerificationModal';
@@ -396,10 +396,42 @@ const AuthModal = ({
 };
 
 export default function Home() {
+    const router = useRouter();
     const [modalOpen, setModalOpen] = useState(false);
     const [authMode, setAuthMode] = useState<AuthMode>('login');
     const [verificationEmail, setVerificationEmail] = useState('');
     const [showVerificationModal, setShowVerificationModal] = useState(false);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const params = new URLSearchParams(window.location.search);
+        const auth = params.get('auth');
+        const token = params.get('token');
+        const error = params.get('error') || params.get('verifyError');
+        const verified = params.get('verified');
+
+        if (token) {
+            localStorage.setItem('token', token);
+            router.push('/dashboard');
+            return;
+        }
+
+        if (auth === 'login' || auth === 'register') {
+            setAuthMode(auth);
+            setModalOpen(true);
+        }
+
+        if (verified === 'true') {
+            setAuthMode('login');
+            setModalOpen(true);
+        }
+
+        if (error) {
+            setAuthMode('login');
+            setModalOpen(true);
+        }
+    }, [router]);
 
     const openModal = (mode: AuthMode) => {
         setAuthMode(mode);

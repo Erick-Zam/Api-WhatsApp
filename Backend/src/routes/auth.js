@@ -61,15 +61,34 @@ router.post('/register', async (req, res) => {
 router.get('/me', verifyJwt, async (req, res) => {
     try {
         const { id } = req.user;
-        const result = await db.query(`
-             SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
-                 (u.password_hash IS NOT NULL) as has_password,
-                   COALESCE(ms.is_enabled, false) as mfa_enabled
-            FROM api_users u 
-            LEFT JOIN roles r ON u.role_id = r.id
-            LEFT JOIN mfa_settings ms ON ms.user_id = u.id
-            WHERE u.id = $1
-        `, [id]);
+        let result;
+        try {
+            result = await db.query(`
+                SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+                       (u.password_hash IS NOT NULL) as has_password,
+                       COALESCE(ms.is_enabled, false) as mfa_enabled
+                FROM api_users u 
+                LEFT JOIN roles r ON u.role_id = r.id
+                LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+                WHERE u.id = $1
+            `, [id]);
+        } catch (queryError) {
+            if (queryError?.code !== '42703') {
+                throw queryError;
+            }
+
+            // Backward compatibility when new columns are not migrated yet.
+            result = await db.query(`
+                SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at,
+                       true as email_verified,
+                       (u.password_hash IS NOT NULL) as has_password,
+                       COALESCE(ms.is_enabled, false) as mfa_enabled
+                FROM api_users u
+                LEFT JOIN roles r ON u.role_id = r.id
+                LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+                WHERE u.id = $1
+            `, [id]);
+        }
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
@@ -203,13 +222,15 @@ router.get('/oauth/:provider/callback', async (req, res) => {
         logAudit(result.user.id, 'LOGIN_OAUTH', { provider, email: result.user.email }, req.ip);
 
         const frontendBase = process.env.FRONTEND_URL || 'http://localhost:3000';
-        const redirectUrl = new URL('/login', frontendBase);
+        const redirectUrl = new URL('/', frontendBase);
+        redirectUrl.searchParams.set('auth', 'login');
         redirectUrl.searchParams.set('token', result.token);
         return res.redirect(302, redirectUrl.toString());
     } catch (error) {
         logError('Auth', error.message, error.stack, { provider, code: !!code, state: !!state });
         const frontendBase = process.env.FRONTEND_URL || 'http://localhost:3000';
-        const redirectUrl = new URL('/login', frontendBase);
+        const redirectUrl = new URL('/', frontendBase);
+        redirectUrl.searchParams.set('auth', 'login');
         redirectUrl.searchParams.set('error', error.message);
         return res.redirect(302, redirectUrl.toString());
     }
@@ -390,11 +411,11 @@ router.get('/verify-email/:token', async (req, res) => {
         
         // Redirect to login/dashboard or return JSON
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        return res.redirect(302, `${frontendUrl}/login?verified=true`);
+        return res.redirect(302, `${frontendUrl}/?auth=login&verified=true`);
     } catch (error) {
         logError('Auth', error.message, error.stack, req.params);
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        return res.redirect(302, `${frontendUrl}/login?verifyError=${encodeURIComponent(error.message)}`);
+        return res.redirect(302, `${frontendUrl}/?auth=login&verifyError=${encodeURIComponent(error.message)}`);
     }
 });
 

@@ -147,12 +147,20 @@ export const generateDeviceFingerprint = (userAgent, ip) => {
 };
 
 export const isTrustedDevice = async (userId, deviceFingerprint) => {
-    const result = await db.query(`
-        SELECT id FROM trusted_devices 
-        WHERE user_id = $1 AND device_fingerprint = $2
-    `, [userId, deviceFingerprint]);
+    try {
+        const result = await db.query(`
+            SELECT id FROM trusted_devices 
+            WHERE user_id = $1 AND device_fingerprint = $2
+        `, [userId, deviceFingerprint]);
 
-    return result.rows.length > 0;
+        return result.rows.length > 0;
+    } catch (error) {
+        // Backward compatibility while migration is not yet applied.
+        if (error?.code === '42P01') {
+            return false;
+        }
+        throw error;
+    }
 };
 
 export const trustDevice = async (userId, deviceFingerprint, deviceName) => {
@@ -167,26 +175,42 @@ export const trustDevice = async (userId, deviceFingerprint, deviceName) => {
 
         return { trusted: true, deviceId: result.rows[0].id };
     } catch (error) {
+        if (error?.code === '42P01') {
+            return { trusted: false, deviceId: null };
+        }
         throw new Error('Failed to trust device: ' + error.message);
     }
 };
 
 export const getTrustedDevices = async (userId) => {
-    const result = await db.query(`
-        SELECT id, device_name, last_used_at, trusted_at
-        FROM trusted_devices
-        WHERE user_id = $1
-        ORDER BY last_used_at DESC
-    `, [userId]);
+    try {
+        const result = await db.query(`
+            SELECT id, device_name, last_used_at, trusted_at
+            FROM trusted_devices
+            WHERE user_id = $1
+            ORDER BY last_used_at DESC
+        `, [userId]);
 
-    return result.rows;
+        return result.rows;
+    } catch (error) {
+        if (error?.code === '42P01') {
+            return [];
+        }
+        throw error;
+    }
 };
 
 export const removeTrustedDevice = async (userId, deviceId) => {
-    await db.query(`
-        DELETE FROM trusted_devices
-        WHERE id = $1 AND user_id = $2
-    `, [deviceId, userId]);
+    try {
+        await db.query(`
+            DELETE FROM trusted_devices
+            WHERE id = $1 AND user_id = $2
+        `, [deviceId, userId]);
+    } catch (error) {
+        if (error?.code !== '42P01') {
+            throw error;
+        }
+    }
 
     return { removed: true };
 };
