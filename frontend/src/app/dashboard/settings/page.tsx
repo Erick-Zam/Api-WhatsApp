@@ -3,6 +3,7 @@ import type { SyntheticEvent } from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface SettingsSession {
     id: string;
@@ -51,6 +52,7 @@ export default function SettingsPage() {
     const [mfaLoading, setMfaLoading] = useState(false);
     const [mfaMessage, setMfaMessage] = useState('');
     const [mfaError, setMfaError] = useState('');
+    const [copiedMfaField, setCopiedMfaField] = useState('');
 
     const handlePasswordChange = async (e: SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -191,6 +193,16 @@ export default function SettingsPage() {
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
         alert('Copied!');
+    };
+
+    const copyMfaValue = async (value: string, field: string) => {
+        try {
+            await navigator.clipboard.writeText(value);
+            setCopiedMfaField(field);
+            setTimeout(() => setCopiedMfaField(''), 1500);
+        } catch {
+            setMfaError('Unable to copy. Please copy it manually.');
+        }
     };
 
     const startMfaSetup = async () => {
@@ -530,12 +542,59 @@ export default function SettingsPage() {
                     )}
 
                     {mfaSetupSecret && (
-                        <div className="mt-4 p-4 rounded-lg border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/40">
-                            <p className="text-sm mb-2 text-amber-900 dark:text-amber-200">Add this secret to your authenticator app:</p>
-                            <div className="font-mono text-xs break-all text-amber-900 dark:text-amber-100">{mfaSetupSecret}</div>
-                            {mfaSetupUri && (
-                                <p className="text-xs mt-2 text-amber-700 dark:text-amber-300 break-all">{mfaSetupUri}</p>
-                            )}
+                        <div className="mt-4 p-4 rounded-xl border border-cyan-200/60 bg-cyan-50 dark:bg-cyan-950/20 dark:border-cyan-800/40">
+                            <h4 className="text-sm font-bold text-cyan-900 dark:text-cyan-200 mb-3">Set up authenticator app</h4>
+                            <div className="grid gap-4 md:grid-cols-[200px_1fr] items-start">
+                                <div className="rounded-lg bg-white dark:bg-zinc-900 p-3 border border-cyan-200/70 dark:border-cyan-800/40 flex items-center justify-center">
+                                    {mfaSetupUri ? (
+                                        <QRCodeSVG
+                                            value={mfaSetupUri}
+                                            size={170}
+                                            bgColor="#ffffff"
+                                            fgColor="#111827"
+                                            level="M"
+                                            includeMargin
+                                        />
+                                    ) : (
+                                        <p className="text-xs text-gray-500 text-center">QR unavailable. Use secret manually.</p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-3">
+                                    <p className="text-sm text-cyan-900 dark:text-cyan-200">
+                                        1. Scan the QR with Google Authenticator, Authy, or Microsoft Authenticator.
+                                    </p>
+                                    <p className="text-sm text-cyan-900 dark:text-cyan-200">
+                                        2. Enter the 6-digit code below to enable MFA.
+                                    </p>
+
+                                    <div className="rounded-lg bg-white/70 dark:bg-zinc-900/60 border border-cyan-200 dark:border-cyan-800/40 p-3">
+                                        <p className="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300 mb-2">Manual secret</p>
+                                        <div className="font-mono text-xs break-all text-cyan-900 dark:text-cyan-100">{mfaSetupSecret}</div>
+                                        <button
+                                            type="button"
+                                            onClick={() => copyMfaValue(mfaSetupSecret, 'secret')}
+                                            className="mt-2 px-3 py-1.5 rounded-md text-xs font-semibold bg-cyan-600 hover:bg-cyan-700 text-white transition"
+                                        >
+                                            {copiedMfaField === 'secret' ? 'Copied' : 'Copy secret'}
+                                        </button>
+                                    </div>
+
+                                    {mfaSetupUri && (
+                                        <details className="rounded-lg bg-white/70 dark:bg-zinc-900/60 border border-cyan-200 dark:border-cyan-800/40 p-3">
+                                            <summary className="cursor-pointer text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">Advanced: otpauth URI</summary>
+                                            <p className="mt-2 font-mono text-[11px] break-all text-cyan-900 dark:text-cyan-100">{mfaSetupUri}</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => copyMfaValue(mfaSetupUri, 'uri')}
+                                                className="mt-2 px-3 py-1.5 rounded-md text-xs font-semibold bg-cyan-600 hover:bg-cyan-700 text-white transition"
+                                            >
+                                                {copiedMfaField === 'uri' ? 'Copied' : 'Copy URI'}
+                                            </button>
+                                        </details>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -546,9 +605,11 @@ export default function SettingsPage() {
                                 id="mfaCode"
                                 type="text"
                                 value={mfaCode}
-                                onChange={(e) => setMfaCode(e.target.value)}
+                                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 className="w-full md:w-64 bg-gray-50 dark:bg-black/50 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none focus:border-green-500 text-gray-800 dark:text-gray-200"
                                 placeholder="123456"
+                                inputMode="numeric"
+                                maxLength={6}
                             />
                         </div>
 
