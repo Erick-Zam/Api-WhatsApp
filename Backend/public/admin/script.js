@@ -261,26 +261,74 @@ async function loadUsage() {
 
 // Chart.js
 function renderChart() {
-    const ctx = document.getElementById('activityChart').getContext('2d');
-    // Destroy previous if exists?
-    // Start fresh.
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [{
-                label: 'Requests',
-                data: [12, 19, 3, 5, 2, 3, 15], // Mock data for now
-                borderColor: 'rgba(75, 192, 192, 1)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-            }
-        }
+    const canvas = document.getElementById('activityChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const points = [12, 19, 3, 5, 2, 3, 15];
+    const maxVal = Math.max(...points, 1);
+
+    const width = canvas.clientWidth || 640;
+    const height = 260;
+    const padding = 24;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Background
+    ctx.fillStyle = 'rgba(6, 17, 38, 0.72)';
+    ctx.fillRect(0, 0, width, height);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(126, 164, 255, 0.14)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i += 1) {
+        const y = padding + ((height - padding * 2) * i) / 4;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+    }
+
+    // Line path
+    ctx.strokeStyle = '#00d4c7';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+
+    points.forEach((value, index) => {
+        const x = padding + ((width - padding * 2) * index) / (points.length - 1);
+        const y = height - padding - (value / maxVal) * (height - padding * 2);
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Fill under line
+    ctx.beginPath();
+    points.forEach((value, index) => {
+        const x = padding + ((width - padding * 2) * index) / (points.length - 1);
+        const y = height - padding - (value / maxVal) * (height - padding * 2);
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.lineTo(width - padding, height - padding);
+    ctx.lineTo(padding, height - padding);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0, 212, 199, 0.14)';
+    ctx.fill();
+
+    // Points
+    points.forEach((value, index) => {
+        const x = padding + ((width - padding * 2) * index) / (points.length - 1);
+        const y = height - padding - (value / maxVal) * (height - padding * 2);
+        ctx.beginPath();
+        ctx.arc(x, y, 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#33a1ff';
+        ctx.fill();
     });
 }
 
