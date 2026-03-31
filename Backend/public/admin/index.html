@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhatsApp API Admin Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- For charts -->
 </head>
@@ -13,11 +13,13 @@
         <!-- Login Section -->
         <section id="login-section" class="active">
             <div class="login-container glass">
+                <p class="eyebrow">Control Panel</p>
                 <h1>Admin Login</h1>
+                <p class="subtitle">Access audit logs, users, roles, and system activity.</p>
                 <form id="login-form">
                     <input type="email" id="email" placeholder="Email" required>
                     <input type="password" id="password" placeholder="Password" required>
-                    <button type="submit" class="btn-primary">Sign In</button>
+                    <button id="login-button" type="submit" class="btn-primary">Sign In</button>
                 </form>
                 <div id="login-error" class="error-msg"></div>
             </div>
@@ -27,12 +29,13 @@
         <section id="dashboard-section" class="hidden">
             <nav class="sidebar glass">
                 <div class="logo">API Admin</div>
+                <p id="dashboard-title" class="dashboard-title">Authenticated session</p>
                 <ul>
-                    <li onclick="showPage('overview')" class="active">Overview</li>
-                    <li onclick="showPage('users')">Users & Roles</li>
-                    <li onclick="showPage('logs')">Activity Logs</li>
-                    <li onclick="showPage('usage')">API Usage</li>
-                    <li onclick="logout()" class="logout-btn">Logout</li>
+                    <li class="menu-item active" data-page="overview">Overview</li>
+                    <li class="menu-item" data-page="users">Users & Roles</li>
+                    <li class="menu-item" data-page="logs">Activity Logs</li>
+                    <li class="menu-item" data-page="usage">API Usage</li>
+                    <li id="logout-button" class="logout-btn">Logout</li>
                 </ul>
             </nav>
             

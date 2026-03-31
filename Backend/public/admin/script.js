@@ -11,11 +11,16 @@ const loginSection = document.getElementById('login-section');
 const dashboardSection = document.getElementById('dashboard-section');
 const loginForm = document.getElementById('login-form');
 const loginError = document.getElementById('login-error');
+const loginButton = document.getElementById('login-button');
 const contentPages = document.querySelectorAll('.page');
-const menuItems = document.querySelectorAll('.sidebar li');
+const menuItems = document.querySelectorAll('.menu-item');
+const logoutButton = document.getElementById('logout-button');
+const dashboardTitle = document.getElementById('dashboard-title');
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
+    bindSidebarEvents();
+
     if (token) {
         verifyToken();
     } else {
@@ -23,8 +28,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function setLoginError(message = '') {
+    loginError.textContent = message;
+}
+
+function setLoginLoading(isLoading) {
+    if (!loginButton) return;
+    loginButton.disabled = isLoading;
+    loginButton.textContent = isLoading ? 'Signing In...' : 'Sign In';
+}
+
+function normalizeRole(rawUser) {
+    return rawUser?.role || rawUser?.role_name || 'general';
+}
+
+function bindSidebarEvents() {
+    menuItems.forEach((item) => {
+        item.addEventListener('click', () => {
+            const pageId = item.dataset.page;
+            if (pageId) {
+                showPage(pageId);
+            }
+        });
+    });
+
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logout);
+    }
+}
+
 // Auth Functions
 async function login(email, password) {
+    setLoginError('');
+
     try {
         const res = await fetch(`${AUTH_URL}/login`, {
             method: 'POST',
@@ -33,21 +69,29 @@ async function login(email, password) {
         });
         const data = await res.json();
 
-        if (res.ok) {
-            token = data.token;
-            user = data.user;
-            localStorage.setItem('admin_token', token);
-
-            if (user.role !== 'admin') {
-                throw new Error('Access denied: You are not an administrator.');
-            }
-
-            showDashboard();
-        } else {
-            throw new Error(data.error);
+        if (!res.ok) {
+            throw new Error(data.error || 'Login failed');
         }
+
+        if (data.requiresMfa) {
+            throw new Error('MFA is enabled for this account. Please log in from the main app flow to complete verification.');
+        }
+
+        if (!data.token || !data.user) {
+            throw new Error('Invalid login response from server.');
+        }
+
+        const role = normalizeRole(data.user);
+        if (role !== 'admin') {
+            throw new Error('Access denied: You are not an administrator.');
+        }
+
+        token = data.token;
+        user = { ...data.user, role };
+        localStorage.setItem('admin_token', token);
+        showDashboard();
     } catch (e) {
-        loginError.textContent = e.message;
+        setLoginError(e.message || 'Unexpected login error');
         logout();
     }
 }
@@ -59,8 +103,9 @@ async function verifyToken() {
         });
         const data = await res.json();
 
-        if (res.ok && data.user.role === 'admin') {
-            user = data.user;
+        const role = normalizeRole(data?.user);
+        if (res.ok && data?.user && role === 'admin') {
+            user = { ...data.user, role };
             showDashboard();
         } else {
             throw new Error('Session expired or unauthorized');
@@ -86,6 +131,9 @@ function showLogin() {
 function showDashboard() {
     loginSection.classList.add('hidden');
     dashboardSection.classList.remove('hidden');
+    if (dashboardTitle && user?.email) {
+        dashboardTitle.textContent = `Signed in as ${user.email}`;
+    }
     loadPage('overview');
 }
 
@@ -93,10 +141,9 @@ function showPage(pageId) {
     contentPages.forEach(p => p.classList.remove('active'));
     document.getElementById(`page-${pageId}`).classList.add('active');
 
-    // Update menu
-    menuItems.forEach(item => item.classList.remove('active'));
-    // Find the li with onclick="showPage('pageId')"
-    // Simple iteration or bind click properly
+    menuItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.page === pageId);
+    });
 
     loadPage(pageId);
 }
@@ -113,6 +160,7 @@ async function loadOverview() {
     const res = await fetch(`${API_URL}/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!res.ok) throw new Error('Failed to load overview stats');
     const data = await res.json();
 
     document.getElementById('stat-users').innerText = data.users;
@@ -131,6 +179,7 @@ async function loadUsers() {
     const res = await fetch(`${API_URL}/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!res.ok) throw new Error('Failed to load users');
     const users = await res.json();
 
     const tbody = document.getElementById('users-table-body');
@@ -176,6 +225,7 @@ async function loadLogs() {
     const res = await fetch(`${API_URL}/logs/activity?limit=50`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!res.ok) throw new Error('Failed to load activity logs');
     const logs = await res.json();
 
     const tbody = document.getElementById('logs-table-body');
@@ -194,6 +244,7 @@ async function loadUsage() {
     const res = await fetch(`${API_URL}/logs/usage?limit=50`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!res.ok) throw new Error('Failed to load usage logs');
     const logs = await res.json(); // returns array
 
     const tbody = document.getElementById('usage-table-body');
@@ -238,5 +289,6 @@ loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    login(email, password);
+    setLoginLoading(true);
+    login(email, password).finally(() => setLoginLoading(false));
 });
