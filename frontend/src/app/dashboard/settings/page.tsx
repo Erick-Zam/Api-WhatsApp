@@ -10,6 +10,16 @@ interface SettingsSession {
     id: string;
     status: string;
     apiKey?: string;
+    engineType?: string;
+    healthStatus?: string;
+    lastHeartbeatAt?: string | null;
+}
+
+interface AvailableEngine {
+    id: string;
+    label: string;
+    enabled: boolean;
+    rollout?: number;
 }
 
 interface TrustedDevice {
@@ -37,6 +47,9 @@ export default function SettingsPage() {
 
     const [loading, setLoading] = useState(true);
     const [sessions, setSessions] = useState<SettingsSession[]>([]);
+    const [availableEngines, setAvailableEngines] = useState<AvailableEngine[]>([]);
+    const [engineSavingSessionId, setEngineSavingSessionId] = useState('');
+    const [engineMessage, setEngineMessage] = useState('');
     const [trustedDevices, setTrustedDevices] = useState<TrustedDevice[]>([]);
 
     const [user, setUser] = useState<MeUser | null>(null);
@@ -99,6 +112,10 @@ export default function SettingsPage() {
                 fetch(`${apiBase}/auth/mfa/trusted-devices`, { headers: { Authorization: `Bearer ${token}` } }),
             ]);
 
+            const enginesRes = await fetch(`${apiBase}/sessions/available-engines`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
             if (!meRes.ok) {
                 localStorage.removeItem('token');
                 router.replace('/?auth=login');
@@ -121,6 +138,13 @@ export default function SettingsPage() {
             if (trustedRes.ok) {
                 const trustedData = await trustedRes.json();
                 setTrustedDevices(trustedData.devices || []);
+            }
+
+            if (enginesRes.ok) {
+                const enginesData = await enginesRes.json();
+                if (Array.isArray(enginesData.engines)) {
+                    setAvailableEngines(enginesData.engines);
+                }
             }
         } catch {
             setProfileError('Unable to load settings.');
@@ -352,6 +376,42 @@ export default function SettingsPage() {
         }
     };
 
+    const updateSessionEngine = async (sessionId: string, engineType: string) => {
+        setEngineMessage('');
+        setEngineSavingSessionId(sessionId);
+
+        try {
+            const res = await fetch(`${apiBase}/sessions/${encodeURIComponent(sessionId)}/engine`, {
+                method: 'PUT',
+                headers: authHeaders(),
+                body: JSON.stringify({ engineType, engineConfig: {} }),
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setEngineMessage(data.error || 'Failed to update engine');
+                return;
+            }
+
+            setSessions((prev) => prev.map((session) => (
+                session.id === sessionId
+                    ? {
+                        ...session,
+                        engineType: data.config?.engineType || engineType,
+                        healthStatus: data.config?.healthStatus || session.healthStatus,
+                        lastHeartbeatAt: data.config?.lastHeartbeatAt || session.lastHeartbeatAt,
+                    }
+                    : session
+            )));
+
+            setEngineMessage(`Engine updated for session '${sessionId}'`);
+        } catch {
+            setEngineMessage('Unable to update engine');
+        } finally {
+            setEngineSavingSessionId('');
+        }
+    };
+
     if (loading) {
         return <div className="mx-auto max-w-4xl text-zinc-400">Loading settings...</div>;
     }
@@ -530,6 +590,7 @@ export default function SettingsPage() {
 
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
                     <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Session API Keys</h3>
+                    {engineMessage && <p className="mb-3 text-sm text-cyan-400">{engineMessage}</p>}
                     {sessions.length === 0 ? (
                         <div className="text-sm text-zinc-500">
                             No active sessions found. <Link href="/dashboard" className="text-cyan-400">Connect a device</Link>.
@@ -542,6 +603,39 @@ export default function SettingsPage() {
                                         <div className={`h-2 w-2 rounded-full ${session.status === 'CONNECTED' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                                         <p className="font-semibold text-zinc-100">{session.id}</p>
                                         <span className="text-xs text-zinc-500">{session.status}</span>
+                                    </div>
+                                    <div className="mb-3 grid gap-2 md:grid-cols-[180px_1fr] md:items-center">
+                                        <p className="text-xs text-zinc-400">API Engine</p>
+                                        <div className="flex items-center gap-2">
+                                            {(() => {
+                                                const selectedEngine = session.engineType || 'baileys';
+                                                const hasSelectedOption = availableEngines.some((engine) => engine.id === selectedEngine);
+                                                const fallbackEngines: AvailableEngine[] = [
+                                                    { id: 'baileys', label: 'Baileys (WebSocket)', enabled: true, rollout: 100 },
+                                                    { id: 'puppeteer', label: 'Puppeteer (Browser)', enabled: false, rollout: 0 },
+                                                ];
+                                                const options = availableEngines.length > 0 ? availableEngines : fallbackEngines;
+
+                                                return (
+                                            <select
+                                                value={selectedEngine}
+                                                disabled={engineSavingSessionId === session.id}
+                                                onChange={(e) => updateSessionEngine(session.id, e.target.value)}
+                                                className="rounded border border-zinc-700 bg-black px-2 py-1 text-xs text-zinc-200"
+                                            >
+                                                {!hasSelectedOption && (
+                                                    <option value={selectedEngine}>{selectedEngine} (current)</option>
+                                                )}
+                                                {options.map((engine) => (
+                                                    <option key={engine.id} value={engine.id} disabled={!engine.enabled}>
+                                                        {engine.label}{!engine.enabled ? ' (disabled)' : ''}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                                );
+                                            })()}
+                                            <span className="text-xs text-zinc-500">Health: {session.healthStatus || 'unknown'}</span>
+                                        </div>
                                     </div>
                                     <div className="flex gap-2">
                                         <div className="flex-1 rounded border border-zinc-700 bg-black p-2 font-mono text-xs text-zinc-300 break-all">

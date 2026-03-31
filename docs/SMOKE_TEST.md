@@ -50,9 +50,28 @@ docker compose -f "$BASE" -p "$APP" logs --since=20m backend \
 - Cerrar sesion, volver a iniciar, repetir navegacion.
 - Si hay rebote, limpiar `localStorage` y repetir.
 
+## 6) Validacion Multi-Engine (Fase Orchestrator)
+
+- Ejecutar migracion de engine modes en backend:
+  - `cd Backend`
+  - `npm run migrate:engine-modes`
+- Verificar configuracion de engine por sesion (JWT):
+  - `GET /sessions/:sessionId/engine`
+  - `GET /sessions/available-engines`
+  - `PUT /sessions/:sessionId/engine` con `engineType=baileys`
+  - `GET /sessions/:sessionId/health`
+  - `GET /sessions/:sessionId/metrics?limit=20`
+- Enviar mensajes por endpoints API (`/messages/text`, `/messages/image`, `/messages/video`) y confirmar respuesta `success: true`.
+- Confirmar que rutas legacy (`/messages/reaction`, `/messages/reply`, `/messages/presence`) siguen operando.
+- Cambiar a `engineType=puppeteer` y validar respuesta controlada (sin crash del backend).
+- Intentar switch de engine en sesion `CONNECTED` y validar bloqueo con `409` (requiere estado `DISCONNECTED`).
+
 ## Criterio de PASS
 
 - Servicios arriba.
 - Sin errores `42703` o `42P01` en logs recientes.
 - Login y rutas protegidas estables.
 - Sin loops de redireccion.
+- Endpoints de engine config/health operativos.
+- Endpoint de metrics operativo y devolviendo muestras recientes.
+- Mensajeria core operando via orquestador con fallback seguro.

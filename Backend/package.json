@@ -9,9 +9,13 @@
     "dev": "node --watch src/app.js",
     "start": "node src/app.js",
     "build": "echo 'Backend is ESM, no build step needed'",
+    "test": "node --test src/tests/**/*.test.js",
+    "test:contracts": "node --test src/tests/adapterContract.test.js src/tests/puppeteerAdapter.test.js",
+    "test:engine": "node --test src/tests/sessionEngine.service.test.js",
     "type-check": "echo 'Checking types...'",
     "lint": "eslint src/",
     "migrate": "node src/scripts/migrate.js",
+    "migrate:engine-modes": "node src/scripts/migrate_engine_modes.js",
     "migrate:auth-phase4": "node src/scripts/migrate_auth_phase4.js",
     "setup": "node src/scripts/setup_admin_db.js",
     "backup": "node src/scripts/backup.js"

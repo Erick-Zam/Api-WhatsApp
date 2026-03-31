@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, ReactNode } from 'react';
-import { CheckCircleIcon, XMarkIcon, EnvelopeIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
+import { useState } from 'react';
+import { CheckCircleIcon, EnvelopeIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
 
 interface EmailVerificationModalProps {
     email: string;
@@ -122,7 +122,7 @@ export default function EmailVerificationModal({ email, onClose, onResend }: Ema
                         onClick={onClose}
                         className="flex-1 py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 text-gray-200 rounded-lg text-sm font-medium transition"
                     >
-                        I'll Verify Later
+                        I&apos;ll Verify Later
                     </button>
                     <button
                         onClick={handleCheckEmail}

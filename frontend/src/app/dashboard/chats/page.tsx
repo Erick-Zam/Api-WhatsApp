@@ -36,6 +36,21 @@ export default function ChatsPage() {
 
     const currentChat = chats.find((c) => c.id === selectedChat);
 
+    const handleSelectSession = (sessionId: string) => {
+        setSelectedSession(sessionId);
+        setSelectedChat(null);
+        setMessages([]);
+        setLoadingChats(true);
+        setLoadingMessages(false);
+    };
+
+    const handleSelectChat = (chatId: string | null) => {
+        setSelectedChat(chatId);
+        if (chatId) {
+            setLoadingMessages(true);
+        }
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
@@ -65,7 +80,6 @@ export default function ChatsPage() {
 
     useEffect(() => {
         if (!selectedSession || !apiKey) return;
-        setLoadingChats(true);
         fetch(`/api/chats?sessionId=${encodeURIComponent(selectedSession)}`, {
             headers: { 'x-api-key': apiKey },
         })
@@ -79,7 +93,6 @@ export default function ChatsPage() {
 
     useEffect(() => {
         if (!selectedChat || !selectedSession || !apiKey) return;
-        setLoadingMessages(true);
         fetch(`/api/chats/${encodeURIComponent(selectedChat)}/messages?sessionId=${encodeURIComponent(selectedSession)}&limit=50`, {
             headers: { 'x-api-key': apiKey },
         })
@@ -163,12 +176,12 @@ export default function ChatsPage() {
                 open={showMobileDrawer}
                 sessions={sessions}
                 selectedSession={selectedSession}
-                onSelectSession={setSelectedSession}
+                onSelectSession={handleSelectSession}
                 searchTerm={searchTerm}
                 onSearchTermChange={setSearchTerm}
                 chats={chats}
                 selectedChat={selectedChat}
-                onSelectChat={setSelectedChat}
+                onSelectChat={handleSelectChat}
                 loadingChats={loadingChats}
                 onClose={() => setShowMobileDrawer(false)}
             />
@@ -176,12 +189,12 @@ export default function ChatsPage() {
             <ChatList
                 sessions={sessions}
                 selectedSession={selectedSession}
-                onSelectSession={setSelectedSession}
+                onSelectSession={handleSelectSession}
                 searchTerm={searchTerm}
                 onSearchTermChange={setSearchTerm}
                 chats={chats}
                 selectedChat={selectedChat}
-                onSelectChat={setSelectedChat}
+                onSelectChat={handleSelectChat}
                 loadingChats={loadingChats}
             />
 

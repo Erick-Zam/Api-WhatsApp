@@ -7,8 +7,30 @@ import EmailVerificationModal from '../components/EmailVerificationModal';
 
 export default function Home() {
     const router = useRouter();
-    const [modalOpen, setModalOpen] = useState(false);
-    const [authMode, setAuthMode] = useState<AuthMode>('login');
+    const getInitialUiState = () => {
+        if (typeof window === 'undefined') {
+            return { modalOpen: false, authMode: 'login' as AuthMode };
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const auth = params.get('auth');
+        const error = params.get('error') || params.get('verifyError');
+        const verified = params.get('verified');
+
+        if (auth === 'login' || auth === 'register') {
+            return { modalOpen: true, authMode: auth as AuthMode };
+        }
+
+        if (verified === 'true' || error) {
+            return { modalOpen: true, authMode: 'login' as AuthMode };
+        }
+
+        return { modalOpen: false, authMode: 'login' as AuthMode };
+    };
+
+    const [initialUiState] = useState(getInitialUiState);
+    const [modalOpen, setModalOpen] = useState(initialUiState.modalOpen);
+    const [authMode, setAuthMode] = useState<AuthMode>(initialUiState.authMode);
     const [verificationEmail, setVerificationEmail] = useState('');
     const [showVerificationModal, setShowVerificationModal] = useState(false);
 
@@ -16,30 +38,11 @@ export default function Home() {
         if (typeof window === 'undefined') return;
 
         const params = new URLSearchParams(window.location.search);
-        const auth = params.get('auth');
         const token = params.get('token');
-        const error = params.get('error') || params.get('verifyError');
-        const verified = params.get('verified');
 
         if (token) {
             localStorage.setItem('token', token);
             router.push('/dashboard');
-            return;
-        }
-
-        if (auth === 'login' || auth === 'register') {
-            setAuthMode(auth);
-            setModalOpen(true);
-        }
-
-        if (verified === 'true') {
-            setAuthMode('login');
-            setModalOpen(true);
-        }
-
-        if (error) {
-            setAuthMode('login');
-            setModalOpen(true);
         }
     }, [router]);
 

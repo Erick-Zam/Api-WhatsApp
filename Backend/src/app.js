@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { connectToWhatsApp } from './whatsapp.js';
 import messageRoutes from './routes/messages.js';
 import authRoutes from './routes/auth.js';
 import { authenticate } from './middleware/auth.js';
@@ -10,6 +9,7 @@ import schedulerRoutes from './routes/scheduler.js';
 import templateRoutes from './routes/templates.js';
 import webhookRoutes from './routes/webhooks.js';
 import chatRoutes from './routes/chats.js';
+import sessionEngineRoutes from './routes/sessionEngine.js';
 import { initScheduler } from './services/scheduler.js';
 import * as db from './db.js'; // Import DB to check ownership
 
@@ -23,6 +23,7 @@ import {
   securityMonitoringMiddleware,
 } from './middleware/auditLog.js';
 import gdprRoutes from './routes/gdpr.js';
+import { connectSession, disconnectSession } from './services/sessionOrchestrator.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -115,12 +116,27 @@ app.get('/sessions', verifyJwt, async (req, res) => {
 
         // Map stored keys for easy lookup
         const keyMap = new Map();
-        userSessions.rows.forEach(k => keyMap.set(k.session_id, k.api_key));
+        const metaMap = new Map();
+        userSessions.rows.forEach((row) => {
+            keyMap.set(row.session_id, row.api_key);
+            metaMap.set(row.session_id, {
+                engineType: row.engine_type || 'baileys',
+                healthStatus: row.health_status || 'unknown',
+                lastHeartbeatAt: row.last_heartbeat_at || null,
+            });
+        });
 
         // Merge active sessions with keys
         const merged = visibleActiveSessions.map(s => {
             let key = keyMap.get(s.id);
-            return { ...s, apiKey: key || null };
+            const meta = metaMap.get(s.id) || { engineType: 'baileys', healthStatus: 'unknown', lastHeartbeatAt: null };
+            return {
+                ...s,
+                apiKey: key || null,
+                engineType: meta.engineType,
+                healthStatus: meta.healthStatus,
+                lastHeartbeatAt: meta.lastHeartbeatAt,
+            };
         });
 
         // Also include stored sessions that might be disconnected but belong to user
@@ -130,7 +146,10 @@ app.get('/sessions', verifyJwt, async (req, res) => {
                     id: id,
                     status: 'DISCONNECTED',
                     user: null,
-                    apiKey: keyMap.get(id)
+                    apiKey: keyMap.get(id),
+                    engineType: (metaMap.get(id)?.engineType || 'baileys'),
+                    healthStatus: (metaMap.get(id)?.healthStatus || 'unknown'),
+                    lastHeartbeatAt: (metaMap.get(id)?.lastHeartbeatAt || null),
                 });
             }
         });
@@ -166,14 +185,18 @@ app.delete('/sessions/:sessionId', verifyJwt, async (req, res) => {
     }
 });
 
+// Engine config and health per session (JWT-protected)
+app.use('/sessions', verifyJwt, sessionEngineRoutes);
+
 // Create/Connect specific session
 app.post('/whatsapp/connect', verifyJwt, async (req, res) => {
-    const { sessionId } = req.body;
+    const { sessionId, engineType } = req.body;
     const userId = req.user.id;
 
     try {
         const wa = await import('./whatsapp.js');
         const { createSessionKey } = await import('./services/apiKeys.js');
+        const { setSessionEngineConfig, isAllowedEngine } = await import('./services/sessionEngine.js');
 
         const id = sessionId || 'default';
 
@@ -181,11 +204,18 @@ app.post('/whatsapp/connect', verifyJwt, async (req, res) => {
         // We create the key/entry implicitly here to establish ownership
         await createSessionKey(id, userId);
 
+        if (engineType) {
+            if (!isAllowedEngine(engineType)) {
+                return res.status(400).json({ error: 'Invalid engineType. Allowed values: baileys, puppeteer' });
+            }
+            await setSessionEngineConfig({ sessionId: id, userId, engineType, engineConfig: {} });
+        }
+
         if (wa.getConnectionStatus(id) === 'DISCONNECTED') {
             // Force a fresh QR by cleaning up potentially stale session data 
             // This is critical for users who are stuck in a "Connecting..." loop 
             // or have invalid credentials.
-            wa.connectToWhatsApp(id, { deleteOld: true });
+            await connectSession({ sessionId: id, userId, options: { deleteOld: true } });
             res.json({ message: `Connection process started for session '${id}' (Fresh Start)` });
         } else {
             res.status(400).json({ error: `Session '${id}' is already connected or connecting` });
@@ -213,7 +243,7 @@ app.post('/whatsapp/logout', verifyJwt, async (req, res) => {
         const id = sessionId || 'default';
 
         if (wa.getConnectionStatus(id) === 'CONNECTED') {
-            await wa.disconnectFromWhatsApp(id);
+            await disconnectSession({ sessionId: id, userId });
             // Don't delete key on logout, only on delete? User might want to reconnect.
             // But previous logic deleted it. Let's keep it consistent with request: "logout".
             // Typically logout means disconnect. Delete means "forget".

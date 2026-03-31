@@ -1,10 +1,26 @@
-# WhatsApp API SaaS Platform
+# WhatsApp API SaaS Platform 🚀
+
+![Node.js](https://img.shields.io/badge/Backend-Node.js%2018%2B-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/API-Express%205-000000?logo=express&logoColor=white)
+![Next.js](https://img.shields.io/badge/Frontend-Next.js-111111?logo=next.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Deploy-Docker%20Compose-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 Comprehensive open-source SaaS platform to automate WhatsApp communication using a production-oriented architecture.
 
 Built with Node.js and Express (backend) plus Next.js and TypeScript (frontend), this project helps teams connect devices, manage sessions, and send WhatsApp messages through a REST API.
 
-## Overview
+## ✨ Quick Navigation
+
+- [📖 Overview](#overview)
+- [🔥 Key Features](#key-features)
+- [⚙️ API Engine Modes (WebSocket vs Puppeteer)](#api-engine-modes-websocket-vs-puppeteer)
+- [🏗 High-Level Architecture](#high-level-architecture)
+- [🚀 Getting Started](#getting-started)
+- [📚 Documentation](#documentation)
+
+## 📖 Overview
 
 This platform turns the Baileys engine into a multi-user product with:
 
@@ -15,7 +31,7 @@ This platform turns the Baileys engine into a multi-user product with:
 
 Unlike simple bot scripts, this repository is structured for real deployments and long-term maintenance.
 
-## Key Features
+## 🔥 Key Features
 
 - Multi-user architecture: registration and login with JWT.
 - RESTful API: consistent HTTP endpoints for messaging and operations.
@@ -34,7 +50,29 @@ Unlike simple bot scripts, this repository is structured for real deployments an
 	- Protected API routes via x-api-key.
 - Logging and audit foundation for operational visibility and compliance.
 
-## High-Level Architecture
+## ⚙️ API Engine Modes (WebSocket vs Puppeteer)
+
+To align with platforms like WAHA, a WhatsApp SaaS can offer different connection engines per customer/session.
+
+- Puppeteer mode:
+	- Controls WhatsApp Web through a browser instance.
+	- Usually easier to start and widely used in unofficial integrations.
+	- Heavier on CPU/RAM due to browser runtime.
+- WebSocket mode:
+	- Uses a lower-level protocol client without a full browser UI.
+	- Usually lighter and can scale better for multi-session workloads.
+	- Can require stricter handling for protocol/session edge cases.
+
+Recommended product approach:
+
+- Let users choose engine per session from dashboard settings.
+- Persist engine in database (example: api_mode = websocket | puppeteer).
+- Route session creation to the selected engine provider.
+- Expose engine status and health in admin/logs views.
+
+This is exactly the kind of flexibility Alexander suggested when mentioning WAHA.
+
+## 🏗 High-Level Architecture
 
 ```text
 Web UI (Next.js)
@@ -51,7 +89,7 @@ PostgreSQL (users, sessions, audit)
 WhatsApp Engine (Baileys)
 ```
 
-## Technology Stack
+## 🧩 Technology Stack
 
 | Layer | Main Technologies |
 |---|---|
@@ -61,7 +99,7 @@ WhatsApp Engine (Baileys)
 | Testing | Playwright (E2E smoke tests) |
 | Operations | Docker, Docker Compose, Dokploy, Traefik |
 
-## Repository Structure
+## 🗂 Repository Structure
 
 ```text
 Api-WhatsApp/
@@ -86,7 +124,7 @@ Api-WhatsApp/
 └── docker-compose.yml
 ```
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -120,7 +158,7 @@ Frontend runs on http://localhost:3000
 docker compose up -d
 ```
 
-## Usage Guide
+## 📚 Usage Guide
 
 ### Connect a Device
 
@@ -152,7 +190,7 @@ curl -X POST http://localhost:3001/messages/poll \
 	}'
 ```
 
-## Database Setup
+## 🗄 Database Setup
 
 For production:
 
@@ -160,7 +198,7 @@ For production:
 2. Execute docs/database/schema.sql.
 3. Configure environment variables based on docs/ENV_SETUP.md.
 
-## Current Project Status
+## ✅ Current Project Status
 
 - Modal-only auth flow in frontend (?auth=login and ?auth=register).
 - MFA and trusted devices implemented.
@@ -168,7 +206,7 @@ For production:
 - Chats dashboard refactored into reusable components.
 - Initial Playwright E2E smoke suite available.
 
-## Documentation
+## 📘 Documentation
 
 More documentation is available in docs/.
 
@@ -180,7 +218,7 @@ More documentation is available in docs/.
 - Compliance and audit: [docs/COMPLIANCE.md](docs/COMPLIANCE.md)
 - Database schema: [docs/database/schema.sql](docs/database/schema.sql)
 
-## Disclaimer
+## 🛡 Disclaimer
 
 This project uses Baileys, an unofficial WhatsApp integration approach.
 
@@ -188,6 +226,6 @@ This project uses Baileys, an unofficial WhatsApp integration approach.
 - WhatsApp may restrict or ban accounts that violate their Terms of Service.
 - For enterprise-critical notifications, evaluate the official WhatsApp Cloud API.
 
-## License
+## 📄 License
 
 MIT License
