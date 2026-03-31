@@ -3,6 +3,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+interface SessionHealth {
+    id: string;
+    status: string;
+    engineType?: string;
+    healthStatus?: string;
+}
+
 interface SidebarLinkProps {
     href: string;
     icon: string;
@@ -32,23 +39,58 @@ export default function Sidebar() {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [userRole, setUserRole] = useState<string>('');
+    const [sessions, setSessions] = useState<SessionHealth[]>([]);
 
     const isActive = (path: string) => pathname === path;
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
         if (token) {
-            const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
-            fetch(`${apiBase}/auth/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.user?.role) setUserRole(data.user.role);
-                })
-                .catch(err => console.error(err));
+            const loadSidebarData = async () => {
+                try {
+                    const [meRes, sessionsRes] = await Promise.all([
+                        fetch(`${apiBase}/auth/me`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        }),
+                        fetch(`${apiBase}/sessions`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        }),
+                    ]);
+
+                    if (meRes.ok) {
+                        const meData = await meRes.json();
+                        if (meData.user?.role) setUserRole(meData.user.role);
+                    }
+
+                    if (sessionsRes.ok) {
+                        const sessionsData = await sessionsRes.json();
+                        if (Array.isArray(sessionsData)) {
+                            setSessions(sessionsData);
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+
+            loadSidebarData();
+            const interval = setInterval(loadSidebarData, 30000);
+            return () => clearInterval(interval);
         }
     }, []);
+
+    const connectedCount = sessions.filter((s) => s.status === 'CONNECTED').length;
+    const unhealthyCount = sessions.filter((s) => {
+        const health = (s.healthStatus || 'unknown').toLowerCase();
+        return health === 'degraded' || health === 'unhealthy' || health === 'error';
+    }).length;
+    const healthLabel = unhealthyCount > 0 ? 'Degraded' : connectedCount > 0 ? 'Healthy' : 'Unknown';
+    const healthColor = unhealthyCount > 0
+        ? 'bg-rose-400'
+        : connectedCount > 0
+            ? 'bg-emerald-400'
+            : 'bg-zinc-500';
 
     const logout = () => {
         localStorage.removeItem('token');
@@ -79,6 +121,17 @@ export default function Sidebar() {
                     {isCollapsed ? 'WS' : 'WhatsApp SaaS'}
                 </h1>
             </div>
+
+            {!isCollapsed && (
+                <div className="mb-4 rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs uppercase tracking-wide text-gray-400">Session Health</span>
+                        <span className={`h-2 w-2 rounded-full ${healthColor}`} />
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-gray-100">{healthLabel}</p>
+                    <p className="text-xs text-gray-500">Connected: {connectedCount} · Alerts: {unhealthyCount}</p>
+                </div>
+            )}
 
             <ul className="space-y-2 flex-grow">
                 <SidebarItem href="/dashboard" icon="📱" label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
