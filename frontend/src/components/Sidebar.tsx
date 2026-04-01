@@ -126,7 +126,7 @@ export default function Sidebar() {
                 )}
             </button>
 
-            <div className={`mb-6 rounded-2xl border border-slate-800/90 bg-slate-900/70 px-3 py-3 ${isCollapsed ? 'items-center' : ''}`}>
+            <div className={`mb-4 rounded-2xl border border-slate-800/90 bg-slate-900/70 px-3 py-3 ${isCollapsed ? 'items-center' : ''}`}>
                 <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                     <h1 className={`whitespace-nowrap overflow-hidden font-bold text-gradient-brand transition-all duration-300 ${isCollapsed ? 'text-xl' : 'text-2xl'}`}>
                         {isCollapsed ? 'WS' : 'WhatsApp SaaS'}
@@ -136,7 +136,7 @@ export default function Sidebar() {
             </div>
 
             {!isCollapsed && (
-                <div className="mb-5 rounded-2xl surface-card p-3">
+                <div className="mb-4 rounded-2xl surface-card p-3">
                     <div className="flex items-center justify-between">
                         <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Session Health</span>
                         <span className={`h-2 w-2 rounded-full ${healthColor}`} />
@@ -146,42 +146,44 @@ export default function Sidebar() {
                 </div>
             )}
 
-            <ul className="app-scroll min-h-0 flex-grow space-y-2 overflow-y-auto pr-1">
-                <SidebarItem href="/dashboard" icon={IconGrid} label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
-                <SidebarItem href="/dashboard/chats" icon={IconChat} label="Chats" isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
-                <SidebarItem href="/dashboard/logs" icon={IconChart} label="Logs & Activity" isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
-                
-                <SidebarItem 
-                    href="/dashboard/playground" 
-                    icon={IconFlask} 
-                    label="API Playground" 
-                    isCollapsed={isCollapsed} 
-                    isActive={isActive('/dashboard/playground')}
-                    badge="LAB"
-                    customClasses={isActive('/dashboard/playground')
-                        ? 'surface-card--elevated text-slate-50'
-                        : 'surface-card text-cyan-100/85 hover:brightness-110'
-                    }
-                />
+            <div className="sidebar-scroll app-scroll min-h-0 flex-grow overflow-y-auto pr-2">
+                <ul className="space-y-1.5">
+                    <SidebarItem href="/dashboard" icon={IconGrid} label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
+                    <SidebarItem href="/dashboard/chats" icon={IconChat} label="Chats" isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
+                    <SidebarItem href="/dashboard/logs" icon={IconChart} label="Logs & Activity" isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
 
-                <SidebarItem href="/dashboard/docs" icon={IconBook} label="API Docs" isCollapsed={isCollapsed} isActive={isActive('/dashboard/docs')} />
-
-                {userRole === 'admin' && (
-                    <SidebarItem 
-                        href="/dashboard/admin" 
-                        icon={IconShield} 
-                        label="Administration" 
-                        isCollapsed={isCollapsed} 
-                        isActive={isActive('/dashboard/admin')}
-                        customClasses={isActive('/dashboard/admin') 
-                            ? 'surface-card--elevated text-slate-50' 
-                            : 'text-slate-300 hover:bg-slate-900/80 hover:text-white'
+                    <SidebarItem
+                        href="/dashboard/playground"
+                        icon={IconFlask}
+                        label="API Playground"
+                        isCollapsed={isCollapsed}
+                        isActive={isActive('/dashboard/playground')}
+                        badge="LAB"
+                        customClasses={isActive('/dashboard/playground')
+                            ? 'surface-card--elevated text-slate-50'
+                            : 'surface-card text-cyan-100/85 hover:brightness-110'
                         }
                     />
-                )}
 
-                <SidebarItem href="/dashboard/settings" icon={IconGear} label="Settings" isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
-            </ul>
+                    <SidebarItem href="/dashboard/docs" icon={IconBook} label="API Docs" isCollapsed={isCollapsed} isActive={isActive('/dashboard/docs')} />
+
+                    {userRole === 'admin' && (
+                        <SidebarItem
+                            href="/dashboard/admin"
+                            icon={IconShield}
+                            label="Administration"
+                            isCollapsed={isCollapsed}
+                            isActive={isActive('/dashboard/admin')}
+                            customClasses={isActive('/dashboard/admin')
+                                ? 'surface-card--elevated text-slate-50'
+                                : 'text-slate-300 hover:bg-slate-900/80 hover:text-white'
+                            }
+                        />
+                    )}
+
+                    <SidebarItem href="/dashboard/settings" icon={IconGear} label="Settings" isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
+                </ul>
+            </div>
 
             <div className={`mt-3 border-t border-slate-800 pt-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
                 {!isCollapsed && <div className="mb-3"><ThemeSwitcher /></div>}
