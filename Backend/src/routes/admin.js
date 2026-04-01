@@ -128,4 +128,61 @@ router.put('/users/:id/role', async (req, res) => {
     }
 });
 
+/**
+ * GET /engine-health
+ * Returns per-engine health and connection summary for admin operations.
+ */
+router.get('/engine-health', async (_req, res) => {
+    try {
+        const [summaryRes, totalsRes, latencyRes] = await Promise.all([
+            query(`
+                SELECT
+                    engine_type,
+                    COALESCE(health_status, 'unknown') AS health_status,
+                    COUNT(*)::int AS count
+                FROM whatsapp_sessions
+                GROUP BY engine_type, COALESCE(health_status, 'unknown')
+                ORDER BY engine_type, health_status
+            `),
+            query(`
+                SELECT
+                    COALESCE(engine_type, 'baileys') AS engine_type,
+                    COUNT(*)::int AS total_sessions,
+                    COUNT(*) FILTER (WHERE status = 'CONNECTED')::int AS connected_sessions
+                FROM whatsapp_sessions
+                GROUP BY COALESCE(engine_type, 'baileys')
+                ORDER BY engine_type
+            `),
+            query(`
+                SELECT
+                    engine_type,
+                    ROUND(AVG(latency_ms)::numeric, 2) AS avg_latency_ms,
+                    ROUND(AVG(error_rate)::numeric, 4) AS avg_error_rate,
+                    ROUND(AVG(uptime_percent)::numeric, 2) AS avg_uptime_percent
+                FROM session_engine_health_metrics
+                WHERE sampled_at > NOW() - INTERVAL '30 minutes'
+                GROUP BY engine_type
+                ORDER BY engine_type
+            `),
+        ]);
+
+        return res.json({
+            totals: totalsRes.rows,
+            healthBreakdown: summaryRes.rows,
+            recentMetrics: latencyRes.rows,
+        });
+    } catch (e) {
+        // Backward compatibility when engine columns/tables are not migrated yet.
+        if (e?.code === '42703' || e?.code === '42P01') {
+            return res.json({
+                totals: [{ engine_type: 'baileys', total_sessions: 0, connected_sessions: 0 }],
+                healthBreakdown: [{ engine_type: 'baileys', health_status: 'unknown', count: 0 }],
+                recentMetrics: [],
+                warning: 'Engine health schema not fully available yet',
+            });
+        }
+        return res.status(500).json({ error: e.message });
+    }
+});
+
 export default router;

@@ -306,6 +306,60 @@ select {
     margin-bottom: 0.8rem;
 }
 
+.engine-health-card {
+    margin-top: 1rem;
+    padding: 1rem;
+}
+
+.engine-health-card h3 {
+    color: var(--text-muted);
+    margin-bottom: 0.7rem;
+}
+
+.engine-health-summary {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.engine-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    border: 1px solid rgba(126, 164, 255, 0.2);
+    border-radius: 10px;
+    padding: 0.7rem 0.8rem;
+    background: rgba(8, 18, 38, 0.55);
+}
+
+.engine-main {
+    min-width: 0;
+}
+
+.engine-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.engine-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.engine-metrics {
+    display: flex;
+    gap: 0.8rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.muted {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
 #activityChart {
     display: block;
     width: 100%;

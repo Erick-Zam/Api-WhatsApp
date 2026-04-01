@@ -163,22 +163,67 @@ async function loadPage(pageId) {
 }
 
 async function loadOverview() {
-    const res = await fetch(`${API_URL}/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Failed to load overview stats');
-    const data = await res.json();
+    const [statsRes, healthRes] = await Promise.all([
+        fetch(`${API_URL}/stats`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_URL}/engine-health`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+    ]);
+
+    if (!statsRes.ok) throw new Error('Failed to load overview stats');
+    const data = await statsRes.json();
 
     document.getElementById('stat-users').innerText = data.users;
     document.getElementById('stat-requests').innerText = data.totalRequests;
     document.getElementById('stat-errors').innerText = data.errors;
 
-    // Render Chart
-    // (Mock data for now or parse `recentActivity` if it was time-series)
-    // We'll just list recent activity for now in the chart area as a list? 
-    // Or render a simple chart if data available?
-    // Let's make a dummy chart with real values if possible.
+    if (healthRes.ok) {
+        const healthData = await healthRes.json();
+        renderEngineHealthSummary(healthData);
+    }
+
     renderChart();
+}
+
+function renderEngineHealthSummary(data) {
+    const container = document.getElementById('engine-health-summary');
+    if (!container) return;
+
+    const totals = Array.isArray(data?.totals) ? data.totals : [];
+    const metrics = Array.isArray(data?.recentMetrics) ? data.recentMetrics : [];
+
+    if (totals.length === 0) {
+        container.innerHTML = '<p class="muted">No engine sessions found yet.</p>';
+        return;
+    }
+
+    const metricsMap = new Map();
+    metrics.forEach((m) => metricsMap.set(String(m.engine_type), m));
+
+    container.innerHTML = totals.map((row) => {
+        const engine = String(row.engine_type || 'baileys');
+        const connected = Number(row.connected_sessions || 0);
+        const total = Number(row.total_sessions || 0);
+        const ratio = total > 0 ? Math.round((connected / total) * 100) : 0;
+        const m = metricsMap.get(engine);
+        const avgLatency = m?.avg_latency_ms ?? 'n/a';
+        const avgErrorRate = m?.avg_error_rate ?? 'n/a';
+
+        return `
+            <div class="engine-row">
+                <div class="engine-main">
+                    <p class="engine-name">${engine}</p>
+                    <p class="engine-sub">${connected}/${total} connected (${ratio}%)</p>
+                </div>
+                <div class="engine-metrics">
+                    <span>Latency: ${avgLatency}ms</span>
+                    <span>Error rate: ${avgErrorRate}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 async function loadUsers() {
