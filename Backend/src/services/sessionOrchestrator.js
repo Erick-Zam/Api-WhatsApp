@@ -7,6 +7,7 @@ import {
     recordSessionEngineMetric,
     updateSessionEngineHealth,
 } from './sessionEngine.js';
+import { executeWithCircuitBreaker, getCircuitState } from './circuitBreaker.js';
 
 const adapters = {
     baileys: new BaileysAdapter(),
@@ -37,10 +38,15 @@ export const getSessionAdapter = async (sessionId, userId = null) => {
 
 export const getRegisteredEngines = () => Object.keys(adapters);
 
-const withHealthUpdate = async (sessionId, engineType, action) => {
+const withHealthUpdate = async (sessionId, engineType, actionName, action) => {
     const startedAt = Date.now();
+    const breakerKey = `${engineType}:${sessionId}`;
     try {
-        const result = await action();
+        const result = await executeWithCircuitBreaker(
+            breakerKey,
+            action,
+            `${engineType}.${actionName}`
+        );
         const latencyMs = Date.now() - startedAt;
 
         await recordSessionEngineMetric({
@@ -81,61 +87,65 @@ const withHealthUpdate = async (sessionId, engineType, action) => {
 
 export const connectSession = async ({ sessionId, userId = null, options = {} }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.connect(sessionId, options));
+    return withHealthUpdate(sessionId, engineType, 'connect', () => adapter.connect(sessionId, options));
 };
 
 export const disconnectSession = async ({ sessionId, userId = null }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.disconnect(sessionId));
+    return withHealthUpdate(sessionId, engineType, 'disconnect', () => adapter.disconnect(sessionId));
 };
 
 export const getSessionHealth = async ({ sessionId, userId = null }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
     const health = await adapter.health(sessionId);
-    return { engineType, ...health };
+    return {
+        engineType,
+        ...health,
+        circuitBreaker: getCircuitState(`${engineType}:${sessionId}`),
+    };
 };
 
 export const sendTextMessage = async ({ sessionId, userId = null, jid, message }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendText(sessionId, jid, message));
+    return withHealthUpdate(sessionId, engineType, 'sendText', () => adapter.sendText(sessionId, jid, message));
 };
 
 export const sendImageMessage = async ({ sessionId, userId = null, jid, imageUrl, caption = '' }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendImage(sessionId, jid, imageUrl, caption));
+    return withHealthUpdate(sessionId, engineType, 'sendImage', () => adapter.sendImage(sessionId, jid, imageUrl, caption));
 };
 
 export const sendVideoMessage = async ({ sessionId, userId = null, jid, videoUrl, caption = '', gifPlayback = false }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendVideo(sessionId, jid, videoUrl, caption, gifPlayback));
+    return withHealthUpdate(sessionId, engineType, 'sendVideo', () => adapter.sendVideo(sessionId, jid, videoUrl, caption, gifPlayback));
 };
 
 export const sendAudioMessage = async ({ sessionId, userId = null, jid, audioUrl, ptt = false }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendAudio(sessionId, jid, audioUrl, ptt));
+    return withHealthUpdate(sessionId, engineType, 'sendAudio', () => adapter.sendAudio(sessionId, jid, audioUrl, ptt));
 };
 
 export const sendDocumentMessage = async ({ sessionId, userId = null, jid, docUrl, fileName, mimetype }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendDocument(sessionId, jid, docUrl, fileName, mimetype));
+    return withHealthUpdate(sessionId, engineType, 'sendDocument', () => adapter.sendDocument(sessionId, jid, docUrl, fileName, mimetype));
 };
 
 export const sendLocationMessage = async ({ sessionId, userId = null, jid, latitude, longitude }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendLocation(sessionId, jid, latitude, longitude));
+    return withHealthUpdate(sessionId, engineType, 'sendLocation', () => adapter.sendLocation(sessionId, jid, latitude, longitude));
 };
 
 export const sendContactMessage = async ({ sessionId, userId = null, jid, contactName, contactPhone }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendContact(sessionId, jid, contactName, contactPhone));
+    return withHealthUpdate(sessionId, engineType, 'sendContact', () => adapter.sendContact(sessionId, jid, contactName, contactPhone));
 };
 
 export const sendPollMessage = async ({ sessionId, userId = null, jid, name, values, singleSelect = false }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.sendPoll(sessionId, jid, name, values, singleSelect));
+    return withHealthUpdate(sessionId, engineType, 'sendPoll', () => adapter.sendPoll(sessionId, jid, name, values, singleSelect));
 };
 
 export const sendPresenceUpdate = async ({ sessionId, userId = null, jid, type }) => {
     const { adapter, engineType } = await getSessionAdapter(sessionId, userId);
-    return withHealthUpdate(sessionId, engineType, () => adapter.updatePresence(sessionId, jid, type));
+    return withHealthUpdate(sessionId, engineType, 'updatePresence', () => adapter.updatePresence(sessionId, jid, type));
 };
