@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: '/api/admin/:path*',
+        destination: `${backendInternalUrl}/api/admin/:path*`
+      },
+      {
+        source: '/api/gdpr/:path*',
+        destination: `${backendInternalUrl}/api/gdpr/:path*`
+      },
+      {
         source: '/api/:path*',
         destination: `${backendInternalUrl}/:path*`
       }
