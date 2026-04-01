@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
     executeWithCircuitBreaker,
+    executeWithRetry,
     getCircuitState,
     resetCircuit,
 } from '../services/circuitBreaker.js';
@@ -43,4 +44,40 @@ test('circuit breaker opens after threshold failures and blocks calls', async ()
         /Circuit is OPEN/
     );
     assert.equal(called, false);
+});
+
+test('retry wrapper retries transient failures then succeeds', async () => {
+    let attempts = 0;
+
+    const result = await executeWithRetry(async () => {
+        attempts += 1;
+        if (attempts < 3) {
+            const error = new Error('temporary network issue');
+            error.code = 'ECONNRESET';
+            throw error;
+        }
+        return 'ok-after-retry';
+    }, {
+        maxAttempts: 3,
+        baseDelayMs: 1,
+    });
+
+    assert.equal(result, 'ok-after-retry');
+    assert.equal(attempts, 3);
+});
+
+test('retry wrapper does not retry when circuit is open', async () => {
+    let attempts = 0;
+
+    await assert.rejects(() => executeWithRetry(async () => {
+        attempts += 1;
+        const error = new Error('Circuit is OPEN for test');
+        error.code = 'CIRCUIT_OPEN';
+        throw error;
+    }, {
+        maxAttempts: 4,
+        baseDelayMs: 1,
+    }), /Circuit is OPEN/);
+
+    assert.equal(attempts, 1);
 });

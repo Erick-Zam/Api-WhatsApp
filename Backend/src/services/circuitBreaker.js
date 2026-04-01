@@ -2,6 +2,8 @@ const states = new Map();
 
 const FAILURE_THRESHOLD = Number.parseInt(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || '3', 10);
 const OPEN_TIMEOUT_MS = Number.parseInt(process.env.CIRCUIT_BREAKER_OPEN_TIMEOUT_MS || '10000', 10);
+const RETRY_MAX_ATTEMPTS = Number.parseInt(process.env.ENGINE_RETRY_MAX_ATTEMPTS || '2', 10);
+const RETRY_BASE_DELAY_MS = Number.parseInt(process.env.ENGINE_RETRY_BASE_DELAY_MS || '300', 10);
 
 const createDefaultState = () => ({
     state: 'CLOSED',
@@ -93,4 +95,50 @@ export const getCircuitState = (key) => {
 
 export const resetCircuit = (key) => {
     states.delete(key);
+};
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const defaultShouldRetry = (error) => {
+    const code = String(error?.code || '').toUpperCase();
+    if (code === 'CIRCUIT_OPEN') return false;
+
+    const message = String(error?.message || '').toLowerCase();
+    return (
+        message.includes('timeout') ||
+        message.includes('temporar') ||
+        message.includes('network') ||
+        message.includes('connection') ||
+        message.includes('econnreset') ||
+        message.includes('etimedout')
+    );
+};
+
+export const executeWithRetry = async (
+    action,
+    {
+        maxAttempts = RETRY_MAX_ATTEMPTS,
+        baseDelayMs = RETRY_BASE_DELAY_MS,
+        shouldRetry = defaultShouldRetry,
+    } = {}
+) => {
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= Math.max(1, maxAttempts); attempt += 1) {
+        try {
+            return await action(attempt);
+        } catch (error) {
+            lastError = error;
+
+            const retryAllowed = attempt < maxAttempts && shouldRetry(error, attempt);
+            if (!retryAllowed) {
+                throw error;
+            }
+
+            const delay = baseDelayMs * (2 ** (attempt - 1));
+            await wait(delay);
+        }
+    }
+
+    throw lastError || new Error('Retry execution failed without specific error');
 };

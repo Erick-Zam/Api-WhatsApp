@@ -7,7 +7,7 @@ import {
     recordSessionEngineMetric,
     updateSessionEngineHealth,
 } from './sessionEngine.js';
-import { executeWithCircuitBreaker, getCircuitState } from './circuitBreaker.js';
+import { executeWithCircuitBreaker, executeWithRetry, getCircuitState } from './circuitBreaker.js';
 
 const adapters = {
     baileys: new BaileysAdapter(),
@@ -42,10 +42,12 @@ const withHealthUpdate = async (sessionId, engineType, actionName, action) => {
     const startedAt = Date.now();
     const breakerKey = `${engineType}:${sessionId}`;
     try {
-        const result = await executeWithCircuitBreaker(
-            breakerKey,
-            action,
-            `${engineType}.${actionName}`
+        const result = await executeWithRetry(
+            (attempt) => executeWithCircuitBreaker(
+                breakerKey,
+                action,
+                `${engineType}.${actionName}.attempt${attempt}`
+            )
         );
         const latencyMs = Date.now() - startedAt;
 
