@@ -381,7 +381,7 @@ export default function SettingsPage() {
         if (value === 'healthy') return 'text-emerald-400';
         if (value === 'degraded') return 'text-amber-400';
         if (value === 'unhealthy' || value === 'error') return 'text-red-400';
-        return 'text-zinc-500';
+        return 'theme-text-soft';
     };
 
     const updateSessionEngine = async (sessionId: string, engineType: string) => {
@@ -470,18 +470,22 @@ export default function SettingsPage() {
         }
     };
 
+    const cardCls = 'theme-card rounded-2xl p-6';
+    const sectionTitleCls = 'theme-text-main mb-4 text-lg font-bold';
+    const inputCls = 'theme-input w-full rounded-lg px-3 py-2 text-sm';
+
     if (loading) {
-        return <div className="mx-auto max-w-4xl text-zinc-400">Loading settings...</div>;
+        return <div className="theme-text-muted mx-auto max-w-4xl">Loading settings...</div>;
     }
 
     return (
         <div className="mx-auto max-w-5xl">
-            <h2 className="mb-8 text-3xl font-bold text-black dark:text-white">Settings</h2>
+            <h2 className="theme-text-main mb-8 text-3xl font-bold">Settings</h2>
 
             <div className="grid gap-6">
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-                    <h3 className="mb-3 text-lg font-bold text-gray-800 dark:text-white">Email Verification</h3>
-                    <p className="mb-4 text-sm text-gray-500 dark:text-zinc-400">
+                <div className={cardCls}>
+                    <h3 className="theme-text-main mb-3 text-lg font-bold">Email Verification</h3>
+                    <p className="theme-text-muted mb-4 text-sm">
                         Status:{' '}
                         <strong className={user?.email_verified ? 'text-emerald-500' : 'text-orange-500'}>
                             {user?.email_verified ? 'Verified' : 'Not verified'}
@@ -496,14 +500,14 @@ export default function SettingsPage() {
                             {verificationLoading ? 'Sending...' : 'Send verification email'}
                         </button>
                     )}
-                    {verificationMessage && <p className="mt-3 text-sm text-zinc-400">{verificationMessage}</p>}
+                    {verificationMessage && <p className="theme-text-muted mt-3 text-sm">{verificationMessage}</p>}
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+                <div className={cardCls}>
                     <div className="mb-4 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Profile</h3>
+                        <h3 className="theme-text-main text-lg font-bold">Profile</h3>
                         {!editProfile && (
-                            <button className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-white" onClick={() => setEditProfile(true)}>
+                            <button className="theme-button-secondary rounded-lg px-3 py-1.5 text-xs font-semibold" onClick={() => setEditProfile(true)}>
                                 Edit
                             </button>
                         )}
@@ -511,27 +515,27 @@ export default function SettingsPage() {
 
                     {editProfile ? (
                         <form onSubmit={handleProfileUpdate} className="space-y-3">
-                            <input className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" value={username} onChange={(e) => setUsername(e.target.value)} />
-                            <input className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" value={email} onChange={(e) => setEmail(e.target.value)} />
+                            <input className={inputCls} value={username} onChange={(e) => setUsername(e.target.value)} />
+                            <input className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
                             {profileError && <p className="text-sm text-red-500">{profileError}</p>}
                             <div className="flex gap-2">
                                 <button type="submit" disabled={profileLoading} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
                                     {profileLoading ? 'Saving...' : 'Save'}
                                 </button>
-                                <button type="button" onClick={() => setEditProfile(false)} className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white">
+                                <button type="button" onClick={() => setEditProfile(false)} className="theme-button-secondary rounded-lg px-4 py-2 text-sm font-semibold">
                                     Cancel
                                 </button>
                             </div>
                         </form>
                     ) : (
                         <div className="grid gap-3 md:grid-cols-2">
-                            <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
-                                <p className="text-xs text-zinc-400">Username</p>
-                                <p className="font-semibold text-zinc-100">{user?.username}</p>
+                            <div className="theme-card-strong rounded-lg p-3">
+                                <p className="theme-text-soft text-xs">Username</p>
+                                <p className="theme-text-main font-semibold">{user?.username}</p>
                             </div>
-                            <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
-                                <p className="text-xs text-zinc-400">Email</p>
-                                <p className="font-semibold text-zinc-100">{user?.email}</p>
+                            <div className="theme-card-strong rounded-lg p-3">
+                                <p className="theme-text-soft text-xs">Email</p>
+                                <p className="theme-text-main font-semibold">{user?.email}</p>
                             </div>
                             {profileSuccess && <p className="text-sm text-emerald-500">{profileSuccess}</p>}
                         </div>
@@ -548,30 +552,30 @@ export default function SettingsPage() {
                                 placeholder="New password"
                                 value={setPasswordValue}
                                 onChange={(e) => setSetPasswordValue(e.target.value)}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"
+                                className={inputCls}
                             />
                             <input
                                 type="password"
                                 placeholder="Confirm password"
                                 value={setPasswordConfirm}
                                 onChange={(e) => setSetPasswordConfirm(e.target.value)}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"
+                                className={inputCls}
                             />
                             <button disabled={setPasswordFormLoading} className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500">
                                 {setPasswordFormLoading ? 'Saving...' : 'Set password'}
                             </button>
-                            {setPasswordMsg && <p className="text-sm text-zinc-200">{setPasswordMsg}</p>}
+                            {setPasswordMsg && <p className="theme-text-main text-sm">{setPasswordMsg}</p>}
                         </form>
                     </div>
                 )}
 
                 {user?.has_password && (
-                    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-                        <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Change Password</h3>
+                    <div className={cardCls}>
+                        <h3 className={sectionTitleCls}>Change Password</h3>
                         <form onSubmit={handlePasswordChange} className="space-y-3">
-                            <input type="password" placeholder="Current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
-                            <input type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
-                            <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                            <input type="password" placeholder="Current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className={inputCls} />
+                            <input type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={inputCls} />
+                            <input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputCls} />
                             {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
                             {passwordSuccess && <p className="text-sm text-emerald-500">{passwordSuccess}</p>}
                             <button disabled={passwordLoading} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
@@ -581,9 +585,9 @@ export default function SettingsPage() {
                     </div>
                 )}
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-                    <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Multi-Factor Authentication</h3>
-                    <p className="mb-4 text-sm text-zinc-400">
+                <div className={cardCls}>
+                    <h3 className={sectionTitleCls}>Multi-Factor Authentication</h3>
+                    <p className="theme-text-muted mb-4 text-sm">
                         Status: <strong className={mfaEnabled ? 'text-emerald-500' : 'text-orange-500'}>{mfaEnabled ? 'Enabled' : 'Disabled'}</strong>
                     </p>
 
@@ -595,8 +599,8 @@ export default function SettingsPage() {
 
                     {mfaSetupSecret && (
                         <div className="mt-4 grid gap-4 lg:grid-cols-[200px_1fr]">
-                            <div className="rounded-lg border border-cyan-700/30 bg-white p-3">
-                                {mfaSetupUri ? <QRCodeSVG value={mfaSetupUri} size={170} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin /> : <p className="text-xs text-zinc-500">QR unavailable</p>}
+                            <div className="theme-card rounded-lg p-3">
+                                {mfaSetupUri ? <QRCodeSVG value={mfaSetupUri} size={170} bgColor="#ffffff" fgColor="#111827" level="M" includeMargin /> : <p className="theme-text-soft text-xs">QR unavailable</p>}
                             </div>
                             <div className="space-y-3">
                                 <div className="rounded-lg border border-cyan-700/30 bg-cyan-950/20 p-3">
@@ -607,7 +611,7 @@ export default function SettingsPage() {
                                     </button>
                                 </div>
                                 <form onSubmit={verifyMfa} className="space-y-2">
-                                    <input value={mfaCode} onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Enter 6-digit code" className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                                    <input value={mfaCode} onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Enter 6-digit code" className={inputCls} />
                                     <button disabled={mfaLoading} className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500">Verify and enable</button>
                                 </form>
                             </div>
@@ -616,7 +620,7 @@ export default function SettingsPage() {
 
                     {mfaEnabled && (
                         <div className="mt-4 space-y-3">
-                            <input value={mfaCode} onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Current MFA code (for disable)" className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+                            <input value={mfaCode} onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Current MFA code (for disable)" className={inputCls} />
                             <button onClick={disableMfa} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">Disable MFA</button>
                         </div>
                     )}
@@ -625,17 +629,17 @@ export default function SettingsPage() {
                     {mfaError && <p className="mt-3 text-sm text-red-500">{mfaError}</p>}
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-                    <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Trusted Devices</h3>
+                <div className={cardCls}>
+                    <h3 className={sectionTitleCls}>Trusted Devices</h3>
                     {trustedDevices.length === 0 ? (
-                        <p className="text-sm text-zinc-500">No trusted devices yet.</p>
+                        <p className="theme-text-soft text-sm">No trusted devices yet.</p>
                     ) : (
                         <div className="space-y-2">
                             {trustedDevices.map((d) => (
-                                <div key={d.id} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+                                <div key={d.id} className="theme-card-strong flex items-center justify-between rounded-lg p-3">
                                     <div>
-                                        <p className="text-sm font-semibold text-zinc-200">{d.device_name || 'Device'}</p>
-                                        <p className="text-xs text-zinc-500">Last used: {new Date(d.last_used_at).toLocaleString()}</p>
+                                        <p className="theme-text-main text-sm font-semibold">{d.device_name || 'Device'}</p>
+                                        <p className="theme-text-soft text-xs">Last used: {new Date(d.last_used_at).toLocaleString()}</p>
                                     </div>
                                     <button onClick={() => removeTrusted(d.id)} className="rounded bg-red-600/20 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-600/30">
                                         Remove
@@ -646,24 +650,24 @@ export default function SettingsPage() {
                     )}
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-                    <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">Session API Keys</h3>
+                <div className={cardCls}>
+                    <h3 className={sectionTitleCls}>Session API Keys</h3>
                     {engineMessage && <p className="mb-3 text-sm text-cyan-400">{engineMessage}</p>}
                     {sessions.length === 0 ? (
-                        <div className="text-sm text-zinc-500">
+                        <div className="theme-text-soft text-sm">
                             No active sessions found. <Link href="/dashboard" className="text-cyan-400">Connect a device</Link>.
                         </div>
                     ) : (
                         <div className="space-y-3">
                             {sessions.map((session) => (
-                                <div key={session.id} className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+                                <div key={session.id} className="theme-card-strong rounded-lg p-3">
                                     <div className="mb-2 flex items-center gap-2">
                                         <div className={`h-2 w-2 rounded-full ${session.status === 'CONNECTED' ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                                        <p className="font-semibold text-zinc-100">{session.id}</p>
-                                        <span className="text-xs text-zinc-500">{session.status}</span>
+                                        <p className="theme-text-main font-semibold">{session.id}</p>
+                                        <span className="theme-text-soft text-xs">{session.status}</span>
                                     </div>
                                     <div className="mb-3 grid gap-2 md:grid-cols-[180px_1fr] md:items-center">
-                                        <p className="text-xs text-zinc-400">API Engine</p>
+                                        <p className="theme-text-muted text-xs">API Engine</p>
                                         <div className="flex items-center gap-2">
                                             {(() => {
                                                 const selectedEngine = session.engineType || 'baileys';
@@ -679,7 +683,7 @@ export default function SettingsPage() {
                                                 value={selectedEngine}
                                                 disabled={engineSavingSessionId === session.id}
                                                 onChange={(e) => updateSessionEngine(session.id, e.target.value)}
-                                                className="rounded border border-zinc-700 bg-black px-2 py-1 text-xs text-zinc-200"
+                                                className="theme-input rounded px-2 py-1 text-xs"
                                             >
                                                 {!hasSelectedOption && (
                                                     <option value={selectedEngine}>{selectedEngine} (current)</option>
@@ -692,22 +696,22 @@ export default function SettingsPage() {
                                             </select>
                                                 );
                                             })()}
-                                            <span className="text-xs text-zinc-500">Health: {session.healthStatus || 'unknown'}</span>
+                                            <span className="theme-text-soft text-xs">Health: {session.healthStatus || 'unknown'}</span>
                                         </div>
                                     </div>
                                     <div className="mb-3 flex items-center gap-2 text-xs">
-                                        <span className="text-zinc-500">Engine status:</span>
+                                        <span className="theme-text-soft">Engine status:</span>
                                         <span className={healthTone(session.healthStatus)}>{session.healthStatus || 'unknown'}</span>
                                         {session.lastHeartbeatAt && (
-                                            <span className="text-zinc-500">• Last heartbeat: {new Date(session.lastHeartbeatAt).toLocaleString()}</span>
+                                            <span className="theme-text-soft">• Last heartbeat: {new Date(session.lastHeartbeatAt).toLocaleString()}</span>
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <div className="flex-1 rounded border border-zinc-700 bg-black p-2 font-mono text-xs text-zinc-300 break-all">
+                                        <div className="theme-code-block flex-1 rounded p-2 font-mono text-xs break-all">
                                             {session.apiKey || 'No key'}
                                         </div>
                                         {session.apiKey && (
-                                            <button onClick={() => copyToClipboard(session.apiKey || '')} className="rounded bg-zinc-800 px-3 text-xs font-semibold text-zinc-200 hover:bg-zinc-700">
+                                            <button onClick={() => copyToClipboard(session.apiKey || '')} className="theme-button-secondary rounded px-3 text-xs font-semibold">
                                                 Copy
                                             </button>
                                         )}

@@ -29,12 +29,12 @@ const SidebarItem = ({ href, icon, label, isCollapsed, isActive, customClasses, 
             href={href}
             className={`group flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-3.5'} py-2.5 rounded-xl transition-all ${
                 customClasses || (isActive
-                    ? 'surface-card--elevated text-slate-50'
-                    : 'text-slate-300 hover:bg-slate-900/80 hover:text-white')
+                    ? 'surface-card--elevated theme-text-main'
+                    : 'theme-text-muted hover:bg-[color:color-mix(in_srgb,var(--surface-muted)_84%,transparent)] hover:text-[color:var(--foreground)]')
             }`}
             title={isCollapsed ? (title || label) : ""}
         >
-            <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? 'border-cyan-300/40 bg-cyan-400/15 text-cyan-200' : 'border-slate-700/70 bg-slate-900/80 text-slate-300 group-hover:border-slate-600'}`}>
+            <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? 'border-cyan-300/40 bg-cyan-400/15 text-cyan-200' : 'theme-card-strong theme-text-muted group-hover:border-[color:color-mix(in_srgb,var(--accent-strong)_35%,var(--border-soft))]'}`}>
                 {icon}
             </span>
             {!isCollapsed && (
@@ -110,10 +110,10 @@ export default function Sidebar() {
     };
 
     return (
-        <nav className={`${isCollapsed ? 'w-24' : 'w-[17rem]'} relative z-50 hidden h-[100dvh] flex-col overflow-visible border-r border-slate-800/80 bg-slate-950/85 p-3 text-white backdrop-blur transition-all duration-300 md:flex`}>
+        <nav className={`${isCollapsed ? 'w-24' : 'w-[17rem]'} theme-card-strong theme-text-main relative z-50 hidden h-[100dvh] flex-col overflow-visible border-r p-3 backdrop-blur transition-all duration-300 md:flex`}>
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-4 top-6 z-20 rounded-full border border-slate-700 bg-slate-900/95 p-1.5 text-slate-300 shadow-[0_10px_30px_rgba(0,0,0,0.4)] transition hover:text-white"
+                className="theme-card-strong theme-text-muted absolute -right-4 top-6 z-20 rounded-full p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.4)] transition hover:text-[color:var(--foreground)]"
                 aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
                 {isCollapsed ? (
@@ -127,7 +127,7 @@ export default function Sidebar() {
                 )}
             </button>
 
-            <div className={`mb-3 rounded-2xl border border-slate-800/90 bg-slate-900/70 px-3 py-2.5 ${isCollapsed ? 'items-center' : ''}`}>
+            <div className={`theme-card-muted mb-3 rounded-2xl px-3 py-2.5 ${isCollapsed ? 'items-center' : ''}`}>
                 <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                     <h1 className={`whitespace-nowrap overflow-hidden font-bold text-gradient-brand transition-all duration-300 ${isCollapsed ? 'text-xl' : 'text-2xl'}`}>
                         {isCollapsed ? 'WS' : 'WhatsApp SaaS'}
@@ -139,11 +139,11 @@ export default function Sidebar() {
             {!isCollapsed && (
                 <div className="mb-3 rounded-xl surface-card p-2.5">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Session Health</span>
+                        <span className="theme-text-muted text-xs uppercase tracking-[0.16em]">Session Health</span>
                         <span className={`h-2 w-2 rounded-full ${healthColor}`} />
                     </div>
-                    <p className="mt-1 text-sm font-semibold text-slate-100">{healthLabel}</p>
-                    <p className="text-xs text-slate-500">Connected: {connectedCount} - Alerts: {unhealthyCount}</p>
+                    <p className="theme-text-main mt-1 text-sm font-semibold">{healthLabel}</p>
+                    <p className="theme-text-soft text-xs">Connected: {connectedCount} - Alerts: {unhealthyCount}</p>
                 </div>
             )}
 
@@ -161,7 +161,7 @@ export default function Sidebar() {
                         isActive={isActive('/dashboard/playground')}
                         badge="LAB"
                         customClasses={isActive('/dashboard/playground')
-                            ? 'surface-card--elevated text-slate-50'
+                            ? 'surface-card--elevated theme-text-main'
                             : 'surface-card text-cyan-100/85 hover:brightness-110'
                         }
                     />
@@ -176,8 +176,8 @@ export default function Sidebar() {
                             isCollapsed={isCollapsed}
                             isActive={isActive('/dashboard/admin')}
                             customClasses={isActive('/dashboard/admin')
-                                ? 'surface-card--elevated text-slate-50'
-                                : 'text-slate-300 hover:bg-slate-900/80 hover:text-white'
+                                ? 'surface-card--elevated theme-text-main'
+                                : 'theme-text-muted hover:bg-[color:color-mix(in_srgb,var(--surface-muted)_84%,transparent)] hover:text-[color:var(--foreground)]'
                             }
                         />
                     )}
@@ -192,7 +192,7 @@ export default function Sidebar() {
                 </ul>
             </div>
 
-            <div className={`mt-3 border-t border-slate-800 pt-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
+            <div className={`mt-3 border-t border-[color:color-mix(in_srgb,var(--border-soft)_90%,transparent)] pt-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
                 <button
                     onClick={logout}
                     className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-3.5'} rounded-xl py-2.5 text-left text-rose-300 transition-colors hover:bg-rose-500/10`}
