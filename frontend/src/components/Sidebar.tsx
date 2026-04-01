@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { apiRequest, getStoredToken } from '@/lib/api/client';
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher';
 
 interface SessionHealth {
     id: string;
@@ -144,6 +145,8 @@ export default function Sidebar() {
                     <p className="text-xs text-slate-500">Connected: {connectedCount} - Alerts: {unhealthyCount}</p>
                 </div>
             )}
+
+            {!isCollapsed && <div className="mb-4"><ThemeSwitcher /></div>}
 
             <ul className="flex-grow space-y-2">
                 <SidebarItem href="/dashboard" icon={IconGrid} label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />

@@ -14,21 +14,21 @@ export default function AdminOverview({ stats, loading = false, openSecurityIssu
 
     return (
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Panel className="p-5">
-                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Total users</p>
-                <p className="mt-2 text-3xl font-bold text-white">{loading ? '...' : totalUsers}</p>
+            <Panel elevated className="p-5">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Total users</p>
+                <p className="mt-2 text-3xl font-bold text-slate-100">{loading ? '...' : totalUsers}</p>
             </Panel>
-            <Panel className="p-5">
-                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Total requests</p>
-                <p className="mt-2 text-3xl font-bold text-white">{loading ? '...' : totalRequests}</p>
+            <Panel elevated className="p-5">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Total requests</p>
+                <p className="mt-2 text-3xl font-bold text-slate-100">{loading ? '...' : totalRequests}</p>
             </Panel>
-            <Panel className="p-5">
-                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Request errors</p>
-                <p className="mt-2 text-3xl font-bold text-white">{loading ? '...' : totalErrors}</p>
+            <Panel elevated className="p-5">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Request errors</p>
+                <p className="mt-2 text-3xl font-bold text-rose-200">{loading ? '...' : totalErrors}</p>
             </Panel>
-            <Panel className="p-5">
-                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Open security issues</p>
-                <p className="mt-2 text-3xl font-bold text-amber-300">{loading ? '...' : openSecurityIssues}</p>
+            <Panel elevated className="p-5">
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Open security issues</p>
+                <p className="mt-2 text-3xl font-bold text-amber-200">{loading ? '...' : openSecurityIssues}</p>
             </Panel>
         </section>
     );
