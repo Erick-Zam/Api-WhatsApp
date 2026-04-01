@@ -278,7 +278,7 @@ router.get('/audit/events', authorizePermission('audit:view_events'), async (req
         return res.json(events.rows);
     } catch (error) {
         if (isSchemaMissing(error)) {
-            return res.status(501).json({ error: 'Audit events schema not available yet' });
+            return res.json([]);
         }
         return res.status(500).json({ error: error.message });
     }
@@ -303,7 +303,7 @@ router.get('/audit/security', authorizePermission('audit:view_security'), async 
         return res.json(incidents.rows);
     } catch (error) {
         if (isSchemaMissing(error)) {
-            return res.status(501).json({ error: 'Security events schema not available yet' });
+            return res.json([]);
         }
         return res.status(500).json({ error: error.message });
     }
