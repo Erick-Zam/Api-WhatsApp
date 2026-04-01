@@ -10,6 +10,7 @@ import ChatList from '../../../components/chats/ChatList';
 import ChatWindow from '../../../components/chats/ChatWindow';
 import MobileChatDrawer from '../../../components/chats/MobileChatDrawer';
 import { type Chat, type Message, type WASession } from '../../../components/chats/types';
+import Button from '@/components/ui/Button';
 
 export default function ChatsPage() {
     const [sessions, setSessions] = useState<WASession[]>([]);
@@ -145,28 +146,26 @@ export default function ChatsPage() {
     };
 
     return (
-        <div className="flex h-full w-full bg-black text-white overflow-hidden">
+        <div className="relative flex h-full w-full overflow-hidden rounded-3xl border border-slate-800/70 bg-slate-950/50 text-white">
             {showConsentModal && (
-                <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="w-full max-w-md rounded-2xl border border-zinc-700/50 bg-zinc-900 p-6">
-                        <h2 className="text-lg font-bold mb-2">Sync Contacts & Chats?</h2>
-                        <p className="text-sm text-zinc-400 mb-4">This fetches contact data from your WhatsApp session to improve the chat UI.</p>
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl surface-card--elevated p-6">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-100/80">Privacy</p>
+                        <h2 className="mb-2 mt-1 text-lg font-bold">Sync contacts and chats?</h2>
+                        <p className="mb-4 text-sm text-slate-300">This loads WhatsApp contact metadata to improve chat navigation and thread previews.</p>
                         <div className="flex gap-2">
-                            <button
-                                className="flex-1 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold hover:bg-cyan-500"
+                            <Button
+                                className="flex-1"
                                 onClick={() => {
                                     localStorage.setItem('chat_data_consent', 'true');
                                     setShowConsentModal(false);
                                 }}
                             >
                                 I Agree
-                            </button>
-                            <button
-                                className="flex-1 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold hover:bg-zinc-700"
-                                onClick={() => setShowConsentModal(false)}
-                            >
+                            </Button>
+                            <Button variant="secondary" className="flex-1" onClick={() => setShowConsentModal(false)}>
                                 Later
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -198,18 +197,18 @@ export default function ChatsPage() {
                 loadingChats={loadingChats}
             />
 
-            <main className="flex-1 flex flex-col bg-black">
+            <main className="flex-1 flex-col bg-transparent">
                 {!selectedChat && (
-                    <div className="flex h-full flex-col items-center justify-center text-zinc-600">
+                    <div className="flex h-full flex-col items-center justify-center px-6 text-slate-500">
                         <button
-                            className="mb-4 inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 lg:hidden"
+                            className="mb-4 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-200 lg:hidden"
                             onClick={() => setShowMobileDrawer(true)}
                         >
                             <Bars3Icon className="h-4 w-4" />
                             Browse chats
                         </button>
-                        <ChatBubbleLeftIcon className="w-16 h-16 mb-3 opacity-20" />
-                        <p className="text-lg font-semibold opacity-50">Select a chat</p>
+                        <ChatBubbleLeftIcon className="mb-3 h-16 w-16 opacity-20" />
+                        <p className="text-lg font-semibold text-slate-400">Select a chat to start messaging</p>
                     </div>
                 )}
 

@@ -33,20 +33,25 @@ export default function ChatWindow({
 }: ChatWindowProps) {
     return (
         <>
-            <div className="h-16 border-b border-zinc-800/60 bg-zinc-950/60 px-4 lg:px-6 flex items-center justify-between">
+            <div className="surface-card border-x-0 border-t-0 px-4 py-3 lg:px-6">
+                <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <button className="lg:hidden rounded-lg p-1.5 hover:bg-zinc-800" onClick={onOpenDrawer}>
-                        <ChevronLeftIcon className="w-5 h-5" />
+                    <button className="rounded-lg border border-slate-700 bg-slate-900/80 p-1.5 text-slate-300 lg:hidden" onClick={onOpenDrawer}>
+                        <ChevronLeftIcon className="h-5 w-5" />
                     </button>
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold ${currentChat?.isGroup ? 'bg-emerald-500/75 text-white' : 'bg-cyan-400 text-slate-950'}`}>
+                        {(currentChat?.name || selectedChat).charAt(0).toUpperCase()}
+                    </div>
                     <div>
-                        <p className="text-sm font-semibold">{currentChat?.name || selectedChat}</p>
-                        <p className="text-xs text-emerald-400/80">Active now</p>
+                        <p className="text-sm font-semibold text-slate-100">{currentChat?.name || selectedChat}</p>
+                        <p className="text-xs text-emerald-300/85">Active now</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
-                    <button className="rounded-lg p-2 hover:bg-zinc-800"><PhoneIcon className="w-5 h-5 text-zinc-300" /></button>
-                    <button className="rounded-lg p-2 hover:bg-zinc-800 hidden md:block"><VideoCameraIcon className="w-5 h-5 text-zinc-300" /></button>
-                    <button className="rounded-lg p-2 hover:bg-zinc-800"><InformationCircleIcon className="w-5 h-5 text-zinc-300" /></button>
+                <div className="flex items-center gap-1.5">
+                    <button className="rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white"><PhoneIcon className="h-5 w-5" /></button>
+                    <button className="hidden rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white md:block"><VideoCameraIcon className="h-5 w-5" /></button>
+                    <button className="rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white"><InformationCircleIcon className="h-5 w-5" /></button>
+                </div>
                 </div>
             </div>
 
