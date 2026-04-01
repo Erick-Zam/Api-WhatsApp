@@ -13,6 +13,37 @@
   --danger: #ff4d6d;
 }
 
+html,
+body {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+html[data-theme='dark'] {
+  --background: #080d16;
+  --foreground: #e7edf7;
+  --surface: #111827;
+  --surface-muted: #1a2435;
+  --surface-elevated: #24324a;
+  --border-soft: #334155;
+  --accent: #22d3ee;
+  --accent-strong: #38bdf8;
+}
+
+html[data-theme='light'] {
+  --background: #f3f7ff;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #e7eefb;
+  --surface-elevated: #d9e7fb;
+  --border-soft: #c9d8ef;
+  --accent: #0ea5e9;
+  --accent-strong: #2563eb;
+}
+
 html[data-theme='midnight'] {
   --background: #030712;
   --foreground: #e6edf6;
@@ -76,6 +107,14 @@ body {
     var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), "Avenir Next", "Segoe UI", sans-serif;
+}
+
+html[data-theme='light'] body {
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent-strong) 12%, transparent), transparent 36%),
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 32%),
+    radial-gradient(circle at 50% 100%, color-mix(in srgb, #dbeafe 80%, transparent), transparent 48%),
+    var(--background);
 }
 
 .surface-card {
@@ -154,4 +193,27 @@ body {
 
 .modal-scroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, rgba(34, 211, 238, 0.85), rgba(59, 130, 246, 0.85));
+}
+
+.app-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.7) transparent;
+}
+
+.app-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.app-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-scroll::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.65);
+  border-radius: 9999px;
+}
+
+.app-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.9);
 }

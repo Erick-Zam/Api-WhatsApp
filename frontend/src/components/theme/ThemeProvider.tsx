@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-export type AppTheme = 'midnight' | 'ocean' | 'graphite';
+export type AppTheme = 'dark' | 'light' | 'midnight' | 'ocean' | 'graphite';
 
 interface ThemeContextValue {
     theme: AppTheme;
@@ -14,7 +14,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 const THEME_STORAGE_KEY = 'ui_theme';
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setThemeState] = useState<AppTheme>('midnight');
+    const [theme, setThemeState] = useState<AppTheme>('dark');
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -22,9 +22,9 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
         }
 
         const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) as AppTheme | null;
-        const resolvedTheme: AppTheme = storedTheme && ['midnight', 'ocean', 'graphite'].includes(storedTheme)
+        const resolvedTheme: AppTheme = storedTheme && ['dark', 'light', 'midnight', 'ocean', 'graphite'].includes(storedTheme)
             ? storedTheme
-            : 'midnight';
+            : 'dark';
 
         setThemeState(resolvedTheme);
         document.documentElement.setAttribute('data-theme', resolvedTheme);

@@ -110,7 +110,7 @@ export default function Sidebar() {
     };
 
     return (
-        <nav className={`${isCollapsed ? 'w-24' : 'w-72'} hidden h-screen flex-col border-r border-slate-800/80 bg-slate-950/85 p-4 text-white backdrop-blur md:flex transition-all duration-300 relative z-50`}>
+        <nav className={`${isCollapsed ? 'w-24' : 'w-72'} relative z-50 hidden h-[100dvh] flex-col overflow-hidden border-r border-slate-800/80 bg-slate-950/85 p-4 text-white backdrop-blur transition-all duration-300 md:flex`}>
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="absolute -right-3 top-6 z-10 rounded-full border border-slate-700 bg-slate-900 p-1 text-slate-400 shadow-lg hover:text-white"
@@ -146,9 +146,7 @@ export default function Sidebar() {
                 </div>
             )}
 
-            {!isCollapsed && <div className="mb-4"><ThemeSwitcher /></div>}
-
-            <ul className="flex-grow space-y-2">
+            <ul className="app-scroll min-h-0 flex-grow space-y-2 overflow-y-auto pr-1">
                 <SidebarItem href="/dashboard" icon={IconGrid} label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
                 <SidebarItem href="/dashboard/chats" icon={IconChat} label="Chats" isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
                 <SidebarItem href="/dashboard/logs" icon={IconChart} label="Logs & Activity" isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
@@ -185,7 +183,8 @@ export default function Sidebar() {
                 <SidebarItem href="/dashboard/settings" icon={IconGear} label="Settings" isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
             </ul>
 
-            <div className={`mt-auto flex border-t border-slate-800 pt-4 ${isCollapsed ? 'justify-center' : ''}`}>
+            <div className={`mt-3 border-t border-slate-800 pt-3 ${isCollapsed ? 'flex justify-center' : ''}`}>
+                {!isCollapsed && <div className="mb-3"><ThemeSwitcher /></div>}
                 <button
                     onClick={logout}
                     className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-3.5'} rounded-xl py-2.5 text-left text-rose-300 transition-colors hover:bg-rose-500/10`}
