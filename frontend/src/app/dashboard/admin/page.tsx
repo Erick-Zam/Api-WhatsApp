@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AdminEngineHealthResponse, AdminStats, AdminUser, AuditEvent, SecurityEvent } from '@/lib/api/admin';
+import type { AdminApproval, AdminEngineHealthResponse, AdminStats, AdminUser, AuditEvent, SecurityEvent } from '@/lib/api/admin';
 import {
+    approveAdminApproval,
+    getAdminApprovals,
     getAdminAuditEvents,
     getAdminCurrentUser,
     getAdminEngineHealth,
+    rejectAdminApproval,
     getAdminSecurityEvents,
     getAdminStats,
     getAdminUsers,
@@ -20,6 +23,7 @@ import AdminOverview from '@/components/admin/AdminOverview';
 import AdminUsersTable from '@/components/admin/AdminUsersTable';
 import AdminSecurityFeed from '@/components/admin/AdminSecurityFeed';
 import AdminEngineHealth from '@/components/admin/AdminEngineHealth';
+import AdminApprovalsQueue from '@/components/admin/AdminApprovalsQueue';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 
@@ -31,6 +35,7 @@ export default function AdminPage() {
     const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
     const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
     const [engineHealth, setEngineHealth] = useState<AdminEngineHealthResponse | null>(null);
+    const [approvals, setApprovals] = useState<AdminApproval[]>([]);
     const [currentRole, setCurrentRole] = useState('');
 
     const [loading, setLoading] = useState(true);
@@ -38,6 +43,7 @@ export default function AdminPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [actionUserId, setActionUserId] = useState('');
+    const [actionApprovalId, setActionApprovalId] = useState('');
 
     const loadAdminData = useCallback(async ({ showSpinner = false } = {}) => {
         if (showSpinner) {
@@ -53,6 +59,7 @@ export default function AdminPage() {
             const canViewAudit = ['admin', 'super_admin', 'audit_admin'].includes(role);
             const canViewSecurity = ['admin', 'super_admin', 'audit_admin', 'ops_admin'].includes(role);
             const canViewEngine = ['admin', 'super_admin', 'ops_admin'].includes(role);
+            const canViewApprovals = ['admin', 'super_admin'].includes(role);
 
             const mandatoryRequests = await Promise.all([getAdminStats(), getAdminUsers()]);
             const [statsData, usersData] = mandatoryRequests;
@@ -64,13 +71,15 @@ export default function AdminPage() {
                 canViewAudit ? getAdminAuditEvents({ limit: 12 }) : Promise.resolve([]),
                 canViewSecurity ? getAdminSecurityEvents({ limit: 12 }) : Promise.resolve([]),
                 canViewEngine ? getAdminEngineHealth() : Promise.resolve(null),
+                canViewApprovals ? getAdminApprovals({ limit: 12 }) : Promise.resolve([]),
             ]);
 
-            const [auditResult, securityResult, engineResult] = optionalRequests;
+            const [auditResult, securityResult, engineResult, approvalsResult] = optionalRequests;
 
             setAuditEvents(auditResult.status === 'fulfilled' ? (auditResult.value as AuditEvent[]) : []);
             setSecurityEvents(securityResult.status === 'fulfilled' ? (securityResult.value as SecurityEvent[]) : []);
             setEngineHealth(engineResult.status === 'fulfilled' ? (engineResult.value as AdminEngineHealthResponse | null) : null);
+            setApprovals(approvalsResult.status === 'fulfilled' ? (approvalsResult.value as AdminApproval[]) : []);
         } catch (requestError) {
             if (requestError instanceof ApiError) {
                 if (requestError.status === 401) {
@@ -164,6 +173,46 @@ export default function AdminPage() {
         }
     }, [loadAdminData]);
 
+    const handleApprove = useCallback(async (approval: AdminApproval) => {
+        setActionApprovalId(approval.id);
+        setError('');
+        setSuccess('');
+
+        try {
+            await approveAdminApproval(approval.id, 'Approved from admin dashboard');
+            setSuccess('Approval marked as approved.');
+            await loadAdminData({ showSpinner: true });
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
+            } else {
+                setError('Unable to approve request.');
+            }
+        } finally {
+            setActionApprovalId('');
+        }
+    }, [loadAdminData]);
+
+    const handleReject = useCallback(async (approval: AdminApproval) => {
+        setActionApprovalId(approval.id);
+        setError('');
+        setSuccess('');
+
+        try {
+            await rejectAdminApproval(approval.id, 'Rejected from admin dashboard');
+            setSuccess('Approval marked as rejected.');
+            await loadAdminData({ showSpinner: true });
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
+            } else {
+                setError('Unable to reject request.');
+            }
+        } finally {
+            setActionApprovalId('');
+        }
+    }, [loadAdminData]);
+
     const openSecurityIssues = useMemo(() => {
         return securityEvents.filter((event) => !event.is_resolved).length;
     }, [securityEvents]);
@@ -174,6 +223,7 @@ export default function AdminPage() {
     const canViewEngine = useMemo(() => ['admin', 'super_admin', 'ops_admin'].includes(currentRole), [currentRole]);
     const canViewSecurity = useMemo(() => ['admin', 'super_admin', 'audit_admin', 'ops_admin'].includes(currentRole), [currentRole]);
     const canViewAudit = useMemo(() => ['admin', 'super_admin', 'audit_admin'].includes(currentRole), [currentRole]);
+    const canViewApprovals = useMemo(() => ['admin', 'super_admin'].includes(currentRole), [currentRole]);
 
     return (
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 pb-6">
@@ -215,6 +265,16 @@ export default function AdminPage() {
             />
 
             {canViewEngine && <AdminEngineHealth data={engineHealth} loading={loading} />}
+
+            {canViewApprovals && (
+                <AdminApprovalsQueue
+                    approvals={approvals}
+                    loading={loading}
+                    actionApprovalId={actionApprovalId}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                />
+            )}
 
             {(canViewAudit || canViewSecurity) && (
                 <AdminSecurityFeed

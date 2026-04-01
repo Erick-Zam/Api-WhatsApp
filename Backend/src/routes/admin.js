@@ -425,4 +425,123 @@ router.post('/users/:id/api-key/rotate', adminSensitiveActionLimiter, authorizeP
     }
 });
 
+/**
+ * GET /approvals
+ * Returns pending and recent admin approvals.
+ */
+router.get('/approvals', authorizePermission('admin:approve_actions'), async (req, res) => {
+    const { limit, offset } = parsePagination(req);
+
+    try {
+        const approvals = await query(
+            `SELECT
+                id,
+                action_type,
+                target_user_id,
+                payload,
+                status,
+                requested_by_admin_id,
+                reviewed_by_admin_id,
+                reason,
+                requested_at,
+                reviewed_at
+             FROM admin_action_approvals
+             ORDER BY requested_at DESC
+             LIMIT $1 OFFSET $2`,
+            [limit, offset]
+        );
+
+        return res.json(approvals.rows);
+    } catch (error) {
+        if (isSchemaMissing(error)) {
+            return res.status(501).json({ error: 'Approvals schema not available yet' });
+        }
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /approvals/:id/approve
+ * Marks a pending approval as approved.
+ */
+router.post('/approvals/:id/approve', adminSensitiveActionLimiter, authorizePermission('admin:approve_actions'), async (req, res) => {
+    const { id } = req.params;
+    const { reason = null } = req.body || {};
+
+    try {
+        const updated = await query(
+            `UPDATE admin_action_approvals
+             SET status = 'APPROVED',
+                 reviewed_by_admin_id = $1,
+                 reviewed_at = NOW(),
+                 reason = COALESCE($2, reason)
+             WHERE id = $3 AND status = 'PENDING'
+             RETURNING id, action_type, target_user_id, payload, status, requested_by_admin_id, reviewed_by_admin_id, requested_at, reviewed_at, reason`,
+            [req.user.id, reason, id]
+        );
+
+        if (updated.rows.length === 0) {
+            return res.status(404).json({ error: 'Pending approval not found' });
+        }
+
+        await writeAdminAction({
+            adminId: req.user.id,
+            action: 'APPROVAL_APPROVED',
+            targetUserId: updated.rows[0].target_user_id,
+            reason,
+            details: { approvalId: id, actionType: updated.rows[0].action_type },
+            ipAddress: req.ip,
+        });
+
+        return res.json({ message: 'Approval marked as approved', approval: updated.rows[0] });
+    } catch (error) {
+        if (isSchemaMissing(error)) {
+            return res.status(501).json({ error: 'Approvals schema not available yet' });
+        }
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /approvals/:id/reject
+ * Marks a pending approval as rejected.
+ */
+router.post('/approvals/:id/reject', adminSensitiveActionLimiter, authorizePermission('admin:approve_actions'), async (req, res) => {
+    const { id } = req.params;
+    const { reason = null } = req.body || {};
+
+    try {
+        const updated = await query(
+            `UPDATE admin_action_approvals
+             SET status = 'REJECTED',
+                 reviewed_by_admin_id = $1,
+                 reviewed_at = NOW(),
+                 reason = COALESCE($2, reason)
+             WHERE id = $3 AND status = 'PENDING'
+             RETURNING id, action_type, target_user_id, payload, status, requested_by_admin_id, reviewed_by_admin_id, requested_at, reviewed_at, reason`,
+            [req.user.id, reason, id]
+        );
+
+        if (updated.rows.length === 0) {
+            return res.status(404).json({ error: 'Pending approval not found' });
+        }
+
+        await writeAdminAction({
+            adminId: req.user.id,
+            action: 'APPROVAL_REJECTED',
+            targetUserId: updated.rows[0].target_user_id,
+            reason,
+            details: { approvalId: id, actionType: updated.rows[0].action_type },
+            ipAddress: req.ip,
+        });
+
+        return res.json({ message: 'Approval marked as rejected', approval: updated.rows[0] });
+    } catch (error) {
+        if (isSchemaMissing(error)) {
+            return res.status(501).json({ error: 'Approvals schema not available yet' });
+        }
+        return res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;

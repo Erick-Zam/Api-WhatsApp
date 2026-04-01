@@ -73,6 +73,19 @@ export interface AdminEngineHealthResponse {
     warning?: string;
 }
 
+export interface AdminApproval {
+    id: string;
+    action_type: string;
+    target_user_id?: string | null;
+    payload?: Record<string, unknown> | null;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    requested_by_admin_id?: string | null;
+    reviewed_by_admin_id?: string | null;
+    reason?: string | null;
+    requested_at: string;
+    reviewed_at?: string | null;
+}
+
 interface PaginationOptions {
     limit?: number;
     offset?: number;
@@ -115,3 +128,18 @@ export const getAdminSecurityEvents = ({ limit = 10, offset = 0 }: PaginationOpt
 export const getAdminEngineHealth = () => apiRequest<AdminEngineHealthResponse>('/admin/engine-health');
 
 export const getAdminCurrentUser = () => apiRequest<{ user: AdminCurrentUser }>('/auth/me');
+
+export const getAdminApprovals = ({ limit = 10, offset = 0 }: PaginationOptions = {}) =>
+    apiRequest<AdminApproval[]>(`/admin/approvals?limit=${limit}&offset=${offset}`);
+
+export const approveAdminApproval = (approvalId: string, reason?: string) =>
+    apiRequest<{ message: string; approval: AdminApproval }>(`/admin/approvals/${approvalId}/approve`, {
+        method: 'POST',
+        body: { reason },
+    });
+
+export const rejectAdminApproval = (approvalId: string, reason?: string) =>
+    apiRequest<{ message: string; approval: AdminApproval }>(`/admin/approvals/${approvalId}/reject`, {
+        method: 'POST',
+        body: { reason },
+    });
