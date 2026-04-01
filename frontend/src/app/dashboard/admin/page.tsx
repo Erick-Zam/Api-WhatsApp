@@ -1,199 +1,228 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface AdminStats {
-    users: number;
-    totalRequests?: number;
-    errors?: number;
-}
-
-interface AdminUser {
-    id: string;
-    username: string;
-    email: string;
-    role: string;
-    created_at: string;
-}
+import type { AdminEngineHealthResponse, AdminStats, AdminUser, AuditEvent, SecurityEvent } from '@/lib/api/admin';
+import {
+    getAdminAuditEvents,
+    getAdminCurrentUser,
+    getAdminEngineHealth,
+    getAdminSecurityEvents,
+    getAdminStats,
+    getAdminUsers,
+    lockAdminUser,
+    rotateAdminUserApiKey,
+    unlockAdminUser,
+    updateAdminUserRole,
+} from '@/lib/api/admin';
+import { ApiError } from '@/lib/api/client';
+import AdminOverview from '@/components/admin/AdminOverview';
+import AdminUsersTable from '@/components/admin/AdminUsersTable';
+import AdminSecurityFeed from '@/components/admin/AdminSecurityFeed';
+import AdminEngineHealth from '@/components/admin/AdminEngineHealth';
+import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
 
 export default function AdminPage() {
     const router = useRouter();
-    const [users, setUsers] = useState<AdminUser[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+
     const [stats, setStats] = useState<AdminStats | null>(null);
+    const [users, setUsers] = useState<AdminUser[]>([]);
+    const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
+    const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
+    const [engineHealth, setEngineHealth] = useState<AdminEngineHealthResponse | null>(null);
+    const [currentRole, setCurrentRole] = useState('');
 
-    const authorizedFetch = useCallback(async (url: string, options: RequestInit = {}) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            router.replace('/?auth=login');
-            throw new Error('No token');
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [actionUserId, setActionUserId] = useState('');
+
+    const loadAdminData = useCallback(async ({ showSpinner = false } = {}) => {
+        if (showSpinner) {
+            setRefreshing(true);
         }
+        setError('');
 
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                ...options.headers,
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        try {
+            const meData = await getAdminCurrentUser();
+            const role = meData.user?.role || 'general';
+            setCurrentRole(role);
+
+            const canViewAudit = ['admin', 'super_admin', 'audit_admin'].includes(role);
+            const canViewSecurity = ['admin', 'super_admin', 'audit_admin', 'ops_admin'].includes(role);
+            const canViewEngine = ['admin', 'super_admin', 'ops_admin'].includes(role);
+
+            const mandatoryRequests = await Promise.all([getAdminStats(), getAdminUsers()]);
+            const [statsData, usersData] = mandatoryRequests;
+
+            setStats(statsData);
+            setUsers(usersData);
+
+            const optionalRequests = await Promise.allSettled([
+                canViewAudit ? getAdminAuditEvents({ limit: 12 }) : Promise.resolve([]),
+                canViewSecurity ? getAdminSecurityEvents({ limit: 12 }) : Promise.resolve([]),
+                canViewEngine ? getAdminEngineHealth() : Promise.resolve(null),
+            ]);
+
+            const [auditResult, securityResult, engineResult] = optionalRequests;
+
+            setAuditEvents(auditResult.status === 'fulfilled' ? (auditResult.value as AuditEvent[]) : []);
+            setSecurityEvents(securityResult.status === 'fulfilled' ? (securityResult.value as SecurityEvent[]) : []);
+            setEngineHealth(engineResult.status === 'fulfilled' ? (engineResult.value as AdminEngineHealthResponse | null) : null);
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                if (requestError.status === 401) {
+                    localStorage.removeItem('token');
+                    router.replace('/?auth=login');
+                    return;
+                }
+
+                if (requestError.status === 403) {
+                    setError('Access denied for this admin section with your current role.');
+                    return;
+                }
+
+                setError(requestError.message);
+                return;
             }
-        });
 
-        if (res.status === 401) {
-            localStorage.removeItem('token');
-            router.replace('/?auth=login');
-            throw new Error('Unauthorized');
-        }
-
-        if (res.status === 403) {
-            setError('Access Denied: Admin privileges required.');
-            setLoading(false);
-            throw new Error('Forbidden');
-        }
-
-        return res;
-    }, [router]);
-
-    const fetchStats = useCallback(async () => {
-        try {
-            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/api/admin/stats`);
-            const data = await res.json();
-            setStats(data);
-        } catch (err) {
-            console.error(err);
-        }
-    }, [authorizedFetch]);
-
-    const fetchUsers = useCallback(async () => {
-        try {
-            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/api/admin/users`);
-            const data = await res.json();
-            setUsers(data);
-        } catch (err) {
-            console.error(err);
+            setError('Failed to load administration data.');
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
-    }, [authorizedFetch]);
+    }, [router]);
 
     useEffect(() => {
-        const init = async () => {
-            await fetchStats();
-            await fetchUsers();
-        };
-        init();
-    }, [fetchStats, fetchUsers]);
+        loadAdminData();
+    }, [loadAdminData]);
 
-    const handleRoleChange = async (userId: string, newRole: string) => {
+    const handleRoleChange = useCallback(async (userId: string, roleName: string) => {
+        setActionUserId(userId);
+        setError('');
+        setSuccess('');
+
         try {
-            const res = await authorizedFetch(`/api/api/admin/users/${userId}/role`, {
-                method: 'PUT',
-                body: JSON.stringify({ roleName: newRole })
-            });
-
-            if (res.ok) {
-                alert('Role updated successfully');
-                fetchUsers();
+            await updateAdminUserRole(userId, roleName, 'Updated from admin dashboard');
+            setSuccess('User role updated successfully.');
+            await loadAdminData({ showSpinner: true });
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
             } else {
-                const err = await res.json();
-                alert(`Failed to update role: ${err.error || 'Unknown error'}`);
+                setError('Unable to update user role.');
             }
-        } catch (error) {
-            console.error(error);
+        } finally {
+            setActionUserId('');
         }
-    };
+    }, [loadAdminData]);
 
-    if (error) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-red-500">
-                <h2 className="text-2xl font-bold mb-2">Error</h2>
-                <p>{error}</p>
-            </div>
-        );
-    }
+    const handleLockToggle = useCallback(async (user: AdminUser) => {
+        setActionUserId(user.id);
+        setError('');
+        setSuccess('');
 
-    if (loading) {
-        return <div className="p-8 text-center text-gray-500">Loading admin dashboard...</div>;
-    }
+        try {
+            if (user.is_active ?? true) {
+                await lockAdminUser(user.id, 'Locked from admin dashboard');
+                setSuccess(`User ${user.username} has been locked.`);
+            } else {
+                await unlockAdminUser(user.id, 'Unlocked from admin dashboard');
+                setSuccess(`User ${user.username} has been unlocked.`);
+            }
+            await loadAdminData({ showSpinner: true });
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
+            } else {
+                setError('Unable to update user status.');
+            }
+        } finally {
+            setActionUserId('');
+        }
+    }, [loadAdminData]);
+
+    const handleRotateApiKey = useCallback(async (user: AdminUser) => {
+        setActionUserId(user.id);
+        setError('');
+        setSuccess('');
+
+        try {
+            await rotateAdminUserApiKey(user.id, 'Rotated from admin dashboard');
+            setSuccess(`API key rotated for ${user.username}.`);
+            await loadAdminData({ showSpinner: true });
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
+            } else {
+                setError('Unable to rotate API key.');
+            }
+        } finally {
+            setActionUserId('');
+        }
+    }, [loadAdminData]);
+
+    const openSecurityIssues = useMemo(() => {
+        return securityEvents.filter((event) => !event.is_resolved).length;
+    }, [securityEvents]);
+
+    const canManageRoles = useMemo(() => ['admin', 'super_admin', 'user_admin'].includes(currentRole), [currentRole]);
+    const canLockUsers = useMemo(() => ['admin', 'super_admin', 'user_admin', 'ops_admin'].includes(currentRole), [currentRole]);
+    const canRotateApiKeys = useMemo(() => ['admin', 'super_admin', 'ops_admin'].includes(currentRole), [currentRole]);
+    const canViewEngine = useMemo(() => ['admin', 'super_admin', 'ops_admin'].includes(currentRole), [currentRole]);
+    const canViewSecurity = useMemo(() => ['admin', 'super_admin', 'audit_admin', 'ops_admin'].includes(currentRole), [currentRole]);
+    const canViewAudit = useMemo(() => ['admin', 'super_admin', 'audit_admin'].includes(currentRole), [currentRole]);
 
     return (
-        <div className="h-full">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8 text-black dark:text-white">Admin Dashboard</h1>
-
-                {/* Stats Overview */}
-                {stats && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
-                            <h3 className="text-sm font-bold text-gray-500 uppercase">Total Users</h3>
-                            <p className="text-3xl font-bold text-black dark:text-white mt-2">{stats.users}</p>
-                        </div>
-                        {/* Placeholder stats if not available in endpoint */}
-                        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
-                            <h3 className="text-sm font-bold text-gray-500 uppercase">Total Requests</h3>
-                            <p className="text-3xl font-bold text-black dark:text-white mt-2">{stats.totalRequests || '-'}</p>
-                        </div>
-                        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
-                            <h3 className="text-sm font-bold text-gray-500 uppercase">Errors</h3>
-                            <p className="text-3xl font-bold text-black dark:text-white mt-2">{stats.errors || 0}</p>
-                        </div>
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 pb-6">
+            <section className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-5 md:p-6">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-cyan-300/70">Control Center</p>
+                        <h1 className="mt-1 text-3xl font-bold text-white">Administration</h1>
+                        <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+                            Manage roles, lock and unlock users, rotate API keys, and monitor security events in real time.
+                        </p>
                     </div>
-                )}
-
-                {/* Users Management */}
-                <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 dark:border-zinc-800">
-                        <h2 className="text-xl font-bold text-black dark:text-white">User Management</h2>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-gray-50 dark:bg-zinc-950 text-gray-500 dark:text-gray-400 text-xs uppercase font-bold">
-                                <tr>
-                                    <th className="p-4">ID</th>
-                                    <th className="p-4">Username</th>
-                                    <th className="p-4">Email</th>
-                                    <th className="p-4">Role</th>
-                                    <th className="p-4">Created At</th>
-                                    <th className="p-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
-                                {users.map((user) => (
-                                    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-zinc-800/50">
-                                        <td className="p-4 text-sm font-mono text-gray-600 dark:text-gray-400">
-                                            {user.id.toString().substring(0, 8)}...
-                                        </td>
-                                        <td className="p-4 font-medium text-gray-900 dark:text-white">{user.username}</td>
-                                        <td className="p-4 text-gray-600 dark:text-gray-300">{user.email}</td>
-                                        <td className="p-4">
-                                            <span className={`px-2 py-1 rounded text-xs font-bold ${user.role === 'admin'
-                                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                                }`}>
-                                                {user.role?.toUpperCase() || 'GENERAL'}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-sm text-gray-500">
-                                            {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-                                        </td>
-                                        <td className="p-4">
-                                            <select
-                                                className="bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded px-2 py-1 text-sm dark:text-white"
-                                                value={user.role || 'general'}
-                                                onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                                            >
-                                                <option value="general">General</option>
-                                                <option value="admin">Admin</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <Button
+                        variant="secondary"
+                        className="self-start border border-zinc-700 bg-zinc-900 px-4 py-2 text-zinc-100 hover:bg-zinc-800"
+                        onClick={() => loadAdminData({ showSpinner: true })}
+                        disabled={refreshing}
+                    >
+                        {refreshing ? 'Refreshing...' : 'Refresh data'}
+                    </Button>
                 </div>
-            </div>
+            </section>
+
+            {error && <Alert tone="error">{error}</Alert>}
+            {success && <Alert tone="success">{success}</Alert>}
+
+            <AdminOverview stats={stats} loading={loading} openSecurityIssues={openSecurityIssues} />
+
+            <AdminUsersTable
+                users={users}
+                loading={loading}
+                actionUserId={actionUserId}
+                canManageRoles={canManageRoles}
+                canLockUsers={canLockUsers}
+                canRotateApiKeys={canRotateApiKeys}
+                onRoleChange={handleRoleChange}
+                onLockToggle={handleLockToggle}
+                onRotateApiKey={handleRotateApiKey}
+            />
+
+            {canViewEngine && <AdminEngineHealth data={engineHealth} loading={loading} />}
+
+            {(canViewAudit || canViewSecurity) && (
+                <AdminSecurityFeed
+                    auditEvents={canViewAudit ? auditEvents : []}
+                    securityEvents={canViewSecurity ? securityEvents : []}
+                    loading={loading}
+                />
+            )}
         </div>
     );
 }

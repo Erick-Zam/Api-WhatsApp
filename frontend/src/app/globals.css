@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f7fb;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #e8eef7;
+  --accent: #00a38c;
+  --accent-strong: #0077b6;
+  --danger: #b91c1c;
 }
 
 @theme inline {
@@ -14,15 +19,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #070c16;
+    --foreground: #e5e7eb;
+    --surface: #0f172a;
+    --surface-muted: #111827;
+    --accent: #22d3ee;
+    --accent-strong: #38bdf8;
+    --danger: #ef4444;
   }
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 42%),
+    radial-gradient(circle at 85% 5%, color-mix(in srgb, var(--accent-strong) 20%, transparent), transparent 35%),
+    var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+  font-family: var(--font-geist-sans), "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
 /* Custom Scrollbar for a seamless dark/light theme fit */

@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { apiRequest, getStoredToken } from '@/lib/api/client';
 
 interface SessionHealth {
     id: string;
@@ -44,33 +45,24 @@ export default function Sidebar() {
     const isActive = (path: string) => pathname === path;
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
+        const token = getStoredToken();
         if (token) {
             const loadSidebarData = async () => {
                 try {
-                    const [meRes, sessionsRes] = await Promise.all([
-                        fetch(`${apiBase}/auth/me`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        }),
-                        fetch(`${apiBase}/sessions`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        }),
+                    const [meData, sessionsData] = await Promise.all([
+                        apiRequest<{ user?: { role?: string } }>('/auth/me', { token }),
+                        apiRequest<SessionHealth[]>('/sessions', { token }),
                     ]);
 
-                    if (meRes.ok) {
-                        const meData = await meRes.json();
-                        if (meData.user?.role) setUserRole(meData.user.role);
+                    if (meData.user?.role) {
+                        setUserRole(meData.user.role);
                     }
 
-                    if (sessionsRes.ok) {
-                        const sessionsData = await sessionsRes.json();
-                        if (Array.isArray(sessionsData)) {
-                            setSessions(sessionsData);
-                        }
+                    if (Array.isArray(sessionsData)) {
+                        setSessions(sessionsData);
                     }
-                } catch (err) {
-                    console.error(err);
+                } catch {
+                    setSessions([]);
                 }
             };
 

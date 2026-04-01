@@ -3,6 +3,11 @@
 import { useMemo, useState } from 'react';
 import type { SyntheticEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { ApiError, apiRequestNoAuth } from '@/lib/api/client';
+import Alert from '@/components/ui/Alert';
+import LoginForm from '@/components/auth/LoginForm';
+import RegisterForm from '@/components/auth/RegisterForm';
+import MfaForm from '@/components/auth/MfaForm';
 
 export type AuthMode = 'login' | 'register' | 'mfa';
 
@@ -53,16 +58,20 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
         setError('');
         setSuccess('');
 
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
-        const res = await fetch(`${apiBase}/auth/oauth/${provider}/url`);
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok || !data.url) {
-            setError(data.error || `Unable to start ${provider} sign-in`);
-            return;
+        try {
+            const data = await apiRequestNoAuth<{ url: string }>(`/auth/oauth/${provider}/url`);
+            if (!data.url) {
+                setError(`Unable to start ${provider} sign-in`);
+                return;
+            }
+            window.location.href = data.url;
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
+                return;
+            }
+            setError(`Unable to start ${provider} sign-in`);
         }
-
-        window.location.href = data.url;
     };
 
     const handleLogin = async (e: SyntheticEvent) => {
@@ -72,22 +81,25 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
         setSuccess('');
 
         try {
-            const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
-            const res = await fetch(`${apiBase}/auth/login`, {
+            const data = await apiRequestNoAuth<{
+                token?: string;
+                requiresMfa?: boolean;
+                mfaToken?: string;
+                recommendMfa?: boolean;
+                user?: { email_verified?: boolean };
+            }>('/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: loginEmail, password: loginPassword, deviceFingerprint: getDeviceFingerprint() }),
+                body: { email: loginEmail, password: loginPassword, deviceFingerprint: getDeviceFingerprint() },
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                if (data.requiresMfa) {
-                    setMfaToken(data.mfaToken);
-                    setMfaCode('');
-                    onSwitchMode('mfa');
-                    return;
-                }
+            if (data.requiresMfa) {
+                setMfaToken(data.mfaToken || '');
+                setMfaCode('');
+                onSwitchMode('mfa');
+                return;
+            }
 
+            if (data.token) {
                 localStorage.setItem('token', data.token);
                 const notices: string[] = [];
                 if (data.recommendMfa) {
@@ -105,11 +117,14 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
                     router.push('/dashboard');
                 }
             } else {
-                const data = await res.json().catch(() => ({}));
-                setError(data.error || 'Login failed');
+                setError('Login failed');
             }
-        } catch {
-            setError('Error connecting to server');
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
+            } else {
+                setError('Error connecting to server');
+            }
         } finally {
             setLoading(false);
         }
@@ -140,27 +155,24 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
         }
 
         try {
-            const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
-            const res = await fetch(`${apiBase}/auth/register`, {
+            await apiRequestNoAuth<{ message: string }>('/auth/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+                body: {
                     email: registerEmail,
                     password: registerPassword,
                     username: registerUsername.trim(),
-                }),
+                },
             });
 
-            if (res.ok) {
-                setSuccess('Account created. Check your email for verification.');
-                onRegistered(registerEmail);
-                onClose();
+            setSuccess('Account created. Check your email for verification.');
+            onRegistered(registerEmail);
+            onClose();
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
             } else {
-                const data = await res.json();
-                setError(data.error || 'Registration failed');
+                setError('Error connecting to server');
             }
-        } catch {
-            setError('Error connecting to server');
         } finally {
             setLoading(false);
         }
@@ -173,20 +185,21 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
         setSuccess('');
 
         try {
-            const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
-            const res = await fetch(`${apiBase}/auth/mfa/login-verify`, {
+            const data = await apiRequestNoAuth<{
+                token?: string;
+                recommendMfa?: boolean;
+                user?: { email_verified?: boolean };
+            }>('/auth/mfa/login-verify', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+                body: {
                     mfaToken,
                     code: mfaCode,
                     trustDevice,
                     deviceFingerprint: getDeviceFingerprint(),
-                }),
+                },
             });
 
-            if (res.ok) {
-                const data = await res.json();
+            if (data.token) {
                 localStorage.setItem('token', data.token);
                 const notices: string[] = [];
                 if (data.recommendMfa) {
@@ -204,11 +217,14 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
                     router.push('/dashboard');
                 }
             } else {
-                const data = await res.json().catch(() => ({}));
-                setError(data.error || 'Invalid MFA code');
+                setError('Invalid MFA code');
             }
-        } catch {
-            setError('Error connecting to server');
+        } catch (requestError) {
+            if (requestError instanceof ApiError) {
+                setError(requestError.message);
+            } else {
+                setError('Error connecting to server');
+            }
         } finally {
             setLoading(false);
         }
@@ -232,184 +248,49 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
                 </div>
 
                 <div className="modal-scroll min-h-0 space-y-5 overflow-y-auto px-6 pb-6 pt-5 sm:px-8 sm:pb-8">
-                    {error && <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</div>}
-                    {success && <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">{success}</div>}
+                    {error && <Alert tone="error">{error}</Alert>}
+                    {success && <Alert tone="success">{success}</Alert>}
 
                     {mode === 'login' && (
-                        <>
-                        <form onSubmit={handleLogin} className="space-y-4">
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Work email</span>
-                                <input
-                                    type="email"
-                                    value={loginEmail}
-                                    onChange={(e) => setLoginEmail(e.target.value)}
-                                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-                                    placeholder="team@company.com"
-                                    required
-                                />
-                            </label>
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Password</span>
-                                <input
-                                    type="password"
-                                    value={loginPassword}
-                                    onChange={(e) => setLoginPassword(e.target.value)}
-                                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-                                    placeholder="Your password"
-                                    required
-                                />
-                            </label>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-bold text-zinc-950 transition hover:brightness-110 disabled:opacity-50"
-                            >
-                                {loading ? 'Signing in...' : 'Sign in'}
-                            </button>
-                        </form>
-
-                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs uppercase tracking-wide text-zinc-500">
-                            <span className="h-px bg-zinc-800" />
-                            Or continue with
-                            <span className="h-px bg-zinc-800" />
-                        </div>
-
-                        <div className="grid gap-2 sm:grid-cols-2">
-                            <button onClick={() => startOAuth('google')} className="rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-900">
-                                Google
-                            </button>
-                            <button onClick={() => startOAuth('github')} className="rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-900">
-                                GitHub
-                            </button>
-                        </div>
-
-                        <p className="mt-6 text-center text-sm text-zinc-400">
-                            New here?{' '}
-                            <button onClick={() => onSwitchMode('register')} className="font-semibold text-cyan-300 hover:text-cyan-200">
-                                Create account
-                            </button>
-                        </p>
-                        </>
+                        <LoginForm
+                            loading={loading}
+                            loginEmail={loginEmail}
+                            loginPassword={loginPassword}
+                            onSubmit={handleLogin}
+                            onEmailChange={setLoginEmail}
+                            onPasswordChange={setLoginPassword}
+                            onOAuth={startOAuth}
+                            onSwitchToRegister={() => onSwitchMode('register')}
+                        />
                     )}
 
                     {mode === 'register' && (
-                        <>
-                        <form onSubmit={handleRegister} className="space-y-4">
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Workspace name</span>
-                                <input
-                                    type="text"
-                                    value={registerUsername}
-                                    onChange={(e) => setRegisterUsername(e.target.value)}
-                                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-                                    placeholder="Acme Team"
-                                    required
-                                />
-                            </label>
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Email</span>
-                                <input
-                                    type="email"
-                                    value={registerEmail}
-                                    onChange={(e) => setRegisterEmail(e.target.value)}
-                                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-                                    placeholder="owner@company.com"
-                                    required
-                                />
-                            </label>
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Password</span>
-                                <input
-                                    type="password"
-                                    value={registerPassword}
-                                    onChange={(e) => setRegisterPassword(e.target.value)}
-                                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-                                    placeholder="At least 8 characters"
-                                    required
-                                />
-                            </label>
-                            <label className="block">
-                                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Confirm password</span>
-                                <input
-                                    type="password"
-                                    value={registerPasswordConfirm}
-                                    onChange={(e) => setRegisterPasswordConfirm(e.target.value)}
-                                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-                                    placeholder="Repeat your password"
-                                    required
-                                />
-                            </label>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-4 py-3 font-bold text-zinc-950 transition hover:brightness-110 disabled:opacity-50"
-                            >
-                                {loading ? 'Creating account...' : 'Create account'}
-                            </button>
-                        </form>
-
-                        <div className="my-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs uppercase tracking-wide text-zinc-500">
-                            <span className="h-px bg-zinc-800" />
-                            Or register with
-                            <span className="h-px bg-zinc-800" />
-                        </div>
-
-                        <div className="grid gap-2 sm:grid-cols-2">
-                            <button onClick={() => startOAuth('google')} className="rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-900">
-                                Google
-                            </button>
-                            <button onClick={() => startOAuth('github')} className="rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-900">
-                                GitHub
-                            </button>
-                        </div>
-
-                        <p className="mt-6 text-center text-sm text-zinc-400">
-                            Already have an account?{' '}
-                            <button onClick={() => onSwitchMode('login')} className="font-semibold text-cyan-300 hover:text-cyan-200">
-                                Sign in
-                            </button>
-                        </p>
-                        </>
+                        <RegisterForm
+                            loading={loading}
+                            registerUsername={registerUsername}
+                            registerEmail={registerEmail}
+                            registerPassword={registerPassword}
+                            registerPasswordConfirm={registerPasswordConfirm}
+                            onSubmit={handleRegister}
+                            onUsernameChange={setRegisterUsername}
+                            onEmailChange={setRegisterEmail}
+                            onPasswordChange={setRegisterPassword}
+                            onPasswordConfirmChange={setRegisterPasswordConfirm}
+                            onOAuth={startOAuth}
+                            onSwitchToLogin={() => onSwitchMode('login')}
+                        />
                     )}
 
                     {mode === 'mfa' && (
-                        <form onSubmit={handleMfa} className="space-y-4">
-                        <label className="block">
-                            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-zinc-400">Authenticator code</span>
-                            <input
-                                type="text"
-                                value={mfaCode}
-                                onChange={(e) => setMfaCode(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-                                placeholder="123456"
-                                required
-                            />
-                        </label>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-bold text-zinc-950 transition hover:brightness-110 disabled:opacity-50"
-                        >
-                            {loading ? 'Verifying...' : 'Verify and continue'}
-                        </button>
-                        <label className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300">
-                            <input
-                                type="checkbox"
-                                checked={trustDevice}
-                                onChange={(e) => setTrustDevice(e.target.checked)}
-                                className="h-4 w-4"
-                            />
-                            Trust this device for next logins
-                        </label>
-                        <button
-                            type="button"
-                            onClick={() => onSwitchMode('login')}
-                            className="w-full rounded-xl border border-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-900"
-                        >
-                            Back to sign in
-                        </button>
-                        </form>
+                        <MfaForm
+                            loading={loading}
+                            mfaCode={mfaCode}
+                            trustDevice={trustDevice}
+                            onSubmit={handleMfa}
+                            onCodeChange={setMfaCode}
+                            onTrustDeviceChange={setTrustDevice}
+                            onBackToLogin={() => onSwitchMode('login')}
+                        />
                     )}
                 </div>
             </div>
