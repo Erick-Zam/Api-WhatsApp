@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
     ChatBubbleLeftIcon,
     Bars3Icon,
+    RectangleGroupIcon,
 } from '@heroicons/react/24/solid';
 import ChatDetailsPanel from '../../../components/chats/ChatDetailsPanel';
 import ChatList from '../../../components/chats/ChatList';
@@ -38,6 +39,13 @@ export default function ChatsPage() {
         : chatsSource;
 
     const currentChat = chats.find((c) => c.id === selectedChat);
+    const desktopColumns = showDesktopRail
+        ? showDetailsPanel
+            ? 'minmax(20rem, 24rem) minmax(0, 1fr) minmax(18rem, 20rem)'
+            : 'minmax(20rem, 24rem) minmax(0, 1fr)'
+        : showDetailsPanel
+            ? 'minmax(0, 1fr) minmax(18rem, 20rem)'
+            : 'minmax(0, 1fr)';
 
     const handleSelectSession = (sessionId: string) => {
         setSelectedSession(sessionId);
@@ -148,7 +156,7 @@ export default function ChatsPage() {
     };
 
     return (
-        <div className="relative flex h-full w-full overflow-hidden rounded-3xl border border-slate-800/70 bg-slate-950/50 text-white">
+        <div className="relative -m-5 h-[100dvh] overflow-hidden border border-slate-800/70 bg-slate-950/50 text-white md:-m-8 lg:-m-10">
             {showConsentModal && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-2xl surface-card--elevated p-6">
@@ -187,25 +195,70 @@ export default function ChatsPage() {
                 onClose={() => setShowMobileDrawer(false)}
             />
 
-            {showDesktopRail && (
-                <ChatList
-                    sessions={sessions}
-                    selectedSession={selectedSession}
-                    onSelectSession={handleSelectSession}
-                    searchTerm={searchTerm}
-                    onSearchTermChange={setSearchTerm}
-                    chats={chats}
-                    selectedChat={selectedChat}
-                    onSelectChat={handleSelectChat}
-                    loadingChats={loadingChats}
-                />
-            )}
+            <div className="hidden h-full lg:grid" style={{ gridTemplateColumns: desktopColumns }}>
+                {showDesktopRail && (
+                    <ChatList
+                        sessions={sessions}
+                        selectedSession={selectedSession}
+                        onSelectSession={handleSelectSession}
+                        searchTerm={searchTerm}
+                        onSearchTermChange={setSearchTerm}
+                        chats={chats}
+                        selectedChat={selectedChat}
+                        onSelectChat={handleSelectChat}
+                        loadingChats={loadingChats}
+                    />
+                )}
 
-            <main className="flex flex-1 flex-col bg-transparent">
+                <main className="flex min-h-0 flex-1 flex-col bg-transparent">
+                    {!selectedChat && (
+                        <div className="flex h-full flex-col items-center justify-center px-6 text-slate-500">
+                            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-6 text-center">
+                                <RectangleGroupIcon className="mx-auto mb-2 h-10 w-10 text-cyan-300/70" />
+                                <p className="text-base font-semibold text-slate-200">Choose a conversation</p>
+                                <p className="mt-1 text-sm text-slate-400">Open a thread from the left panel to start messaging.</p>
+                                {!showDesktopRail && (
+                                    <button
+                                        className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-200"
+                                        onClick={() => setShowDesktopRail(true)}
+                                    >
+                                        <Bars3Icon className="h-4 w-4" />
+                                        Show conversations
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {selectedChat && (
+                        <ChatWindow
+                            selectedChat={selectedChat}
+                            currentChat={currentChat}
+                            loadingMessages={loadingMessages}
+                            messages={messages}
+                            messagesEndRef={messagesEndRef}
+                            onOpenDrawer={() => setShowMobileDrawer(true)}
+                            onToggleDesktopRail={() => setShowDesktopRail((prev) => !prev)}
+                            onToggleDetailsPanel={() => setShowDetailsPanel((prev) => !prev)}
+                            showDesktopRail={showDesktopRail}
+                            showDetailsPanel={showDetailsPanel}
+                            newMessage={newMessage}
+                            onNewMessageChange={setNewMessage}
+                            onSendMessage={handleSendMessage}
+                        />
+                    )}
+                </main>
+
+                {selectedChat && showDetailsPanel && (
+                    <ChatDetailsPanel selectedChat={selectedChat} selectedSession={selectedSession} currentChat={currentChat} />
+                )}
+            </div>
+
+            <div className="flex h-full flex-col lg:hidden">
                 {!selectedChat && (
                     <div className="flex h-full flex-col items-center justify-center px-6 text-slate-500">
                         <button
-                            className="mb-4 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-200 lg:hidden"
+                            className="mb-4 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-200"
                             onClick={() => setShowMobileDrawer(true)}
                         >
                             <Bars3Icon className="h-4 w-4" />
@@ -233,11 +286,7 @@ export default function ChatsPage() {
                         onSendMessage={handleSendMessage}
                     />
                 )}
-            </main>
-
-            {selectedChat && showDetailsPanel && (
-                <ChatDetailsPanel selectedChat={selectedChat} selectedSession={selectedSession} currentChat={currentChat} />
-            )}
+            </div>
         </div>
     );
 }

@@ -68,29 +68,38 @@ interface MessageThreadProps {
     endRef: React.RefObject<HTMLDivElement | null>;
 }
 
+function formatMessageTime(ts?: number) {
+    if (!ts) return '';
+    const ms = ts > 2_000_000_000 ? ts : ts * 1000;
+    const d = new Date(ms);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 export default function MessageThread({ messages, loadingMessages, endRef }: MessageThreadProps) {
     return (
-        <div className="flex-1 overflow-y-auto px-4 py-5 lg:px-6">
-            <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
-            {loadingMessages && <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-sm text-slate-400">Loading messages...</div>}
-            {!loadingMessages && messages.length === 0 && <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-sm text-slate-500">No messages yet.</div>}
-            {messages.map((msg) => {
-                const mine = msg.key.fromMe;
-                return (
-                    <div key={msg.key.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                        <div
-                            className={`max-w-[82%] rounded-2xl border px-4 py-2.5 text-sm lg:max-w-[62%] ${
+        <div className="app-scroll chat-canvas flex-1 overflow-y-auto px-3 py-3 md:px-5 lg:px-7">
+            <div className="mx-auto flex w-full max-w-5xl flex-col gap-2.5">
+                {loadingMessages && <div className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3 text-sm text-slate-400">Loading messages...</div>}
+                {!loadingMessages && messages.length === 0 && <div className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3 text-sm text-slate-500">No messages yet.</div>}
+                {messages.map((msg) => {
+                    const mine = msg.key.fromMe;
+                    return (
+                        <div key={msg.key.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[90%] rounded-2xl border px-3.5 py-2.5 text-sm shadow-sm lg:max-w-[70%] ${
                                 mine
-                                    ? 'rounded-br-none border-cyan-300/30 bg-gradient-to-r from-cyan-500/85 to-blue-500/80 text-white'
-                                    : 'rounded-bl-none border-slate-700/60 bg-slate-900/85 text-slate-100'
-                            }`}
-                        >
-                            {renderMessageContent(msg)}
+                                    ? 'rounded-br-md border-cyan-300/35 bg-gradient-to-r from-cyan-500/90 to-blue-500/85 text-white'
+                                    : 'rounded-bl-md border-slate-700/80 bg-slate-900/90 text-slate-100'
+                            }`}>
+                                {renderMessageContent(msg)}
+                                <p className={`mt-1 text-[10px] ${mine ? 'text-cyan-50/90' : 'text-slate-500'}`}>
+                                    {formatMessageTime(msg.messageTimestamp)}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                );
-            })}
-            <div ref={endRef} />
+                    );
+                })}
+                <div ref={endRef} />
             </div>
         </div>
     );

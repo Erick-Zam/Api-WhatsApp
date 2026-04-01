@@ -28,13 +28,13 @@ export default function ChatRailContent({
     onAfterSelectChat,
 }: ChatRailContentProps) {
     return (
-        <>
-            <div className="rounded-2xl surface-card p-3">
+        <div className="flex h-full min-h-0 flex-col gap-2.5">
+            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-3">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Session</p>
                 <select
                     value={selectedSession}
                     onChange={(e) => onSelectSession(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
                 >
                     {sessions.map((s) => (
                         <option key={s.id} value={s.id}>
@@ -44,7 +44,7 @@ export default function ChatRailContent({
                 </select>
             </div>
 
-            <div className="rounded-2xl surface-card p-3">
+            <div className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-3">
                 <label className="flex h-11 items-center rounded-xl border border-slate-700 bg-slate-900/70 px-3">
                     <MagnifyingGlassIcon className="h-4 w-4 text-slate-500" />
                     <input
@@ -56,9 +56,9 @@ export default function ChatRailContent({
                 </label>
             </div>
 
-            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-                {loadingChats && <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-sm text-slate-400">Loading chats...</div>}
-                {!loadingChats && chats.length === 0 && <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-sm text-slate-500">No chats found.</div>}
+            <div className="app-scroll min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+                {loadingChats && <div className="rounded-xl border border-slate-700/70 bg-slate-900/50 p-3 text-sm text-slate-400">Loading chats...</div>}
+                {!loadingChats && chats.length === 0 && <div className="rounded-xl border border-slate-700/70 bg-slate-900/50 p-3 text-sm text-slate-500">No chats found.</div>}
 
                 {chats.map((chat) => {
                     const active = selectedChat === chat.id;
@@ -71,8 +71,8 @@ export default function ChatRailContent({
                             }}
                             className={`w-full rounded-2xl border p-3 text-left transition ${
                                 active
-                                    ? 'surface-card--elevated'
-                                    : 'border-slate-800 bg-slate-900/65 hover:border-slate-700 hover:bg-slate-900/90'
+                                    ? 'border-cyan-300/35 bg-gradient-to-r from-cyan-400/20 to-blue-500/15 shadow-[0_8px_30px_rgba(14,165,233,0.2)]'
+                                    : 'border-slate-700/80 bg-slate-900/65 hover:border-slate-600 hover:bg-slate-900/90'
                             }`}
                         >
                             <div className="flex items-start gap-3">
@@ -96,6 +96,6 @@ export default function ChatRailContent({
                     );
                 })}
             </div>
-        </>
+        </div>
     );
 }

@@ -110,10 +110,11 @@ export default function Sidebar() {
     };
 
     return (
-        <nav className={`${isCollapsed ? 'w-24' : 'w-[17rem]'} relative z-50 hidden h-[100dvh] flex-col overflow-hidden border-r border-slate-800/80 bg-slate-950/85 p-3 text-white backdrop-blur transition-all duration-300 md:flex`}>
+        <nav className={`${isCollapsed ? 'w-24' : 'w-[17rem]'} relative z-50 hidden h-[100dvh] flex-col overflow-visible border-r border-slate-800/80 bg-slate-950/85 p-3 text-white backdrop-blur transition-all duration-300 md:flex`}>
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-3 top-6 z-10 rounded-full border border-slate-700 bg-slate-900 p-1 text-slate-400 shadow-lg hover:text-white"
+                className="absolute -right-4 top-6 z-20 rounded-full border border-slate-700 bg-slate-900/95 p-1.5 text-slate-300 shadow-[0_10px_30px_rgba(0,0,0,0.4)] transition hover:text-white"
+                aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
                 {isCollapsed ? (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">

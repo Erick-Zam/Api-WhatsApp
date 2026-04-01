@@ -236,3 +236,10 @@ html[data-theme='light'] body {
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, rgba(56, 189, 248, 0.85), rgba(34, 211, 238, 0.65));
 }
+
+.chat-canvas {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(34, 211, 238, 0.08), transparent 28%),
+    radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(2, 8, 23, 0.2), rgba(2, 8, 23, 0.4));
+}
