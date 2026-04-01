@@ -24,6 +24,8 @@ export default function ChatsPage() {
     const [apiKey, setApiKey] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [showMobileDrawer, setShowMobileDrawer] = useState(false);
+    const [showDesktopRail, setShowDesktopRail] = useState(true);
+    const [showDetailsPanel, setShowDetailsPanel] = useState(true);
     const [showConsentModal, setShowConsentModal] = useState(() => {
         if (typeof window === 'undefined') return false;
         return !localStorage.getItem('chat_data_consent');
@@ -185,19 +187,21 @@ export default function ChatsPage() {
                 onClose={() => setShowMobileDrawer(false)}
             />
 
-            <ChatList
-                sessions={sessions}
-                selectedSession={selectedSession}
-                onSelectSession={handleSelectSession}
-                searchTerm={searchTerm}
-                onSearchTermChange={setSearchTerm}
-                chats={chats}
-                selectedChat={selectedChat}
-                onSelectChat={handleSelectChat}
-                loadingChats={loadingChats}
-            />
+            {showDesktopRail && (
+                <ChatList
+                    sessions={sessions}
+                    selectedSession={selectedSession}
+                    onSelectSession={handleSelectSession}
+                    searchTerm={searchTerm}
+                    onSearchTermChange={setSearchTerm}
+                    chats={chats}
+                    selectedChat={selectedChat}
+                    onSelectChat={handleSelectChat}
+                    loadingChats={loadingChats}
+                />
+            )}
 
-            <main className="flex-1 flex-col bg-transparent">
+            <main className="flex flex-1 flex-col bg-transparent">
                 {!selectedChat && (
                     <div className="flex h-full flex-col items-center justify-center px-6 text-slate-500">
                         <button
@@ -220,6 +224,10 @@ export default function ChatsPage() {
                         messages={messages}
                         messagesEndRef={messagesEndRef}
                         onOpenDrawer={() => setShowMobileDrawer(true)}
+                        onToggleDesktopRail={() => setShowDesktopRail((prev) => !prev)}
+                        onToggleDetailsPanel={() => setShowDetailsPanel((prev) => !prev)}
+                        showDesktopRail={showDesktopRail}
+                        showDetailsPanel={showDetailsPanel}
                         newMessage={newMessage}
                         onNewMessageChange={setNewMessage}
                         onSendMessage={handleSendMessage}
@@ -227,7 +235,7 @@ export default function ChatsPage() {
                 )}
             </main>
 
-            {selectedChat && (
+            {selectedChat && showDetailsPanel && (
                 <ChatDetailsPanel selectedChat={selectedChat} selectedSession={selectedSession} currentChat={currentChat} />
             )}
         </div>

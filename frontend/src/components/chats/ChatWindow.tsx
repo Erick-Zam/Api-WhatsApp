@@ -1,4 +1,6 @@
 import {
+    ArrowsPointingInIcon,
+    ArrowsPointingOutIcon,
     ChevronLeftIcon,
     InformationCircleIcon,
     PhoneIcon,
@@ -15,6 +17,10 @@ interface ChatWindowProps {
     messages: Message[];
     messagesEndRef: React.RefObject<HTMLDivElement | null>;
     onOpenDrawer: () => void;
+    onToggleDesktopRail: () => void;
+    onToggleDetailsPanel: () => void;
+    showDesktopRail: boolean;
+    showDetailsPanel: boolean;
     newMessage: string;
     onNewMessageChange: (value: string) => void;
     onSendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -27,6 +33,10 @@ export default function ChatWindow({
     messages,
     messagesEndRef,
     onOpenDrawer,
+    onToggleDesktopRail,
+    onToggleDetailsPanel,
+    showDesktopRail,
+    showDetailsPanel,
     newMessage,
     onNewMessageChange,
     onSendMessage,
@@ -48,9 +58,24 @@ export default function ChatWindow({
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5">
+                    <button
+                        type="button"
+                        className="hidden rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white lg:inline-flex"
+                        onClick={onToggleDesktopRail}
+                        title={showDesktopRail ? 'Collapse conversations' : 'Expand conversations'}
+                    >
+                        {showDesktopRail ? <ArrowsPointingInIcon className="h-5 w-5" /> : <ArrowsPointingOutIcon className="h-5 w-5" />}
+                    </button>
                     <button className="rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white"><PhoneIcon className="h-5 w-5" /></button>
                     <button className="hidden rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white md:block"><VideoCameraIcon className="h-5 w-5" /></button>
-                    <button className="rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white"><InformationCircleIcon className="h-5 w-5" /></button>
+                    <button
+                        type="button"
+                        className="rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white"
+                        onClick={onToggleDetailsPanel}
+                        title={showDetailsPanel ? 'Collapse details' : 'Expand details'}
+                    >
+                        <InformationCircleIcon className="h-5 w-5" />
+                    </button>
                 </div>
                 </div>
             </div>
