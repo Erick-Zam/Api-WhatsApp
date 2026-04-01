@@ -376,8 +376,47 @@ export default function SettingsPage() {
         }
     };
 
+    const healthTone = (healthStatus?: string) => {
+        const value = String(healthStatus || 'unknown').toLowerCase();
+        if (value === 'healthy') return 'text-emerald-400';
+        if (value === 'degraded') return 'text-amber-400';
+        if (value === 'unhealthy' || value === 'error') return 'text-red-400';
+        return 'text-zinc-500';
+    };
+
     const updateSessionEngine = async (sessionId: string, engineType: string) => {
         setEngineMessage('');
+
+        const targetSession = sessions.find((session) => session.id === sessionId);
+        if (!targetSession) {
+            setEngineMessage('Session not found');
+            return;
+        }
+
+        const previousEngine = targetSession.engineType || 'baileys';
+        if (previousEngine === engineType) {
+            setEngineMessage(`Session '${sessionId}' already uses ${engineType}`);
+            return;
+        }
+
+        if (targetSession.status === 'CONNECTED') {
+            setEngineMessage(`Cannot switch engine while '${sessionId}' is CONNECTED. Disconnect first.`);
+            return;
+        }
+
+        const selected = availableEngines.find((engine) => engine.id === engineType);
+        if (selected && !selected.enabled) {
+            setEngineMessage(`Engine '${engineType}' is disabled by rollout policy`);
+            return;
+        }
+
+        const confirmed = globalThis.confirm(
+            `Switch session '${sessionId}' from '${previousEngine}' to '${engineType}'?`
+        );
+        if (!confirmed) {
+            return;
+        }
+
         setEngineSavingSessionId(sessionId);
 
         try {
@@ -389,8 +428,26 @@ export default function SettingsPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                setEngineMessage(data.error || 'Failed to update engine');
+                if (res.status === 409) {
+                    setEngineMessage(data.error || 'Switch blocked: session must be DISCONNECTED');
+                } else if (res.status === 400) {
+                    setEngineMessage(data.error || 'Invalid engine selection');
+                } else {
+                    setEngineMessage(data.error || 'Failed to update engine');
+                }
                 return;
+            }
+
+            let runtimeHealth: Record<string, unknown> | null = null;
+            try {
+                const healthRes = await fetch(`${apiBase}/sessions/${encodeURIComponent(sessionId)}/health`, {
+                    headers: authHeaders(),
+                });
+                if (healthRes.ok) {
+                    runtimeHealth = await healthRes.json();
+                }
+            } catch {
+                // Keep DB-updated state even if runtime health check fails.
             }
 
             setSessions((prev) => prev.map((session) => (
@@ -398,8 +455,9 @@ export default function SettingsPage() {
                     ? {
                         ...session,
                         engineType: data.config?.engineType || engineType,
-                        healthStatus: data.config?.healthStatus || session.healthStatus,
-                        lastHeartbeatAt: data.config?.lastHeartbeatAt || session.lastHeartbeatAt,
+                        status: String(runtimeHealth?.status || session.status),
+                        healthStatus: String(runtimeHealth?.healthStatus || data.config?.healthStatus || session.healthStatus || 'unknown'),
+                        lastHeartbeatAt: String(runtimeHealth?.lastHeartbeatAt || data.config?.lastHeartbeatAt || session.lastHeartbeatAt || ''),
                     }
                     : session
             )));
@@ -636,6 +694,13 @@ export default function SettingsPage() {
                                             })()}
                                             <span className="text-xs text-zinc-500">Health: {session.healthStatus || 'unknown'}</span>
                                         </div>
+                                    </div>
+                                    <div className="mb-3 flex items-center gap-2 text-xs">
+                                        <span className="text-zinc-500">Engine status:</span>
+                                        <span className={healthTone(session.healthStatus)}>{session.healthStatus || 'unknown'}</span>
+                                        {session.lastHeartbeatAt && (
+                                            <span className="text-zinc-500">• Last heartbeat: {new Date(session.lastHeartbeatAt).toLocaleString()}</span>
+                                        )}
                                     </div>
                                     <div className="flex gap-2">
                                         <div className="flex-1 rounded border border-zinc-700 bg-black p-2 font-mono text-xs text-zinc-300 break-all">
