@@ -46,24 +46,24 @@ export default function LoginForm({
                 </Button>
             </form>
 
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs uppercase tracking-wide text-zinc-500">
-                <span className="h-px bg-zinc-800" />
+            <div className="theme-text-soft grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs uppercase tracking-wide">
+                <span className="h-px bg-[color:color-mix(in_srgb,var(--border-soft)_80%,transparent)]" />
                 Or continue with
-                <span className="h-px bg-zinc-800" />
+                <span className="h-px bg-[color:color-mix(in_srgb,var(--border-soft)_80%,transparent)]" />
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
-                <Button onClick={() => onOAuth('google')} variant="secondary" className="border border-zinc-700 bg-transparent text-zinc-200 hover:border-zinc-500 hover:bg-zinc-900">
+                <Button onClick={() => onOAuth('google')} variant="secondary" className="bg-transparent">
                     Google
                 </Button>
-                <Button onClick={() => onOAuth('github')} variant="secondary" className="border border-zinc-700 bg-transparent text-zinc-200 hover:border-zinc-500 hover:bg-zinc-900">
+                <Button onClick={() => onOAuth('github')} variant="secondary" className="bg-transparent">
                     GitHub
                 </Button>
             </div>
 
-            <p className="mt-6 text-center text-sm text-zinc-400">
+            <p className="theme-text-muted mt-6 text-center text-sm">
                 New here?{' '}
-                <button onClick={onSwitchToRegister} className="font-semibold text-cyan-300 hover:text-cyan-200" type="button">
+                <button onClick={onSwitchToRegister} className="font-semibold text-[color:var(--accent-strong)] hover:text-[color:var(--accent)]" type="button">
                     Create account
                 </button>
             </p>

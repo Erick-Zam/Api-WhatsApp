@@ -24,11 +24,11 @@ export default function AdminOverview({ stats, loading = false, openSecurityIssu
             </Panel>
             <Panel elevated className="p-5">
                 <p className="theme-text-muted text-xs uppercase tracking-[0.16em]">Request errors</p>
-                <p className="mt-2 text-3xl font-bold text-rose-200">{loading ? '...' : totalErrors}</p>
+                <p className="mt-2 text-3xl font-bold text-rose-500">{loading ? '...' : totalErrors}</p>
             </Panel>
             <Panel elevated className="p-5">
                 <p className="theme-text-muted text-xs uppercase tracking-[0.16em]">Open security issues</p>
-                <p className="mt-2 text-3xl font-bold text-amber-200">{loading ? '...' : openSecurityIssues}</p>
+                <p className="mt-2 text-3xl font-bold text-amber-500">{loading ? '...' : openSecurityIssues}</p>
             </Panel>
         </section>
     );

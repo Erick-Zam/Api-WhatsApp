@@ -9,9 +9,9 @@ interface AlertProps {
 }
 
 const toneClassMap: Record<AlertTone, string> = {
-    error: 'border-rose-400/30 bg-rose-500/10 text-rose-200',
-    success: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-100',
-    info: 'border-cyan-400/30 bg-cyan-500/10 text-cyan-100',
+    error: 'theme-badge-danger',
+    success: 'theme-badge-success',
+    info: 'theme-badge-info',
 };
 
 export default function Alert({ tone = 'info', title, children }: AlertProps) {

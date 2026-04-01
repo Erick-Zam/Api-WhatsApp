@@ -35,12 +35,12 @@ export default function MfaForm({
                 {loading ? 'Verifying...' : 'Verify and continue'}
             </Button>
             <Panel className="px-3 py-2">
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <label className="theme-text-muted flex items-center gap-2 text-sm">
                     <input
                         type="checkbox"
                         checked={trustDevice}
                         onChange={(e) => onTrustDeviceChange(e.target.checked)}
-                        className="h-4 w-4"
+                        className="h-4 w-4 accent-[color:var(--accent-strong)]"
                     />
                     Trust this device for next logins
                 </label>
@@ -49,7 +49,7 @@ export default function MfaForm({
                 type="button"
                 onClick={onBackToLogin}
                 variant="secondary"
-                className="w-full border border-zinc-800 bg-transparent text-zinc-300 hover:bg-zinc-900"
+                className="w-full bg-transparent"
             >
                 Back to sign in
             </Button>

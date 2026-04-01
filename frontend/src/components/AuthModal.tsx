@@ -231,18 +231,18 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
     };
 
     return (
-        <div className="fixed inset-0 z-50 grid place-items-center p-3 sm:p-4 bg-black/65 backdrop-blur-md">
+        <div className="theme-overlay fixed inset-0 z-50 grid place-items-center p-3 backdrop-blur-md sm:p-4">
             <button
                 aria-label="Close"
                 onClick={onClose}
                 className="absolute inset-0"
             />
-            <div className="relative z-10 flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-cyan-500/20 bg-zinc-950/90 shadow-[0_24px_90px_rgba(0,0,0,0.65)]">
-                <div className="border-b border-zinc-800/80 px-6 pb-4 pt-6 sm:px-8 sm:pt-7">
-                    <p className="text-xs uppercase tracking-[0.18em] text-cyan-300/70">Access Portal</p>
-                    <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl">{title}</h2>
-                    <p className="mt-2 text-sm text-zinc-400">{subtitle}</p>
-                    <button onClick={onClose} className="absolute right-4 top-4 rounded-full bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:text-white">
+            <div className="theme-hero-surface relative z-10 flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl">
+                <div className="border-b border-[color:color-mix(in_srgb,var(--border-soft)_82%,transparent)] px-6 pb-4 pt-6 sm:px-8 sm:pt-7">
+                    <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--accent-strong)]">Access Portal</p>
+                    <h2 className="theme-text-main mt-2 text-3xl font-bold sm:text-4xl">{title}</h2>
+                    <p className="theme-text-muted mt-2 text-sm">{subtitle}</p>
+                    <button onClick={onClose} className="theme-button-secondary absolute right-4 top-4 rounded-full px-3 py-2 text-xs font-semibold transition">
                         Close
                     </button>
                 </div>
