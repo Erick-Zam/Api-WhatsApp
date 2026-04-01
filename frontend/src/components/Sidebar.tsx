@@ -18,23 +18,42 @@ interface SidebarLinkProps {
     isCollapsed: boolean;
     isActive: boolean;
     customClasses?: string;
+    badge?: string;
     title?: string;
 }
 
-const SidebarItem = ({ href, icon, label, isCollapsed, isActive, customClasses, title }: SidebarLinkProps) => (
+const SidebarItem = ({ href, icon, label, isCollapsed, isActive, customClasses, badge, title }: SidebarLinkProps) => (
     <li>
         <Link
             href={href}
-            className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg transition-all ${
-                customClasses || (isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white')
+            className={`group flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-3.5'} py-2.5 rounded-xl transition-all ${
+                customClasses || (isActive
+                    ? 'surface-card--elevated text-slate-50'
+                    : 'text-slate-300 hover:bg-slate-900/80 hover:text-white')
             }`}
             title={isCollapsed ? (title || label) : ""}
         >
-            <span className="text-xl">{icon}</span>
-            {!isCollapsed && <span className="ml-3 font-medium">{label}</span>}
+            <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? 'border-cyan-300/40 bg-cyan-400/15 text-cyan-200' : 'border-slate-700/70 bg-slate-900/80 text-slate-300 group-hover:border-slate-600'}`}>
+                {icon}
+            </span>
+            {!isCollapsed && (
+                <>
+                    <span className="ml-3 flex-1 text-sm font-medium">{label}</span>
+                    {badge && <span className="rounded-full border border-cyan-300/30 bg-cyan-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-100">{badge}</span>}
+                </>
+            )}
         </Link>
     </li>
 );
+
+const IconGrid = 'DB';
+const IconChat = 'CH';
+const IconChart = 'LG';
+const IconFlask = 'AP';
+const IconBook = 'DC';
+const IconShield = 'AD';
+const IconGear = 'ST';
+const IconDoor = 'LO';
 
 export default function Sidebar() {
     const pathname = usePathname();
@@ -90,12 +109,10 @@ export default function Sidebar() {
     };
 
     return (
-        <nav
-            className={`${isCollapsed ? 'w-20' : 'w-64'} bg-gray-900 text-white p-4 h-screen hidden md:flex flex-col border-r border-gray-800 transition-all duration-300 relative z-50`}
-        >
+        <nav className={`${isCollapsed ? 'w-24' : 'w-72'} hidden h-screen flex-col border-r border-slate-800/80 bg-slate-950/85 p-4 text-white backdrop-blur md:flex transition-all duration-300 relative z-50`}>
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-3 top-6 bg-gray-800 text-gray-400 hover:text-white p-1 rounded-full border border-gray-700 shadow-lg z-10"
+                className="absolute -right-3 top-6 z-10 rounded-full border border-slate-700 bg-slate-900 p-1 text-slate-400 shadow-lg hover:text-white"
             >
                 {isCollapsed ? (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -108,67 +125,71 @@ export default function Sidebar() {
                 )}
             </button>
 
-            <div className={`mb-8 flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
-                <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 whitespace-nowrap overflow-hidden transition-all duration-300 ${isCollapsed ? 'text-xl' : 'text-2xl'}`}>
-                    {isCollapsed ? 'WS' : 'WhatsApp SaaS'}
-                </h1>
+            <div className={`mb-6 rounded-2xl border border-slate-800/90 bg-slate-900/70 px-3 py-3 ${isCollapsed ? 'items-center' : ''}`}>
+                <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+                    <h1 className={`whitespace-nowrap overflow-hidden font-bold text-gradient-brand transition-all duration-300 ${isCollapsed ? 'text-xl' : 'text-2xl'}`}>
+                        {isCollapsed ? 'WS' : 'WhatsApp SaaS'}
+                    </h1>
+                    {!isCollapsed && <span className="rounded-full border border-cyan-300/30 bg-cyan-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-100">Live</span>}
+                </div>
             </div>
 
             {!isCollapsed && (
-                <div className="mb-4 rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2">
+                <div className="mb-5 rounded-2xl surface-card p-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs uppercase tracking-wide text-gray-400">Session Health</span>
+                        <span className="text-xs uppercase tracking-[0.16em] text-slate-400">Session Health</span>
                         <span className={`h-2 w-2 rounded-full ${healthColor}`} />
                     </div>
-                    <p className="mt-1 text-sm font-semibold text-gray-100">{healthLabel}</p>
-                    <p className="text-xs text-gray-500">Connected: {connectedCount} · Alerts: {unhealthyCount}</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-100">{healthLabel}</p>
+                    <p className="text-xs text-slate-500">Connected: {connectedCount} - Alerts: {unhealthyCount}</p>
                 </div>
             )}
 
-            <ul className="space-y-2 flex-grow">
-                <SidebarItem href="/dashboard" icon="📱" label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
-                <SidebarItem href="/dashboard/chats" icon="💬" label="Chats" isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
-                <SidebarItem href="/dashboard/logs" icon="📊" label="Logs & Activity" isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
+            <ul className="flex-grow space-y-2">
+                <SidebarItem href="/dashboard" icon={IconGrid} label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
+                <SidebarItem href="/dashboard/chats" icon={IconChat} label="Chats" isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
+                <SidebarItem href="/dashboard/logs" icon={IconChart} label="Logs & Activity" isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
                 
                 <SidebarItem 
                     href="/dashboard/playground" 
-                    icon="🧪" 
+                    icon={IconFlask} 
                     label="API Playground" 
                     isCollapsed={isCollapsed} 
                     isActive={isActive('/dashboard/playground')}
+                    badge="LAB"
                     customClasses={isActive('/dashboard/playground')
-                        ? 'bg-blue-900/40 text-blue-200 border-blue-500/50'
-                        : 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 text-blue-300 border-blue-900/50 hover:bg-blue-900/30'
+                        ? 'surface-card--elevated text-slate-50'
+                        : 'surface-card text-cyan-100/85 hover:brightness-110'
                     }
                 />
 
-                <SidebarItem href="/dashboard/docs" icon="📚" label="API Docs" isCollapsed={isCollapsed} isActive={isActive('/dashboard/docs')} />
+                <SidebarItem href="/dashboard/docs" icon={IconBook} label="API Docs" isCollapsed={isCollapsed} isActive={isActive('/dashboard/docs')} />
 
                 {userRole === 'admin' && (
                     <SidebarItem 
                         href="/dashboard/admin" 
-                        icon="🛡️" 
+                        icon={IconShield} 
                         label="Administration" 
                         isCollapsed={isCollapsed} 
                         isActive={isActive('/dashboard/admin')}
                         customClasses={isActive('/dashboard/admin') 
-                            ? 'bg-purple-900/40 text-purple-200 border border-purple-500/30' 
-                            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                            ? 'surface-card--elevated text-slate-50' 
+                            : 'text-slate-300 hover:bg-slate-900/80 hover:text-white'
                         }
                     />
                 )}
 
-                <SidebarItem href="/dashboard/settings" icon="⚙️" label="Settings" isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
+                <SidebarItem href="/dashboard/settings" icon={IconGear} label="Settings" isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
             </ul>
 
-            <div className={`mt-auto border-t border-gray-800 pt-4 flex ${isCollapsed ? 'justify-center' : ''}`}>
+            <div className={`mt-auto flex border-t border-slate-800 pt-4 ${isCollapsed ? 'justify-center' : ''}`}>
                 <button
                     onClick={logout}
-                    className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-lg hover:bg-red-900/20 text-red-400 transition-colors text-left`}
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-3.5'} rounded-xl py-2.5 text-left text-rose-300 transition-colors hover:bg-rose-500/10`}
                     title={isCollapsed ? "Logout" : ""}
                 >
-                    <span className="text-xl">🚪</span>
-                    {!isCollapsed && <span className="ml-3 font-medium">Logout</span>}
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-300/25 bg-rose-400/10 text-[11px] font-semibold tracking-wide">{IconDoor}</span>
+                    {!isCollapsed && <span className="ml-3 text-sm font-medium">Logout</span>}
                 </button>
             </div>
         </nav>

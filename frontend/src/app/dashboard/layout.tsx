@@ -3,10 +3,10 @@ import { ReactNode } from 'react';
 
 export default function DashboardLayout({ children }: Readonly<{ children: ReactNode }>) {
     return (
-        <div className="flex h-screen bg-gray-50 dark:bg-black">
+        <div className="flex h-screen bg-transparent">
             <Sidebar />
 
-            <main className="flex-1 relative w-full h-full bg-gray-50 dark:bg-black overflow-y-auto p-6 md:p-10">
+            <main className="relative h-full w-full flex-1 overflow-y-auto bg-transparent p-5 md:p-8 lg:p-10">
                 {children}
             </main>
         </div>

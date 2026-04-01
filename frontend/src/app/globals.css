@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f7fb;
-  --foreground: #0f172a;
-  --surface: #ffffff;
-  --surface-muted: #e8eef7;
-  --accent: #00a38c;
-  --accent-strong: #0077b6;
-  --danger: #b91c1c;
+  --background: #030712;
+  --foreground: #e6edf6;
+  --surface: #0c1322;
+  --surface-muted: #121b2e;
+  --surface-elevated: #16233a;
+  --border-soft: #25304a;
+  --accent: #00d4b8;
+  --accent-strong: #16a3ff;
+  --warning: #f6c945;
+  --danger: #ff4d6d;
 }
 
 @theme inline {
@@ -19,23 +22,54 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #070c16;
-    --foreground: #e5e7eb;
-    --surface: #0f172a;
-    --surface-muted: #111827;
-    --accent: #22d3ee;
-    --accent-strong: #38bdf8;
-    --danger: #ef4444;
+    --background: #030712;
+    --foreground: #e6edf6;
+    --surface: #0c1322;
+    --surface-muted: #121b2e;
+    --surface-elevated: #16233a;
+    --border-soft: #25304a;
+    --accent: #00d4b8;
+    --accent-strong: #16a3ff;
+    --warning: #f6c945;
+    --danger: #ff4d6d;
   }
 }
 
 body {
   background:
-    radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 42%),
-    radial-gradient(circle at 85% 5%, color-mix(in srgb, var(--accent-strong) 20%, transparent), transparent 35%),
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent-strong) 18%, transparent), transparent 36%),
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 28%),
+    radial-gradient(circle at 50% 100%, color-mix(in srgb, #0d1d36 65%, transparent), transparent 46%),
     var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), "Trebuchet MS", "Segoe UI", sans-serif;
+  font-family: var(--font-geist-sans), "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.surface-card {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 78%, transparent);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--surface) 92%, transparent) 0%,
+    color-mix(in srgb, var(--surface-muted) 92%, transparent) 100%
+  );
+  box-shadow: 0 14px 32px rgba(4, 10, 22, 0.35);
+}
+
+.surface-card--elevated {
+  border: 1px solid color-mix(in srgb, var(--accent-strong) 22%, var(--border-soft));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--surface-elevated) 94%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 90%, transparent) 100%
+  );
+  box-shadow: 0 18px 36px rgba(2, 8, 20, 0.5);
+}
+
+.text-gradient-brand {
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Custom Scrollbar for a seamless dark/light theme fit */

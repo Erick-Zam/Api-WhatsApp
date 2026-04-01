@@ -3,8 +3,9 @@ import type { ReactNode } from 'react';
 interface PanelProps {
     children: ReactNode;
     className?: string;
+    elevated?: boolean;
 }
 
-export default function Panel({ children, className = '' }: PanelProps) {
-    return <div className={`rounded-2xl border border-zinc-800 bg-zinc-950/70 ${className}`}>{children}</div>;
+export default function Panel({ children, className = '', elevated = false }: PanelProps) {
+    return <div className={`rounded-2xl ${elevated ? 'surface-card--elevated' : 'surface-card'} ${className}`}>{children}</div>;
 }
