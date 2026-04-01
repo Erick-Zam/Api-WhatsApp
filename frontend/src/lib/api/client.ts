@@ -23,7 +23,9 @@ export class ApiError extends Error {
     }
 }
 
-export const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Always route browser requests through Next.js rewrite/proxy.
+// This avoids direct cross-domain calls that can miss internal paths in production.
+export const apiBaseUrl = '/api';
 
 export const getStoredToken = () => {
     if (typeof window === 'undefined') {

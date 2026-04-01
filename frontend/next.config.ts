@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const backendInternalUrl = (process.env.BACKEND_INTERNAL_URL || 'http://backend:3001').replace(/\/$/, '');
+
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
@@ -7,8 +9,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        // Fallback a ruta absoluta pública vía variable real de sistema o dominio público si falla la red docker
-        destination: `${process.env.BACKEND_INTERNAL_URL || 'https://ws-api.erickvillon.dev'}/:path*`
+        destination: `${backendInternalUrl}/:path*`
       }
     ]
   }

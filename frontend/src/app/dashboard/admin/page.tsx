@@ -29,6 +29,7 @@ import Button from '@/components/ui/Button';
 
 export default function AdminPage() {
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
 
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [users, setUsers] = useState<AdminUser[]>([]);
@@ -105,8 +106,15 @@ export default function AdminPage() {
     }, [router]);
 
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) {
+            return;
+        }
         loadAdminData();
-    }, [loadAdminData]);
+    }, [mounted, loadAdminData]);
 
     const handleRoleChange = useCallback(async (userId: string, roleName: string) => {
         setActionUserId(userId);
@@ -224,6 +232,16 @@ export default function AdminPage() {
     const canViewSecurity = useMemo(() => ['admin', 'super_admin', 'audit_admin', 'ops_admin'].includes(currentRole), [currentRole]);
     const canViewAudit = useMemo(() => ['admin', 'super_admin', 'audit_admin'].includes(currentRole), [currentRole]);
     const canViewApprovals = useMemo(() => ['admin', 'super_admin'].includes(currentRole), [currentRole]);
+
+    if (!mounted) {
+        return (
+            <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 pb-6">
+                <section className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-5 md:p-6">
+                    <p className="text-sm text-zinc-400">Loading administration workspace...</p>
+                </section>
+            </div>
+        );
+    }
 
     return (
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 pb-6">
