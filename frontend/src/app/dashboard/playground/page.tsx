@@ -174,36 +174,36 @@ export default function Playground() {
 
     return (
         <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold mb-6 text-black dark:text-white">API Playground</h2>
-            <p className="mb-8 text-gray-600 dark:text-gray-400">Test your API integration instantly. Select a session, fill in the fields, and send the request.</p>
+            <h2 className="theme-text-main text-3xl font-bold mb-6">API Playground</h2>
+            <p className="theme-text-muted mb-8">Test your API integration instantly. Select a session, fill in the fields, and send the request.</p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left Column: Controls */}
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow border border-gray-200 dark:border-zinc-800">
+                <div className="theme-card p-6 rounded-xl">
 
                     {/* Category Selector */}
-                    <div className="flex space-x-4 mb-6 border-b border-gray-200 dark:border-zinc-800 pb-4">
+                    <div className="flex space-x-4 mb-6 border-b border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] pb-4">
                         <button
                             onClick={() => setCategory('messaging')}
-                            className={`pb-2 px-1 font-semibold ${category === 'messaging' ? 'text-green-500 border-b-2 border-green-500' : 'text-gray-500'}`}
+                            className={`pb-2 px-1 font-semibold ${category === 'messaging' ? 'text-green-500 border-b-2 border-green-500' : 'theme-text-soft'}`}
                         >
                             Messaging
                         </button>
                         <button
                             onClick={() => setCategory('groups')}
-                            className={`pb-2 px-1 font-semibold ${category === 'groups' ? 'text-green-500 border-b-2 border-green-500' : 'text-gray-500'}`}
+                            className={`pb-2 px-1 font-semibold ${category === 'groups' ? 'text-green-500 border-b-2 border-green-500' : 'theme-text-soft'}`}
                         >
                             Groups
                         </button>
                     </div>
 
                     <div className="mb-6">
-                        <label htmlFor="select-session" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">WhatsApp Session</label>
+                        <label htmlFor="select-session" className="block text-sm font-bold theme-text-muted mb-2">WhatsApp Session</label>
                         <select
                             id="select-session"
                             value={selectedSession}
                             onChange={(e) => setSelectedSession(e.target.value)}
-                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white focus:ring-2 focus:ring-green-500 outline-none"
+                            className="theme-input w-full p-3 rounded"
                         >
                             <option value="default">default</option>
                             {sessions.map((s: PlaygroundSession) => (
@@ -217,12 +217,12 @@ export default function Playground() {
                     {category === 'messaging' ? (
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="msg-type" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Message Type</label>
+                                <label htmlFor="msg-type" className="block text-sm font-bold theme-text-muted mb-2">Message Type</label>
                                 <select
                                     id="msg-type"
                                     value={messageType}
                                     onChange={(e) => setMessageType(e.target.value as MessageType)}
-                                    className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white focus:ring-2 focus:ring-green-500 outline-none"
+                                    className="theme-input w-full p-3 rounded"
                                 >
                                     <option value="text">Text Message</option>
                                     <option value="image">Image</option>
@@ -235,51 +235,51 @@ export default function Playground() {
                             </div>
 
                             <div>
-                                <label htmlFor="target-phone" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Phone</label>
+                                <label htmlFor="target-phone" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Target Phone</label>
                                 <input
                                     id="target-phone"
                                     type="text"
                                     value={phone}
                                     onChange={e => setPhone(e.target.value)}
                                     placeholder="593991234567"
-                                    className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                    className="theme-input w-full p-3 rounded text-sm"
                                 />
                             </div>
 
                             {messageType === 'text' && (
                                 <div>
-                                    <label htmlFor="msg-content" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Message Content</label>
+                                    <label htmlFor="msg-content" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Message Content</label>
                                     <textarea
                                         id="msg-content"
                                         value={message}
                                         onChange={e => setMessage(e.target.value)}
                                         rows={4}
-                                        className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                        className="theme-input w-full p-3 rounded text-sm"
                                     ></textarea>
                                 </div>
                             )}
 
                             {['image', 'video', 'audio', 'document'].includes(messageType) && (
                                 <div>
-                                    <label htmlFor="media-url" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Media URL</label>
+                                    <label htmlFor="media-url" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Media URL</label>
                                     <input
                                         id="media-url"
                                         type="text"
                                         value={mediaUrl}
                                         onChange={e => setMediaUrl(e.target.value)}
                                         placeholder="https://example.com/file.jpg"
-                                        className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                        className="theme-input w-full p-3 rounded text-sm"
                                     />
                                     {messageType === 'document' && (
                                         <div className="mt-2">
-                                            <label htmlFor="file-name" className="block text-xs font-semibold text-gray-500 uppercase mb-1">File Name</label>
+                                            <label htmlFor="file-name" className="block text-xs font-semibold theme-text-soft uppercase mb-1">File Name</label>
                                             <input
                                                 id="file-name"
                                                 type="text"
                                                 value={fileName}
                                                 onChange={e => setFileName(e.target.value)}
                                                 placeholder="document.pdf"
-                                                className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                                className="theme-input w-full p-3 rounded text-sm"
                                             />
                                         </div>
                                     )}
@@ -288,14 +288,14 @@ export default function Playground() {
 
                             {['image', 'video'].includes(messageType) && (
                                 <div>
-                                    <label htmlFor="caption" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Caption</label>
+                                    <label htmlFor="caption" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Caption</label>
                                     <input
                                         id="caption"
                                         type="text"
                                         value={caption}
                                         onChange={e => setCaption(e.target.value)}
                                         placeholder="Check this out!"
-                                        className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                        className="theme-input w-full p-3 rounded text-sm"
                                     />
                                 </div>
                             )}
@@ -303,25 +303,25 @@ export default function Playground() {
                             {messageType === 'poll' && (
                                 <>
                                     <div>
-                                        <label htmlFor="poll-name" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Poll Question</label>
+                                        <label htmlFor="poll-name" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Poll Question</label>
                                         <input
                                             id="poll-name"
                                             type="text"
                                             value={pollName}
                                             onChange={e => setPollName(e.target.value)}
                                             placeholder="What is your favorite color?"
-                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                            className="theme-input w-full p-3 rounded text-sm"
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="poll-values" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Options (comma separated)</label>
+                                        <label htmlFor="poll-values" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Options (comma separated)</label>
                                         <input
                                             id="poll-values"
                                             type="text"
                                             value={pollValues}
                                             onChange={e => setPollValues(e.target.value)}
                                             placeholder="Red, Blue, Green"
-                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                            className="theme-input w-full p-3 rounded text-sm"
                                         />
                                     </div>
                                 </>
@@ -329,25 +329,25 @@ export default function Playground() {
                             {messageType === 'location' && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label htmlFor="lat" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Latitude</label>
+                                        <label htmlFor="lat" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Latitude</label>
                                         <input
                                             id="lat"
                                             type="text"
                                             value={latitude}
                                             onChange={e => setLatitude(e.target.value)}
                                             placeholder="-2.17"
-                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                            className="theme-input w-full p-3 rounded text-sm"
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="long" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Longitude</label>
+                                        <label htmlFor="long" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Longitude</label>
                                         <input
                                             id="long"
                                             type="text"
                                             value={longitude}
                                             onChange={e => setLongitude(e.target.value)}
                                             placeholder="-79.92"
-                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                            className="theme-input w-full p-3 rounded text-sm"
                                         />
                                     </div>
                                 </div>
@@ -356,12 +356,12 @@ export default function Playground() {
                     ) : (
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="group-action" className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Group Action</label>
+                                <label htmlFor="group-action" className="block text-sm font-bold theme-text-muted mb-2">Group Action</label>
                                 <select
                                     id="group-action"
                                     value={groupAction}
                                     onChange={(e) => setGroupAction(e.target.value)}
-                                    className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white focus:ring-2 focus:ring-green-500 outline-none"
+                                    className="theme-input w-full p-3 rounded"
                                 >
                                     <option value="create">Create Group</option>
                                     <option value="metadata">Get Group Metadata</option>
@@ -373,25 +373,25 @@ export default function Playground() {
                             {groupAction === 'create' && (
                                 <>
                                     <div>
-                                        <label htmlFor="group-sub" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Group Subject</label>
+                                        <label htmlFor="group-sub" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Group Subject</label>
                                         <input
                                             id="group-sub"
                                             type="text"
                                             value={groupSubject}
                                             onChange={e => setGroupSubject(e.target.value)}
                                             placeholder="My Awesome Group"
-                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                            className="theme-input w-full p-3 rounded text-sm"
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="group-parts" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Participants (Phone numbers, comma sep)</label>
+                                        <label htmlFor="group-parts" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Participants (Phone numbers, comma sep)</label>
                                         <input
                                             id="group-parts"
                                             type="text"
                                             value={participants}
                                             onChange={e => setParticipants(e.target.value)}
                                             placeholder="593991234567, 593997654321"
-                                            className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                            className="theme-input w-full p-3 rounded text-sm"
                                         />
                                     </div>
                                 </>
@@ -399,42 +399,42 @@ export default function Playground() {
 
                             {['metadata', 'participants', 'invite-code'].includes(groupAction) && (
                                 <div>
-                                    <label htmlFor="group-jid" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Group JID</label>
+                                    <label htmlFor="group-jid" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Group JID</label>
                                     <input
                                         id="group-jid"
                                         type="text"
                                         value={groupJid}
                                         onChange={e => setGroupJid(e.target.value)}
                                         placeholder="123456789@g.us"
-                                        className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                        className="theme-input w-full p-3 rounded text-sm"
                                     />
                                 </div>
                             )}
 
                             {groupAction === 'participants' && (
                                 <div>
-                                    <label htmlFor="part-manage" className="block text-xs font-semibold text-gray-500 uppercase mb-1">Participants to Add/Remove</label>
+                                    <label htmlFor="part-manage" className="block text-xs font-semibold theme-text-soft uppercase mb-1">Participants to Add/Remove</label>
                                     <input
                                         id="part-manage"
                                         type="text"
                                         value={participants}
                                         onChange={e => setParticipants(e.target.value)}
                                         placeholder="593991234567"
-                                        className="w-full bg-gray-50 dark:bg-black p-3 rounded border border-gray-300 dark:border-zinc-700 dark:text-white text-sm"
+                                        className="theme-input w-full p-3 rounded text-sm"
                                     />
                                 </div>
                             )}
                         </div>
                     )}
 
-                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-zinc-800">
-                        <label htmlFor="req-apiKey" className="block text-xs font-semibold text-gray-500 uppercase mb-1">API Key used for request</label>
+                    <div className="mt-8 pt-6 border-t border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)]">
+                        <label htmlFor="req-apiKey" className="block text-xs font-semibold theme-text-soft uppercase mb-1">API Key used for request</label>
                         <input
                             id="req-apiKey"
                             type="password"
                             value={apiKey}
                             onChange={e => setApiKey(e.target.value)}
-                            className="w-full bg-gray-100 dark:bg-zinc-800 p-2 rounded border border-gray-300 dark:border-zinc-700 text-gray-600 dark:text-gray-400 text-xs font-mono mb-4"
+                            className="theme-input w-full p-2 rounded text-xs font-mono mb-4"
                         />
 
                         <button
@@ -450,9 +450,9 @@ export default function Playground() {
                 {/* Right Column: Preview */}
                 <div className="space-y-6">
                     {/* Request Preview */}
-                    <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800">
-                        <div className="px-4 py-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Request Body (JSON)</span>
+                    <div className="theme-code-block rounded-xl overflow-hidden">
+                        <div className="px-4 py-2 border-b border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] flex justify-between items-center">
+                            <span className="text-xs font-bold theme-text-soft uppercase tracking-wider">Request Body (JSON)</span>
                             <span className="text-xs font-mono text-green-400">
                                 {(() => {
                                     if (category === 'messaging') return `POST /messages/${messageType}`;
@@ -469,9 +469,9 @@ export default function Playground() {
                     </div>
 
                     {/* Response Preview */}
-                    <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-800 min-h-[200px]">
-                        <div className="px-4 py-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Server Response</span>
+                    <div className="theme-code-block rounded-xl overflow-hidden min-h-[200px]">
+                        <div className="px-4 py-2 border-b border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] flex justify-between items-center">
+                            <span className="text-xs font-bold theme-text-soft uppercase tracking-wider">Server Response</span>
                             {response?.status && (
                                 <span className={`text-xs font-bold px-2 py-1 rounded ${response.status >= 200 && response.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
                                     {response.status} {response.statusText}
@@ -485,8 +485,8 @@ export default function Playground() {
                                 </pre>
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-full py-10 opacity-30">
-                                    <svg className="w-12 h-12 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    <span className="text-gray-500 text-sm">Response will appear here</span>
+                                    <svg className="w-12 h-12 theme-text-soft mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span className="theme-text-soft text-sm">Response will appear here</span>
                                 </div>
                             )}
                         </div>

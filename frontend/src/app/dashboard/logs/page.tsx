@@ -107,30 +107,30 @@ export default function LogsPage() {
     };
 
     const getMethodColorClass = (method: string) => {
-        if (method === 'POST') return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-        if (method === 'GET') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+        if (method === 'POST') return 'bg-blue-500/15 text-blue-500 border border-blue-500/30';
+        if (method === 'GET') return 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30';
+        return 'bg-amber-500/15 text-amber-500 border border-amber-500/30';
     };
 
     return (
         <div className="max-w-7xl mx-auto pb-10">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <h2 className="text-3xl font-bold text-black dark:text-white">Logs & Activity</h2>
+                <h2 className="theme-text-main text-3xl font-bold">Logs & Activity</h2>
                 <div className="relative w-full sm:w-64">
                     <input 
                         type="text" 
                         placeholder="Search logs..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="theme-input w-full rounded-lg px-4 py-2"
                     />
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 rounded-xl shadow border border-gray-200 dark:border-zinc-800 overflow-hidden">
+            <div className="theme-card rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left min-w-max">
-                        <thead className="bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-gray-400">
+                        <thead className="theme-card-strong theme-text-muted">
                             <tr>
                                 <th className="p-4">Method</th>
                                 <th className="p-4">Endpoint</th>
@@ -139,15 +139,15 @@ export default function LogsPage() {
                                 <th className="p-4 text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
+                        <tbody className="divide-y divide-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)]">
                             {paginatedLogs.length > 0 ? paginatedLogs.map((log) => (
-                                <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                                <tr key={log.id} className="hover:bg-[color:color-mix(in_srgb,var(--surface-muted)_82%,transparent)] transition-colors">
                                     <td className="p-4">
                                         <span className={`px-2 py-1 rounded text-xs font-bold ${getMethodColorClass(log.method)}`}>
                                             {log.method}
                                         </span>
                                     </td>
-                                    <td className="p-4 text-gray-800 dark:text-gray-300 font-mono text-sm max-w-[200px] sm:max-w-md truncate">
+                                    <td className="p-4 theme-text-main font-mono text-sm max-w-[200px] sm:max-w-md truncate">
                                         {log.endpoint}
                                     </td>
                                     <td className="p-4">
@@ -155,11 +155,11 @@ export default function LogsPage() {
                                             {log.status_code}
                                         </span>
                                     </td>
-                                    <td className="p-4 text-gray-500 text-right text-xs whitespace-nowrap">{getTimeAgo(log.created_at)}</td>
+                                    <td className="p-4 theme-text-soft text-right text-xs whitespace-nowrap">{getTimeAgo(log.created_at)}</td>
                                     <td className="p-4 text-center">
                                         <button 
                                             onClick={() => openModal(log)}
-                                            className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 rounded transition-colors"
+                                            className="theme-button-secondary text-xs px-3 py-1 rounded transition-colors"
                                         >
                                             Details
                                         </button>
@@ -167,7 +167,7 @@ export default function LogsPage() {
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan={5} className="p-12 text-center text-gray-500">
+                                    <td colSpan={5} className="p-12 text-center theme-text-muted">
                                         {loading ? 'Loading logs...' : 'No activity found matching your criteria.'}
                                     </td>
                                 </tr>
@@ -177,25 +177,25 @@ export default function LogsPage() {
                 </div>
                 
                 {totalPages > 1 && (
-                    <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200 dark:border-zinc-800">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                            Showing <span className="font-medium text-gray-900 dark:text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(currentPage * itemsPerPage, filteredLogs.length)}</span> of <span className="font-medium text-gray-900 dark:text-white">{filteredLogs.length}</span> results
+                    <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)]">
+                        <div className="text-sm theme-text-muted">
+                            Showing <span className="font-medium theme-text-main">{((currentPage - 1) * itemsPerPage) + 1}</span> to <span className="font-medium theme-text-main">{Math.min(currentPage * itemsPerPage, filteredLogs.length)}</span> of <span className="font-medium theme-text-main">{filteredLogs.length}</span> results
                         </div>
                         <div className="flex gap-2">
                             <button 
                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-300 text-gray-700 transition-colors"
+                                className="theme-button-secondary px-3 py-1 text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 Previous
                             </button>
-                            <span className="px-3 py-1 text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                            <span className="px-3 py-1 text-sm theme-text-muted flex items-center">
                                 Page {currentPage} of {totalPages}
                             </span>
                             <button 
                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-gray-300 text-gray-700 transition-colors"
+                                className="theme-button-secondary px-3 py-1 text-sm rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 Next
                             </button>
@@ -214,14 +214,14 @@ export default function LogsPage() {
                     />
                     <dialog 
                         open
-                        className="relative bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] p-0 border-none" 
+                        className="theme-card relative rounded-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] p-0 border-none" 
                         aria-labelledby="modal-title"
                     >
-                        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-zinc-800">
-                            <h3 id="modal-title" className="text-lg font-bold text-gray-900 dark:text-white">Log Details</h3>
+                        <div className="flex justify-between items-center p-4 border-b border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)]">
+                            <h3 id="modal-title" className="text-lg font-bold theme-text-main">Log Details</h3>
                             <button 
                                 onClick={closeModal}
-                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                                className="theme-text-muted hover:text-[color:var(--foreground)] transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -231,39 +231,39 @@ export default function LogsPage() {
                         <div className="p-4 overflow-y-auto space-y-4 text-sm">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs uppercase font-semibold">Method</p>
-                                    <div className="font-mono bg-gray-100 dark:bg-zinc-800 px-3 py-2 rounded text-gray-800 dark:text-gray-200">{selectedLog.method}</div>
+                                    <p className="theme-text-soft mb-1 text-xs uppercase font-semibold">Method</p>
+                                    <div className="theme-code-block font-mono px-3 py-2 rounded">{selectedLog.method}</div>
                                 </div>
                                 <div>
-                                    <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs uppercase font-semibold">Status Code</p>
-                                    <div className={`font-mono font-bold px-3 py-2 rounded bg-gray-100 dark:bg-zinc-800 ${getStatusColorClass(selectedLog.status_code)}`}>
+                                    <p className="theme-text-soft mb-1 text-xs uppercase font-semibold">Status Code</p>
+                                    <div className={`font-mono font-bold px-3 py-2 rounded theme-card-strong ${getStatusColorClass(selectedLog.status_code)}`}>
                                         {selectedLog.status_code}
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs uppercase font-semibold">Endpoint</p>
-                                <div className="font-mono bg-gray-100 dark:bg-zinc-800 px-3 py-2 rounded text-gray-800 dark:text-gray-200 break-all">{selectedLog.endpoint}</div>
+                                <p className="theme-text-soft mb-1 text-xs uppercase font-semibold">Endpoint</p>
+                                <div className="theme-code-block font-mono px-3 py-2 rounded break-all">{selectedLog.endpoint}</div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs uppercase font-semibold">Response Time</p>
-                                    <div className="font-mono bg-gray-100 dark:bg-zinc-800 px-3 py-2 rounded text-gray-800 dark:text-gray-200">{selectedLog.response_time_ms} ms</div>
+                                    <p className="theme-text-soft mb-1 text-xs uppercase font-semibold">Response Time</p>
+                                    <div className="theme-code-block font-mono px-3 py-2 rounded">{selectedLog.response_time_ms} ms</div>
                                 </div>
                                 <div>
-                                    <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs uppercase font-semibold">Log ID</p>
-                                    <div className="font-mono bg-gray-100 dark:bg-zinc-800 px-3 py-2 rounded text-gray-800 dark:text-gray-200"># {selectedLog.id}</div>
+                                    <p className="theme-text-soft mb-1 text-xs uppercase font-semibold">Log ID</p>
+                                    <div className="theme-code-block font-mono px-3 py-2 rounded"># {selectedLog.id}</div>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-gray-500 dark:text-gray-400 mb-1 text-xs uppercase font-semibold">Timestamp</p>
-                                <div className="font-mono bg-gray-100 dark:bg-zinc-800 px-3 py-2 rounded text-gray-800 dark:text-gray-200">{new Date(selectedLog.created_at).toLocaleString()} ({getTimeAgo(selectedLog.created_at)})</div>
+                                <p className="theme-text-soft mb-1 text-xs uppercase font-semibold">Timestamp</p>
+                                <div className="theme-code-block font-mono px-3 py-2 rounded">{new Date(selectedLog.created_at).toLocaleString()} ({getTimeAgo(selectedLog.created_at)})</div>
                             </div>
                         </div>
-                        <div className="p-4 border-t border-gray-200 dark:border-zinc-800 text-right">
+                        <div className="p-4 border-t border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] text-right">
                             <button 
                                 onClick={closeModal}
-                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-800 dark:text-white font-medium rounded transition-colors"
+                                className="theme-button-secondary px-4 py-2 font-medium rounded transition-colors"
                             >
                                 Close
                             </button>

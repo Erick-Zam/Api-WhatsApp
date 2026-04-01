@@ -237,7 +237,7 @@ export default function AdminPage() {
         return (
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 pb-6">
                 <section className="rounded-2xl surface-card p-5 md:p-6">
-                    <p className="text-sm text-slate-400">Loading administration workspace...</p>
+                    <p className="theme-text-muted text-sm">Loading administration workspace...</p>
                 </section>
             </div>
         );
@@ -249,8 +249,8 @@ export default function AdminPage() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                         <p className="text-xs uppercase tracking-[0.16em] text-cyan-100/80">Control Center</p>
-                        <h1 className="mt-1 text-3xl font-bold text-slate-100">Administration</h1>
-                        <p className="mt-2 max-w-2xl text-sm text-slate-300">
+                        <h1 className="mt-1 text-3xl font-bold theme-text-main">Administration</h1>
+                        <p className="mt-2 max-w-2xl text-sm theme-text-muted">
                             Manage roles, lock and unlock users, rotate API keys, and monitor security events in real time.
                         </p>
                     </div>

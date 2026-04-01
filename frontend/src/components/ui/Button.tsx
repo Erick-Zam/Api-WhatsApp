@@ -12,9 +12,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClassMap: Record<ButtonVariant, string> = {
     primary: 'border border-cyan-300/20 bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 hover:brightness-110',
-    secondary: 'border border-slate-700 bg-slate-900/70 text-slate-100 hover:border-slate-600 hover:bg-slate-800/80',
+    secondary: 'border border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] bg-[color:color-mix(in_srgb,var(--surface-muted)_90%,transparent)] text-[color:var(--foreground)] hover:border-[color:color-mix(in_srgb,var(--accent-strong)_35%,var(--border-soft))]',
     danger: 'border border-rose-400/30 bg-rose-500/80 text-white hover:bg-rose-500',
-    ghost: 'border border-transparent bg-transparent text-slate-300 hover:border-slate-700 hover:bg-slate-900/70',
+    ghost: 'border border-transparent bg-transparent text-[color:var(--text-muted)] hover:border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] hover:bg-[color:color-mix(in_srgb,var(--surface-muted)_90%,transparent)]',
 };
 
 const sizeClassMap: Record<ButtonSize, string> = {

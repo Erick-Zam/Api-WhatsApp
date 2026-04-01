@@ -223,16 +223,16 @@ export default function Dashboard() {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h2 className="text-3xl font-bold text-black dark:text-white">Device Manager</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Manage multiple WhatsApp sessions.</p>
+                    <h2 className="theme-text-main text-3xl font-bold">Device Manager</h2>
+                    <p className="theme-text-muted mt-1">Manage multiple WhatsApp sessions.</p>
                 </div>
 
                 {/* Simple create form */}
-                <div className="flex gap-2 bg-white dark:bg-zinc-900 p-2 rounded-lg border border-gray-200 dark:border-zinc-800 shadow-sm">
+                <div className="theme-card flex gap-2 rounded-lg p-2">
                     <input
                         type="text"
                         placeholder="New Session Name (e.g. Work)"
-                        className="bg-transparent px-3 py-1 outline-none text-sm w-48 text-black dark:text-white"
+                        className="theme-text-main bg-transparent px-3 py-1 outline-none text-sm w-48"
                         value={newSessionId}
                         onChange={(e) => setNewSessionId(e.target.value)}
                     />
@@ -249,24 +249,24 @@ export default function Dashboard() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {loading && sessions.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-gray-400">
+                    <div className="col-span-full py-12 text-center theme-text-muted">
                         <div className="animate-spin inline-block w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full mb-4"></div>
                         <p>Loading sessions...</p>
                     </div>
                 )}
 
                 {!loading && sessions.length === 0 && (
-                    <div className="col-span-full py-12 text-center bg-gray-50 dark:bg-zinc-900 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700">
-                        <p className="text-gray-500">No active sessions. Add one above!</p>
+                    <div className="col-span-full py-12 text-center theme-card-muted rounded-xl border border-dashed">
+                        <p className="theme-text-muted">No active sessions. Add one above!</p>
                     </div>
                 )}
 
                 {sessions.map(session => (
-                    <div key={session.id} className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col">
+                    <div key={session.id} className="theme-card rounded-xl overflow-hidden flex flex-col">
 
                         {/* Header */}
-                        <div className="p-4 bg-gray-50 dark:bg-black/40 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center">
-                            <h3 className="font-bold text-gray-800 dark:text-white">{session.id}</h3>
+                        <div className="theme-card-strong p-4 border-b border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] flex justify-between items-center">
+                            <h3 className="font-bold theme-text-main">{session.id}</h3>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${session.status === 'CONNECTED'
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                 : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -286,8 +286,8 @@ export default function Dashboard() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
-                                            <p className="text-center text-gray-500 text-sm mb-1">Connected Number</p>
-                                            <p className="text-xl font-mono font-bold text-gray-800 dark:text-white mb-6">
+                                            <p className="text-center theme-text-muted text-sm mb-1">Connected Number</p>
+                                            <p className="text-xl font-mono font-bold theme-text-main mb-6">
                                                 {session.user?.id?.split(':')[0] || 'Unknown'}
                                             </p>
                                         </>
@@ -297,18 +297,18 @@ export default function Dashboard() {
                                     return (
                                         <div className="flex flex-col items-center justify-center animate-in fade-in duration-300">
                                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500 mb-4"></div>
-                                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 animate-pulse">Generating QR Code...</p>
-                                            <p className="text-xs text-gray-400 mt-2">Please wait...</p>
+                                            <p className="text-sm font-medium theme-text-muted animate-pulse">Generating QR Code...</p>
+                                            <p className="text-xs theme-text-soft mt-2">Please wait...</p>
                                         </div>
                                     );
                                 }
                                 if (qrCodes[session.id]) {
                                     return (
                                         <div className="flex flex-col items-center animate-in fade-in duration-500">
-                                            <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm mb-4">
+                                            <div className="theme-card p-2 rounded-lg mb-4">
                                                 <QRCodeCanvas value={qrCodes[session.id]} size={160} />
                                             </div>
-                                            <p className="text-sm text-gray-500 text-center px-4">
+                                            <p className="text-sm theme-text-muted text-center px-4">
                                                 Scan this QR code with WhatsApp (Linked Devices)
                                             </p>
                                         </div>
@@ -316,19 +316,19 @@ export default function Dashboard() {
                                 }
                                 return (
                                     <div className="text-center">
-                                        <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4 mx-auto">
-                                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="w-16 h-16 theme-card-strong rounded-full flex items-center justify-center mb-4 mx-auto">
+                                            <svg className="w-8 h-8 theme-text-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                                             </svg>
                                         </div>
-                                        <p className="text-gray-500 mb-4">Click Connect to generate QR</p>
+                                        <p className="theme-text-muted mb-4">Click Connect to generate QR</p>
                                     </div>
                                 );
                             })()}
                         </div>
 
                         {/* Actions */}
-                        <div className="p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 flex gap-2">
+                        <div className="p-4 border-t border-[color:color-mix(in_srgb,var(--border-soft)_88%,transparent)] theme-card-muted flex gap-2">
                             {session.status === 'CONNECTED' ? (
                                 <button
                                     onClick={() => handleDisconnect(session.id)}
@@ -341,7 +341,7 @@ export default function Dashboard() {
                                     onClick={() => handleReconnect(session.id)}
                                     disabled={qrLoading[session.id]}
                                     className={`flex-1 py-2 rounded-lg text-sm font-medium transition border ${qrLoading[session.id]
-                                        ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                        ? 'theme-card-strong theme-text-soft cursor-not-allowed'
                                         : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30'
                                         }`}
                                 >
@@ -355,7 +355,7 @@ export default function Dashboard() {
 
                             <button
                                 onClick={() => fetchSessions()}
-                                className="px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-700 transition"
+                                className="theme-button-secondary px-3 py-2 rounded-lg transition"
                                 title="Refresh Status"
                             >
                                 ⟳
