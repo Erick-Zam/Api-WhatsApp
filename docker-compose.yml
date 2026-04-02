@@ -163,6 +163,8 @@ services:
     volumes:
       # Persist WhatsApp sessions (encrypted)
       - whatsapp_sessions:/app/auth_info_baileys
+      # Persist Puppeteer sessions
+      - whatsapp_puppeteer:/app/store_puppeteer
       # Persist backups
       - backups_data:/app/backups
       # Persist logs
@@ -261,6 +263,10 @@ volumes:
   
   # WhatsApp sessions (should be encrypted)
   whatsapp_sessions:
+    driver: local
+    
+  # Puppeteer sessions
+  whatsapp_puppeteer:
     driver: local
   
   # Backups

@@ -59,4 +59,16 @@ export class BaileysAdapter extends EngineAdapter {
             timestamp: new Date().toISOString(),
         };
     }
+
+    getQRCode(sessionId) {
+        return wa.getQRCode(sessionId);
+    }
+
+    getConnectionStatus(sessionId) {
+        return wa.getConnectionStatus(sessionId);
+    }
+
+    getConnectedUser(sessionId) {
+        return wa.getConnectedUser(sessionId);
+    }
 }

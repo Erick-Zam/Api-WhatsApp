@@ -89,11 +89,12 @@ app.get('/qr', verifyJwt, async (req, res) => {
     // For simplicity, we assume session name matches, or we check DB.
     // Ideally, we check if this sessionId belongs to user.
 
-    import('./whatsapp.js').then(wa => {
+    import('./services/sessionOrchestrator.js').then(async (orchestrator) => {
         const id = sessionId || 'default';
-        const qr = wa.getQRCode(id);
-        const status = wa.getConnectionStatus(id);
-        const user = wa.getConnectedUser(id);
+        const { adapter } = await orchestrator.getSessionAdapter(id, userId);
+        const qr = adapter.getQRCode ? adapter.getQRCode(id) : null;
+        const status = adapter.getConnectionStatus ? adapter.getConnectionStatus(id) : 'DISCONNECTED';
+        const user = adapter.getConnectedUser ? adapter.getConnectedUser(id) : null;
         res.json({ qr, status, user, sessionId: id });
     });
 });
@@ -127,22 +128,31 @@ app.get('/sessions', verifyJwt, async (req, res) => {
         });
 
         // Merge active sessions with keys
-        const merged = visibleActiveSessions.map(s => {
+        const merged = Promise.all(visibleActiveSessions.map(async s => {
             let key = keyMap.get(s.id);
             const meta = metaMap.get(s.id) || { engineType: 'baileys', healthStatus: 'unknown', lastHeartbeatAt: null };
+            
+            // To get accurate status, query the appropriate adapter
+            const { getSessionAdapter } = await import('./services/sessionOrchestrator.js');
+            const { adapter } = await getSessionAdapter(s.id, userId);
+            const realStatus = adapter.getConnectionStatus ? adapter.getConnectionStatus(s.id) : s.status;
+
             return {
                 ...s,
+                status: realStatus,
                 apiKey: key || null,
                 engineType: meta.engineType,
                 healthStatus: meta.healthStatus,
                 lastHeartbeatAt: meta.lastHeartbeatAt,
             };
-        });
+        }));
+        
+        const resolvedMerged = await merged;
 
         // Also include stored sessions that might be disconnected but belong to user
         userSessionIds.forEach(id => {
             if (!visibleActiveSessions.find(s => s.id === id)) {
-                merged.push({
+                resolvedMerged.push({
                     id: id,
                     status: 'DISCONNECTED',
                     user: null,
@@ -154,7 +164,7 @@ app.get('/sessions', verifyJwt, async (req, res) => {
             }
         });
 
-        res.json(merged);
+        res.json(resolvedMerged);
     } catch (e) {
         console.error('SERVER ERROR in GET /sessions:', e);
         res.status(500).json({ error: e.message });

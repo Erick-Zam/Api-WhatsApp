@@ -2,9 +2,18 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies needed for Baileys/Chrome if necessary (for screenshots etc)
-# But for standard headless usage, node-alpine is usually enough. 
-# If complex rendering is needed, switch to node:18
+# Install Chromium and dependencies for Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont \
+      ffmpeg
 
 COPY package.json package-lock.json ./
 RUN npm install
