@@ -98,7 +98,8 @@ services:
       BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY}
       SESSION_ENCRYPTION_ENABLED: "true"
       
-      # WhatsApp/Baileys
+      # WhatsApp/Baileys/Engines
+      PUPPETEER_ENABLED: ${PUPPETEER_ENABLED}
       BAILEYS_DEBUG: "false"
       BAILEYS_LOG_LEVEL: error
       WHATSAPP_MESSAGE_RATE_LIMIT: 10
