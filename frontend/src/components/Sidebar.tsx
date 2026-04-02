@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { apiRequest, getStoredToken } from '@/lib/api/client';
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher';
+import { useTranslation } from 'react-i18next';
 
 interface SessionHealth {
     id: string;
@@ -57,6 +58,7 @@ const IconGear = 'ST';
 const IconDoor = 'LO';
 
 export default function Sidebar() {
+    const { t } = useTranslation();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [userRole, setUserRole] = useState<string>('');
@@ -97,7 +99,7 @@ export default function Sidebar() {
         const health = (s.healthStatus || 'unknown').toLowerCase();
         return health === 'degraded' || health === 'unhealthy' || health === 'error';
     }).length;
-    const healthLabel = unhealthyCount > 0 ? 'Degraded' : connectedCount > 0 ? 'Healthy' : 'Unknown';
+    const healthLabel = unhealthyCount > 0 ? t('sidebar.degraded') : connectedCount > 0 ? t('sidebar.healthy') : t('sidebar.unknown');
     const healthColor = unhealthyCount > 0
         ? 'bg-rose-400'
         : connectedCount > 0
@@ -130,33 +132,33 @@ export default function Sidebar() {
             <div className={`theme-card-muted mb-3 rounded-2xl px-3 py-2.5 ${isCollapsed ? 'items-center' : ''}`}>
                 <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                     <h1 className={`whitespace-nowrap overflow-hidden font-bold text-gradient-brand transition-all duration-300 ${isCollapsed ? 'text-xl' : 'text-2xl'}`}>
-                        {isCollapsed ? 'WS' : 'WhatsApp SaaS'}
+                        {isCollapsed ? 'WS' : t('sidebar.title')}
                     </h1>
-                    {!isCollapsed && <span className="rounded-full border border-cyan-300/30 bg-cyan-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-100">Live</span>}
+                    {!isCollapsed && <span className="rounded-full border border-cyan-300/30 bg-cyan-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-100">{t('sidebar.live')}</span>}
                 </div>
             </div>
 
             {!isCollapsed && (
                 <div className="mb-3 rounded-xl surface-card p-2.5">
                     <div className="flex items-center justify-between">
-                        <span className="theme-text-muted text-xs uppercase tracking-[0.16em]">Session Health</span>
+                        <span className="theme-text-muted text-xs uppercase tracking-[0.16em]">{t('sidebar.sessionHealth')}</span>
                         <span className={`h-2 w-2 rounded-full ${healthColor}`} />
                     </div>
                     <p className="theme-text-main mt-1 text-sm font-semibold">{healthLabel}</p>
-                    <p className="theme-text-soft text-xs">Connected: {connectedCount} - Alerts: {unhealthyCount}</p>
+                    <p className="theme-text-soft text-xs">{t('sidebar.connected')}: {connectedCount} - {t('sidebar.alerts')}: {unhealthyCount}</p>
                 </div>
             )}
 
             <div className="sidebar-scroll app-scroll min-h-0 flex-grow overflow-y-auto pr-1">
                 <ul className="space-y-1">
-                    <SidebarItem href="/dashboard" icon={IconGrid} label="Connect Device" isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
-                    <SidebarItem href="/dashboard/chats" icon={IconChat} label="Chats" isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
-                    <SidebarItem href="/dashboard/logs" icon={IconChart} label="Logs & Activity" isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
+                    <SidebarItem href="/dashboard" icon={IconGrid} label={t('sidebar.connectDevice')} isCollapsed={isCollapsed} isActive={isActive('/dashboard')} />
+                    <SidebarItem href="/dashboard/chats" icon={IconChat} label={t('sidebar.chats')} isCollapsed={isCollapsed} isActive={isActive('/dashboard/chats')} />
+                    <SidebarItem href="/dashboard/logs" icon={IconChart} label={t('sidebar.logs')} isCollapsed={isCollapsed} isActive={isActive('/dashboard/logs')} />
 
                     <SidebarItem
                         href="/dashboard/playground"
                         icon={IconFlask}
-                        label="API Playground"
+                        label={t('sidebar.playground')}
                         isCollapsed={isCollapsed}
                         isActive={isActive('/dashboard/playground')}
                         badge="LAB"
@@ -166,13 +168,13 @@ export default function Sidebar() {
                         }
                     />
 
-                    <SidebarItem href="/dashboard/docs" icon={IconBook} label="API Docs" isCollapsed={isCollapsed} isActive={isActive('/dashboard/docs')} />
+                    <SidebarItem href="/dashboard/docs" icon={IconBook} label={t('sidebar.docs')} isCollapsed={isCollapsed} isActive={isActive('/dashboard/docs')} />
 
                     {userRole === 'admin' && (
                         <SidebarItem
                             href="/dashboard/admin"
                             icon={IconShield}
-                            label="Administration"
+                            label={t('sidebar.admin')}
                             isCollapsed={isCollapsed}
                             isActive={isActive('/dashboard/admin')}
                             customClasses={isActive('/dashboard/admin')
@@ -182,7 +184,7 @@ export default function Sidebar() {
                         />
                     )}
 
-                    <SidebarItem href="/dashboard/settings" icon={IconGear} label="Settings" isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
+                    <SidebarItem href="/dashboard/settings" icon={IconGear} label={t('sidebar.settings')} isCollapsed={isCollapsed} isActive={isActive('/dashboard/settings')} />
 
                     {!isCollapsed && (
                         <li className="pt-1">
@@ -196,10 +198,10 @@ export default function Sidebar() {
                 <button
                     onClick={logout}
                     className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-3.5'} rounded-xl py-2.5 text-left text-rose-300 transition-colors hover:bg-rose-500/10`}
-                    title={isCollapsed ? "Logout" : ""}
+                    title={isCollapsed ? t('sidebar.logout') : ""}
                 >
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-300/25 bg-rose-400/10 text-[11px] font-semibold tracking-wide">{IconDoor}</span>
-                    {!isCollapsed && <span className="ml-3 text-sm font-medium">Logout</span>}
+                    {!isCollapsed && <span className="ml-3 text-sm font-medium">{t('sidebar.logout')}</span>}
                 </button>
             </div>
         </nav>

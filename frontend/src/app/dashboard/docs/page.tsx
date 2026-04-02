@@ -1,7 +1,9 @@
 'use client';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 export default function Docs() {
+    const { t } = useTranslation();
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
         if (element) {
@@ -19,9 +21,9 @@ export default function Docs() {
                     <div>
                         <h5 className="mb-4 font-bold theme-text-main uppercase tracking-wider text-xs">Overview</h5>
                         <ul className="space-y-3 text-sm theme-text-muted">
-                            <li><button onClick={() => scrollToSection('introduction')} className="hover:text-green-500 transition text-left w-full">Introduction</button></li>
-                            <li><button onClick={() => scrollToSection('architecture')} className="hover:text-green-500 transition text-left w-full">System Capabilities</button></li>
-                            <li><button onClick={() => scrollToSection('auth')} className="hover:text-green-500 transition text-left w-full">Authentication</button></li>
+                            <li><button onClick={() => scrollToSection('introduction')} className="hover:text-green-500 transition text-left w-full">{t('docs2.intro')}</button></li>
+                            <li><button onClick={() => scrollToSection('architecture')} className="hover:text-green-500 transition text-left w-full">{t('docs2.architecture')}</button></li>
+                            <li><button onClick={() => scrollToSection('auth')} className="hover:text-green-500 transition text-left w-full">{t('docs2.auth')}</button></li>
                         </ul>
                     </div>
 
@@ -52,10 +54,9 @@ export default function Docs() {
                 <div className="max-w-none">
 
                     <div className="mb-16" id="introduction">
-                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">API Documentation</h1>
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">{t('docs2.title')}</h1>
                         <p className="text-xl theme-text-muted leading-relaxed">
-                            Welcome to the WhatsApp SaaS API. A powerful, multi-session WhatsApp automation tool built for scale. 
-                            This documentation will guide you through all system endpoints, their exact required payloads, and how to use them with your unique API keys.
+                            {t('docs2.introDesc')}
                         </p>
                         <div className="mt-8 flex gap-4">
                             <Link href="/dashboard/playground" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:text-lg transition-all shadow-lg hover:shadow-green-500/25">
@@ -68,10 +69,9 @@ export default function Docs() {
 
                     {/* Architecture Section */}
                     <section id="architecture" className="scroll-mt-24 mb-20">
-                        <h2 className="text-3xl font-bold mb-6">System Capabilities & Architecture</h2>
+                        <h2 className="text-3xl font-bold mb-6">{t('docs2.architecture')}</h2>
                         <p className="mb-6 theme-text-muted">
-                            Our architecture provides stable WhatsApp connectivity using the Baileys library and supports multiple 
-                            concurrent user sessions isolated natively via unique API keys.
+                            {t('docs2.archDesc')}
                         </p>
 
                         <div className="grid md:grid-cols-2 gap-6">
@@ -95,11 +95,11 @@ export default function Docs() {
                     </section>
 
                     <section id="auth" className="scroll-mt-24 mb-20">
-                        <h2 className="text-3xl font-bold mb-6 group">Authentication</h2>
+                        <h2 className="text-3xl font-bold mb-6 group">{t('docs2.auth')}</h2>
                         <p className="mb-6 theme-text-muted">
-                            All requests to the messaging endpoints require authentication using the <code className="text-purple-500 bg-purple-100 dark:bg-purple-900/30 px-1 py-0.5 rounded">x-api-key</code> header.
+                            {t('docs2.authDesc')} <code className="text-purple-500 bg-purple-100 dark:bg-purple-900/30 px-1 py-0.5 rounded">x-api-key</code>.
                             <br /><br />
-                            <strong>🔑 How to get your API Key:</strong> Once you pair a device in the dashboard, navigate into the &quot;Settings&quot; menu to view and copy your active Session API Key. Each device you pair runs independently under its given key.
+                            <strong>🔑 {t('docs2.howToGet')}</strong> {t('docs.howToGetApiKeyDesc')}
                         </p>
 
                         <div className="theme-code-block rounded-xl overflow-hidden mb-4">

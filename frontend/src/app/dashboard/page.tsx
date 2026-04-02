@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import Swal from 'sweetalert2';
+import { useTranslation } from 'react-i18next';
 
 const toast = Swal.mixin({
     toast: true,
@@ -23,6 +24,7 @@ interface Session {
 }
 
 export default function Dashboard() {
+    const { t } = useTranslation();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [newSessionId, setNewSessionId] = useState('');
@@ -146,7 +148,7 @@ export default function Dashboard() {
             fetchSessions();
         } catch (err) {
             console.error('Error creating session:', err);
-            toast.fire({ icon: 'error', title: 'Error creating session' });
+            toast.fire({ icon: 'error', title: t('dashboard.alerts.errorCreating') });
         } finally {
             setIsCreating(false);
         }
@@ -154,13 +156,13 @@ export default function Dashboard() {
 
     const handleDelete = async (sessionId: string) => {
         const result = await Swal.fire({
-            title: 'Are you sure?',
-            text: `Are you sure you want to permanently delete session '${sessionId}'? This cannot be undone.`,
+            title: t('dashboard.alerts.deleteConfirmTitle'),
+            text: t('dashboard.alerts.deleteConfirmText', { id: sessionId }),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#3f3f46',
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: t('dashboard.alerts.deleteConfirmBtn'),
             background: '#18181b',
             color: '#e4e4e7'
         });
@@ -178,19 +180,19 @@ export default function Dashboard() {
             fetchSessions();
         } catch (err) {
             console.error('Error deleting session:', err);
-            toast.fire({ icon: 'error', title: 'Error deleting session' });
+            toast.fire({ icon: 'error', title: t('dashboard.alerts.errorDeleting') });
         }
     };
 
     const handleDisconnect = async (sessionId: string) => {
         const result = await Swal.fire({
-            title: 'Disconnect Session?',
-            text: `Are you sure you want to disconnect '${sessionId}'? You will need to scan the QR code to reconnect.`,
+            title: t('dashboard.alerts.disconnectConfirmTitle'),
+            text: t('dashboard.alerts.disconnectConfirmText', { id: sessionId }),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#eab308', // yellow-500
             cancelButtonColor: '#3f3f46',
-            confirmButtonText: 'Disconnect',
+            confirmButtonText: t('dashboard.alerts.disconnectConfirmBtn'),
             background: '#18181b',
             color: '#e4e4e7'
         });
@@ -203,7 +205,7 @@ export default function Dashboard() {
             fetchSessions();
         } catch (err) {
             console.error('Error disconnecting:', err);
-            toast.fire({ icon: 'error', title: 'Error disconnecting' });
+            toast.fire({ icon: 'error', title: t('dashboard.alerts.errorDisconnecting') });
         }
     };
 
@@ -220,7 +222,7 @@ export default function Dashboard() {
             if (res?.ok === false || res === null) {
                 console.error(`[Dashboard] Connect request failed for ${sessionId}`, res?.status);
                 setQrLoading(prev => ({ ...prev, [sessionId]: false }));
-                toast.fire({ icon: 'error', title: 'Failed to start connection process' });
+                toast.fire({ icon: 'error', title: t('dashboard.alerts.failedToStart') });
                 return;
             }
 
@@ -264,7 +266,7 @@ export default function Dashboard() {
             fetchSessions();
         } catch (error) {
             console.error('[Dashboard] Error reconnecting:', error);
-            toast.fire({ icon: 'error', title: 'Error reconnecting' });
+            toast.fire({ icon: 'error', title: t('dashboard.alerts.errorReconnecting') });
             setQrLoading(prev => ({ ...prev, [sessionId]: false }));
         }
     };
@@ -274,8 +276,8 @@ export default function Dashboard() {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h2 className="theme-text-main text-3xl font-bold">Device Manager</h2>
-                    <p className="theme-text-muted mt-1">Manage multiple WhatsApp sessions.</p>
+                    <h2 className="theme-text-main text-3xl font-bold">{t('dashboard.title')}</h2>
+                    <p className="theme-text-muted mt-1">{t('dashboard.subtitle')}</p>
                 </div>
 
                 {/* Add Device Button */}
@@ -284,7 +286,7 @@ export default function Dashboard() {
                         onClick={() => setAddDeviceModalOpen(true)}
                         className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-lg shadow-green-500/20"
                     >
-                        + Add Device
+                        {t('dashboard.addDevice')}
                     </button>
                 </div>
             </div>
@@ -314,7 +316,7 @@ export default function Dashboard() {
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                 : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                 }`}>
-                                {session.status}
+                                {session.status === 'CONNECTED' ? t('dashboard.status.CONNECTED') : t('dashboard.status.DISCONNECTED')}
                             </span>
                         </div>
 
@@ -340,8 +342,8 @@ export default function Dashboard() {
                                     return (
                                         <div className="flex flex-col items-center justify-center animate-in fade-in duration-300">
                                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500 mb-4"></div>
-                                            <p className="text-sm font-medium theme-text-muted animate-pulse">Generating QR Code...</p>
-                                            <p className="text-xs theme-text-soft mt-2">Please wait...</p>
+                                            <p className="text-sm font-medium theme-text-muted animate-pulse">{t('dashboard.waitingQr')}</p>
+                                            <p className="text-xs theme-text-soft mt-2">...</p>
                                         </div>
                                     );
                                 }
@@ -352,7 +354,8 @@ export default function Dashboard() {
                                                 <QRCodeCanvas value={qrCodes[session.id]} size={160} />
                                             </div>
                                             <p className="text-sm theme-text-muted text-center px-4">
-                                                Scan this QR code with WhatsApp (Linked Devices)
+                                                {t('dashboard.openWhatsapp')} <br />
+                                                <span className="text-xs theme-text-soft">{t('dashboard.tapMenu')}</span> <br />
                                             </p>
                                         </div>
                                     );
@@ -421,7 +424,7 @@ export default function Dashboard() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
                     <div className="theme-card-strong max-w-lg w-full rounded-2xl p-6 shadow-2xl border border-[color:color-mix(in_srgb,var(--border-soft)_80%,transparent)]">
                         <div className="flex justify-between items-center mb-5">
-                            <h3 className="text-xl font-bold theme-text-main">Add New Device</h3>
+                            <h3 className="text-xl font-bold theme-text-main">{t('dashboard.addDevice')}</h3>
                             <button onClick={() => setAddDeviceModalOpen(false)} className="theme-text-muted hover:text-[color:var(--foreground)] transition">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -431,19 +434,19 @@ export default function Dashboard() {
 
                         <div className="space-y-5">
                             <div>
-                                <label className="block theme-text-soft text-sm font-semibold mb-1">Session Name</label>
+                                <label className="block theme-text-soft text-sm font-semibold mb-1">{t('dashboard.sessionName')}</label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. Sales, Marketing, Personal"
+                                    placeholder={t('dashboard.sessionNamePlaceholder')}
                                     className="theme-input w-full rounded-lg px-3 py-2 text-sm"
                                     value={newSessionId}
                                     onChange={(e) => setNewSessionId(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
                                 />
-                                <p className="text-[11px] theme-text-muted mt-1">Only alphanumeric characters, dashes, and underscores.</p>
+                                <p className="text-[11px] theme-text-muted mt-1">{t('dashboard.sessionNameHint')}</p>
                             </div>
 
                             <div>
-                                <label className="block theme-text-soft text-sm font-semibold mb-2">Select Engine</label>
+                                <label className="block theme-text-soft text-sm font-semibold mb-2">{t('dashboard.selectEngine')}</label>
                                 <div className="grid grid-cols-2 gap-3">
                                     {availableEngines.length > 0 ? availableEngines.map(engine => (
                                         <label 
@@ -465,7 +468,7 @@ export default function Dashboard() {
                                                     {engine.id === 'baileys' && <span className="ml-1 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded uppercase tracking-wide">Rec</span>}
                                                 </span>
                                                 <span className="text-[11px] theme-text-soft leading-tight">
-                                                    {engine.id === 'baileys' ? 'WebSocket based. Ultra fast and low CPU/RAM usage.' : 'Browser based. High compatibility for edge features.'}
+                                                    {engine.id === 'baileys' ? t('dashboard.baileysDesc') : t('dashboard.puppeteerDesc')}
                                                 </span>
                                             </div>
                                             {!engine.enabled && (
@@ -475,7 +478,7 @@ export default function Dashboard() {
                                             )}
                                         </label>
                                     )) : (
-                                        <p className="col-span-2 text-sm theme-text-soft">Loading engines...</p>
+                                        <p className="col-span-2 text-sm theme-text-soft">{t('dashboard.loadingEngines')}</p>
                                     )}
                                 </div>
                             </div>
@@ -486,14 +489,14 @@ export default function Dashboard() {
                                 onClick={() => setAddDeviceModalOpen(false)}
                                 className="px-5 py-2 rounded-xl text-sm font-semibold theme-text-muted hover:bg-[color:var(--surface-muted)] transition"
                             >
-                                Cancel
+                                {t('dashboard.cancel')}
                             </button>
                             <button 
                                 onClick={handleCreateSession}
                                 disabled={!newSessionId || isCreating}
                                 className="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-500 transition shadow-[0_0_15px_rgba(22,163,74,0.3)] disabled:opacity-50"
                             >
-                                {isCreating ? 'Creating...' : 'Create Device'}
+                                {isCreating ? t('dashboard.creating') : t('dashboard.createDevice')}
                             </button>
                         </div>
                     </div>

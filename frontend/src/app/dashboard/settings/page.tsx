@@ -5,6 +5,7 @@ import type { SyntheticEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
+import { useTranslation } from 'react-i18next';
 
 interface SettingsSession {
     id: string;
@@ -43,6 +44,7 @@ interface MeUser {
 const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export default function SettingsPage() {
+    const { t, i18n } = useTranslation();
     const router = useRouter();
 
     const [loading, setLoading] = useState(true);
@@ -652,7 +654,27 @@ export default function SettingsPage() {
                 </div>
 
                 <div className={cardCls}>
-                    <h3 className={sectionTitleCls}>Session API Keys</h3>
+                    <h3 className={sectionTitleCls}>{t('settings.language')}</h3>
+                    <p className="theme-text-muted mb-4 text-sm">{t('settings.languageDesc')}</p>
+                    <div className="flex gap-4">
+                        <button 
+                            onClick={() => i18n.changeLanguage('en')}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition border ${i18n.language === 'en' ? 'border-cyan-400 bg-cyan-400/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.15)]' : 'theme-card hover:border-[color:var(--border-soft)] theme-text-soft'}`}
+                        >
+                            English (US)
+                        </button>
+                        <button 
+                            onClick={() => i18n.changeLanguage('es')}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition border ${i18n.language === 'es' || i18n.language.startsWith('es') ? 'border-cyan-400 bg-cyan-400/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.15)]' : 'theme-card hover:border-[color:var(--border-soft)] theme-text-soft'}`}
+                        >
+                            Español (ES)
+                        </button>
+                    </div>
+                </div>
+
+                <div className={cardCls}>
+                    <h3 className={sectionTitleCls}>{t('settings.apiKeys')}</h3>
+                    <p className="theme-text-muted mb-4 text-sm">{t('settings.apiKeysDesc')}</p>
                     {engineMessage && <p className="mb-3 text-sm text-cyan-400">{engineMessage}</p>}
                     {sessions.length === 0 ? (
                         <div className="theme-text-soft text-sm">
@@ -665,10 +687,10 @@ export default function SettingsPage() {
                                     <div className="mb-2 flex items-center gap-2">
                                         <div className={`h-2 w-2 rounded-full ${session.status === 'CONNECTED' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                                         <p className="theme-text-main font-semibold">{session.id}</p>
-                                        <span className="theme-text-soft text-xs">{session.status}</span>
+                                        <span className="theme-text-soft text-xs">{session.status === 'CONNECTED' ? t('dashboard.status.CONNECTED') : t('dashboard.status.DISCONNECTED')}</span>
                                     </div>
                                     <div className="mb-3 grid gap-2 md:grid-cols-[180px_1fr] md:items-center">
-                                        <p className="theme-text-muted text-xs">API Engine</p>
+                                        <p className="theme-text-muted text-xs">{t('settings.engineConfig')}</p>
                                         <div className="flex items-center gap-2">
                                             {(() => {
                                                 const selectedEngine = session.engineType || 'baileys';
@@ -707,14 +729,14 @@ export default function SettingsPage() {
                                             </select>
                                                 );
                                             })()}
-                                            <span className="theme-text-soft text-xs">Health: {session.healthStatus || 'unknown'}</span>
+                                            <span className="theme-text-soft text-xs">{t('settings.health')}: {session.healthStatus || t('sidebar.unknown')}</span>
                                         </div>
                                     </div>
                                     <div className="mb-3 flex items-center gap-2 text-xs">
-                                        <span className="theme-text-soft">Engine status:</span>
-                                        <span className={healthTone(session.healthStatus)}>{session.healthStatus || 'unknown'}</span>
+                                        <span className="theme-text-soft">{t('settings.health')}:</span>
+                                        <span className={healthTone(session.healthStatus)}>{session.healthStatus || t('sidebar.unknown')}</span>
                                         {session.lastHeartbeatAt && (
-                                            <span className="theme-text-soft">• Last heartbeat: {new Date(session.lastHeartbeatAt).toLocaleString()}</span>
+                                            <span className="theme-text-soft">• {t('settings.lastHeartbeat')}: {new Date(session.lastHeartbeatAt).toLocaleString()}</span>
                                         )}
                                     </div>
                                     <div className="flex gap-2">
@@ -722,13 +744,13 @@ export default function SettingsPage() {
                                             <span>
                                                 {session.apiKey 
                                                     ? (showApiKey[session.id] ? session.apiKey : '********************************') 
-                                                    : 'No key'}
+                                                    : t('settings.noKey')}
                                             </span>
                                             {session.apiKey && (
                                                 <button 
                                                     onClick={() => setShowApiKey(prev => ({ ...prev, [session.id]: !prev[session.id] }))}
                                                     className="text-cyan-600 hover:text-cyan-400 focus:outline-none ml-2"
-                                                    title={showApiKey[session.id] ? "Hide API Key" : "Show API Key"}
+                                                    title={showApiKey[session.id] ? t('settings.hideApiKey') : t('settings.showApiKey')}
                                                 >
                                                     {showApiKey[session.id] ? (
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -745,7 +767,7 @@ export default function SettingsPage() {
                                         </div>
                                         {session.apiKey && (
                                             <button onClick={() => copyToClipboard(session.apiKey || '')} className="theme-button-secondary rounded px-3 text-xs font-semibold">
-                                                Copy
+                                                {t('settings.copy')}
                                             </button>
                                         )}
                                     </div>
@@ -760,14 +782,14 @@ export default function SettingsPage() {
             {engineConfirmModal && engineConfirmModal.isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
                     <div className="theme-card-strong max-w-md w-full rounded-2xl p-6 shadow-2xl border border-[color:color-mix(in_srgb,var(--border-soft)_80%,transparent)]">
-                        <h3 className="text-xl font-bold theme-text-main mb-2">Confirm Engine Switch</h3>
+                        <h3 className="text-xl font-bold theme-text-main mb-2">{t('settings.confirmEngineSwitch')}</h3>
                         <p className="text-sm theme-text-soft mb-4">
-                            You are about to switch session <strong>{engineConfirmModal?.sessionId}</strong> from <span className="font-semibold">{engineConfirmModal?.oldEngine}</span> to <span className="font-semibold text-cyan-400">{engineConfirmModal?.newEngine}</span>.
+                            {t('settings.engineSwitchWarningText')} <strong>{engineConfirmModal?.sessionId}</strong> {t('settings.engineSwitchWarningFrom')} <span className="font-semibold">{engineConfirmModal?.oldEngine}</span> {t('settings.engineSwitchWarningTo')} <span className="font-semibold text-cyan-400">{engineConfirmModal?.newEngine}</span>.
                         </p>
                         
                         <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg p-3 mb-5 flex gap-2">
                             <span className="text-lg leading-none">⚠️</span>
-                            <p><strong>Warning:</strong> Changing the engine requires the session to be <strong>DISCONNECTED</strong>. After switching, you will need to reconnect the device and scan a new QR code.</p>
+                            <p>{t('settings.engineSwitchWarningAlert')}</p>
                         </div>
 
                         <div className="space-y-3 mb-6">
@@ -786,7 +808,7 @@ export default function SettingsPage() {
                                 onClick={() => setEngineConfirmModal(null)}
                                 className="px-5 py-2 rounded-xl text-sm font-semibold theme-text-muted hover:bg-[color:var(--surface-muted)] transition"
                             >
-                                Cancel
+                                {t('dashboard.cancel')}
                             </button>
                             <button 
                                 onClick={() => {
@@ -795,7 +817,7 @@ export default function SettingsPage() {
                                 disabled={engineSavingSessionId === engineConfirmModal?.sessionId}
                                 className="px-5 py-2 rounded-xl text-sm font-semibold text-zinc-900 bg-cyan-400 hover:bg-cyan-300 transition shadow-[0_0_15px_rgba(34,211,238,0.3)] disabled:opacity-50"
                             >
-                                {engineSavingSessionId === engineConfirmModal?.sessionId ? 'Applying...' : 'Confirm Switch'}
+                                {engineSavingSessionId === engineConfirmModal?.sessionId ? t('settings.applying') : t('settings.confirmSwitch')}
                             </button>
                         </div>
                     </div>
