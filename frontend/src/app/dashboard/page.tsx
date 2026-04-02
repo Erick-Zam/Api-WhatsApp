@@ -350,8 +350,8 @@ export default function Dashboard() {
                                 if (qrCodes[session.id]) {
                                     return (
                                         <div className="flex flex-col items-center animate-in fade-in duration-500">
-                                            <div className="theme-card p-2 rounded-lg mb-4">
-                                                <QRCodeCanvas value={qrCodes[session.id]} size={160} />
+                                            <div className="theme-card p-4 rounded-xl mb-4 bg-white dark:bg-white flex items-center justify-center">
+                                                <QRCodeCanvas value={qrCodes[session.id]} size={256} includeMargin={true} />
                                             </div>
                                             <p className="text-sm theme-text-muted text-center px-4">
                                                 {t('dashboard.openWhatsapp')} <br />
