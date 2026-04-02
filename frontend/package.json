@@ -13,20 +13,21 @@
     "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
-    "@whatsapp/shared": "file:../packages/shared",
     "@heroicons/react": "^2.2.0",
+    "@whatsapp/shared": "file:../packages/shared",
     "next": "16.1.6",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "sweetalert2": "^11.26.24",
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@playwright/test": "^1.54.2",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",

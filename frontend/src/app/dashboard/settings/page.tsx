@@ -52,6 +52,9 @@ export default function SettingsPage() {
     const [engineMessage, setEngineMessage] = useState('');
     const [trustedDevices, setTrustedDevices] = useState<TrustedDevice[]>([]);
 
+    const [engineConfirmModal, setEngineConfirmModal] = useState<{ isOpen: boolean, sessionId: string, newEngine: string, oldEngine: string } | null>(null);
+    const [showApiKey, setShowApiKey] = useState<{ [sessionId: string]: boolean }>({});
+
     const [user, setUser] = useState<MeUser | null>(null);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -410,13 +413,7 @@ export default function SettingsPage() {
             return;
         }
 
-        const confirmed = globalThis.confirm(
-            `Switch session '${sessionId}' from '${previousEngine}' to '${engineType}'?`
-        );
-        if (!confirmed) {
-            return;
-        }
-
+        // Validation passed, execute immediately since modal handled the confirmation
         setEngineSavingSessionId(sessionId);
 
         try {
@@ -462,9 +459,13 @@ export default function SettingsPage() {
                     : session
             )));
 
-            setEngineMessage(`Engine updated for session '${sessionId}'`);
+            if (res.ok) {
+                setEngineMessage(`Engine successfully updated for session '${sessionId}'`);
+                setEngineConfirmModal(null);
+                fetchUserData();
+            }
         } catch {
-            setEngineMessage('Unable to update engine');
+            setEngineMessage('Network error while updating engine');
         } finally {
             setEngineSavingSessionId('');
         }
@@ -682,7 +683,17 @@ export default function SettingsPage() {
                                             <select
                                                 value={selectedEngine}
                                                 disabled={engineSavingSessionId === session.id}
-                                                onChange={(e) => updateSessionEngine(session.id, e.target.value)}
+                                                onChange={(e) => {
+                                                    const newEngine = e.target.value;
+                                                    if (newEngine !== selectedEngine) {
+                                                        setEngineConfirmModal({
+                                                            isOpen: true,
+                                                            sessionId: session.id,
+                                                            newEngine,
+                                                            oldEngine: selectedEngine
+                                                        });
+                                                    }
+                                                }}
                                                 className="theme-input rounded px-2 py-1 text-xs"
                                             >
                                                 {!hasSelectedOption && (
@@ -707,8 +718,30 @@ export default function SettingsPage() {
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <div className="theme-code-block flex-1 rounded p-2 font-mono text-xs break-all">
-                                            {session.apiKey || 'No key'}
+                                        <div className="theme-code-block flex-1 rounded p-2 font-mono text-xs break-all flex items-center justify-between">
+                                            <span>
+                                                {session.apiKey 
+                                                    ? (showApiKey[session.id] ? session.apiKey : '********************************') 
+                                                    : 'No key'}
+                                            </span>
+                                            {session.apiKey && (
+                                                <button 
+                                                    onClick={() => setShowApiKey(prev => ({ ...prev, [session.id]: !prev[session.id] }))}
+                                                    className="text-cyan-600 hover:text-cyan-400 focus:outline-none ml-2"
+                                                    title={showApiKey[session.id] ? "Hide API Key" : "Show API Key"}
+                                                >
+                                                    {showApiKey[session.id] ? (
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            )}
                                         </div>
                                         {session.apiKey && (
                                             <button onClick={() => copyToClipboard(session.apiKey || '')} className="theme-button-secondary rounded px-3 text-xs font-semibold">
@@ -722,6 +755,52 @@ export default function SettingsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Engine Confirmation Modal */}
+            {engineConfirmModal && engineConfirmModal.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="theme-card-strong max-w-md w-full rounded-2xl p-6 shadow-2xl border border-[color:color-mix(in_srgb,var(--border-soft)_80%,transparent)]">
+                        <h3 className="text-xl font-bold theme-text-main mb-2">Confirm Engine Switch</h3>
+                        <p className="text-sm theme-text-soft mb-4">
+                            You are about to switch session <strong>{engineConfirmModal?.sessionId}</strong> from <span className="font-semibold">{engineConfirmModal?.oldEngine}</span> to <span className="font-semibold text-cyan-400">{engineConfirmModal?.newEngine}</span>.
+                        </p>
+                        
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg p-3 mb-5 flex gap-2">
+                            <span className="text-lg leading-none">⚠️</span>
+                            <p><strong>Warning:</strong> Changing the engine requires the session to be <strong>DISCONNECTED</strong>. After switching, you will need to reconnect the device and scan a new QR code.</p>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <div className={`p-3 rounded-xl border ${engineConfirmModal?.newEngine === 'baileys' ? 'border-cyan-400/50 bg-cyan-900/10' : 'theme-card'}`}>
+                                <h4 className="font-semibold theme-text-main text-sm">Baileys (WebSocket)</h4>
+                                <p className="text-xs theme-text-soft">Ultra-fast, low memory usage, network-based. Recommended for high-throughput automation and general messaging.</p>
+                            </div>
+                            <div className={`p-3 rounded-xl border ${engineConfirmModal?.newEngine === 'puppeteer' ? 'border-cyan-400/50 bg-cyan-900/10' : 'theme-card'}`}>
+                                <h4 className="font-semibold theme-text-main text-sm">Puppeteer (Browser)</h4>
+                                <p className="text-xs theme-text-soft">Simulates a real WhatsApp Web browser. Highest compatibility for edge features, but consumes more RAM per session.</p>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={() => setEngineConfirmModal(null)}
+                                className="px-5 py-2 rounded-xl text-sm font-semibold theme-text-muted hover:bg-[color:var(--surface-muted)] transition"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    if (engineConfirmModal) updateSessionEngine(engineConfirmModal.sessionId, engineConfirmModal.newEngine);
+                                }}
+                                disabled={engineSavingSessionId === engineConfirmModal?.sessionId}
+                                className="px-5 py-2 rounded-xl text-sm font-semibold text-zinc-900 bg-cyan-400 hover:bg-cyan-300 transition shadow-[0_0_15px_rgba(34,211,238,0.3)] disabled:opacity-50"
+                            >
+                                {engineSavingSessionId === engineConfirmModal?.sessionId ? 'Applying...' : 'Confirm Switch'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

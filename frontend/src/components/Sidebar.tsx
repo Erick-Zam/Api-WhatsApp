@@ -162,7 +162,7 @@ export default function Sidebar() {
                         badge="LAB"
                         customClasses={isActive('/dashboard/playground')
                             ? 'surface-card--elevated theme-text-main'
-                            : 'surface-card text-cyan-100/85 hover:brightness-110'
+                            : 'theme-text-muted hover:bg-[color:color-mix(in_srgb,var(--surface-muted)_84%,transparent)] hover:text-[color:var(--foreground)]'
                         }
                     />
 

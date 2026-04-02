@@ -2,6 +2,17 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
+import Swal from 'sweetalert2';
+
+const toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    background: '#18181b',
+    color: '#e4e4e7',
+});
 
 interface Session {
     id: string;
@@ -15,7 +26,10 @@ export default function Dashboard() {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [newSessionId, setNewSessionId] = useState('');
+    const [newSessionEngine, setNewSessionEngine] = useState('baileys');
     const [isCreating, setIsCreating] = useState(false);
+    const [addDeviceModalOpen, setAddDeviceModalOpen] = useState(false);
+    const [availableEngines, setAvailableEngines] = useState<any[]>([]);
     const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
     const [qrLoading, setQrLoading] = useState<{ [key: string]: boolean }>({});
     const [token, setToken] = useState<string | null>(null);
@@ -47,6 +61,19 @@ export default function Dashboard() {
         }
         return res;
     }, [token]);
+
+    const fetchEngines = useCallback(async () => {
+        if (!token) return;
+        try {
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions/available-engines`);
+            if (res && res.ok) {
+                const data = await res.json();
+                if (data.engines) setAvailableEngines(data.engines);
+            }
+        } catch (error) {
+            console.error('Error fetching engines:', error);
+        }
+    }, [token, authorizedFetch]);
 
     // Fetch sessions first, but it will need fetchQr
     const fetchSessions = useCallback(async () => {
@@ -100,6 +127,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (token) {
             fetchSessions();
+            fetchEngines();
             const interval = setInterval(fetchSessions, 5000);
             return () => clearInterval(interval);
         }
@@ -111,20 +139,32 @@ export default function Dashboard() {
         try {
             await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/connect`, {
                 method: 'POST',
-                body: JSON.stringify({ sessionId: newSessionId })
+                body: JSON.stringify({ sessionId: newSessionId, engineType: newSessionEngine })
             });
             setNewSessionId('');
+            setAddDeviceModalOpen(false);
             fetchSessions();
         } catch (err) {
             console.error('Error creating session:', err);
-            alert('Error creating session');
+            toast.fire({ icon: 'error', title: 'Error creating session' });
         } finally {
             setIsCreating(false);
         }
     };
 
     const handleDelete = async (sessionId: string) => {
-        if (!confirm(`Are you sure you want to permanently delete session '${sessionId}'? This cannot be undone.`)) return;
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Are you sure you want to permanently delete session '${sessionId}'? This cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#3f3f46',
+            confirmButtonText: 'Yes, delete it!',
+            background: '#18181b',
+            color: '#e4e4e7'
+        });
+        if (!result.isConfirmed) return;
         try {
             await authorizedFetch(`/api/sessions/${sessionId}`, {
                 method: 'DELETE'
@@ -138,12 +178,23 @@ export default function Dashboard() {
             fetchSessions();
         } catch (err) {
             console.error('Error deleting session:', err);
-            alert('Error deleting session');
+            toast.fire({ icon: 'error', title: 'Error deleting session' });
         }
     };
 
     const handleDisconnect = async (sessionId: string) => {
-        if (!confirm(`Disconnect session '${sessionId}'?`)) return;
+        const result = await Swal.fire({
+            title: 'Disconnect Session?',
+            text: `Are you sure you want to disconnect '${sessionId}'? You will need to scan the QR code to reconnect.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#eab308', // yellow-500
+            cancelButtonColor: '#3f3f46',
+            confirmButtonText: 'Disconnect',
+            background: '#18181b',
+            color: '#e4e4e7'
+        });
+        if (!result.isConfirmed) return;
         try {
             await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/logout`, {
                 method: 'POST',
@@ -152,7 +203,7 @@ export default function Dashboard() {
             fetchSessions();
         } catch (err) {
             console.error('Error disconnecting:', err);
-            alert('Error disconnecting');
+            toast.fire({ icon: 'error', title: 'Error disconnecting' });
         }
     };
 
@@ -169,7 +220,7 @@ export default function Dashboard() {
             if (res?.ok === false || res === null) {
                 console.error(`[Dashboard] Connect request failed for ${sessionId}`, res?.status);
                 setQrLoading(prev => ({ ...prev, [sessionId]: false }));
-                alert('Failed to start connection process');
+                toast.fire({ icon: 'error', title: 'Failed to start connection process' });
                 return;
             }
 
@@ -213,7 +264,7 @@ export default function Dashboard() {
             fetchSessions();
         } catch (error) {
             console.error('[Dashboard] Error reconnecting:', error);
-            alert('Error reconnecting');
+            toast.fire({ icon: 'error', title: 'Error reconnecting' });
             setQrLoading(prev => ({ ...prev, [sessionId]: false }));
         }
     };
@@ -227,21 +278,13 @@ export default function Dashboard() {
                     <p className="theme-text-muted mt-1">Manage multiple WhatsApp sessions.</p>
                 </div>
 
-                {/* Simple create form */}
-                <div className="theme-card flex gap-2 rounded-lg p-2">
-                    <input
-                        type="text"
-                        placeholder="New Session Name (e.g. Work)"
-                        className="theme-text-main bg-transparent px-3 py-1 outline-none text-sm w-48"
-                        value={newSessionId}
-                        onChange={(e) => setNewSessionId(e.target.value)}
-                    />
+                {/* Add Device Button */}
+                <div>
                     <button
-                        onClick={handleCreateSession}
-                        disabled={!newSessionId || isCreating}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm font-medium transition disabled:opacity-50"
+                        onClick={() => setAddDeviceModalOpen(true)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-lg shadow-green-500/20"
                     >
-                        {isCreating ? 'Adding...' : '+ Add Device'}
+                        + Add Device
                     </button>
                 </div>
             </div>
@@ -372,6 +415,90 @@ export default function Dashboard() {
                     </div>
                 ))}
             </div>
+
+            {/* Add Device Modal */}
+            {addDeviceModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="theme-card-strong max-w-lg w-full rounded-2xl p-6 shadow-2xl border border-[color:color-mix(in_srgb,var(--border-soft)_80%,transparent)]">
+                        <div className="flex justify-between items-center mb-5">
+                            <h3 className="text-xl font-bold theme-text-main">Add New Device</h3>
+                            <button onClick={() => setAddDeviceModalOpen(false)} className="theme-text-muted hover:text-[color:var(--foreground)] transition">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="space-y-5">
+                            <div>
+                                <label className="block theme-text-soft text-sm font-semibold mb-1">Session Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Sales, Marketing, Personal"
+                                    className="theme-input w-full rounded-lg px-3 py-2 text-sm"
+                                    value={newSessionId}
+                                    onChange={(e) => setNewSessionId(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
+                                />
+                                <p className="text-[11px] theme-text-muted mt-1">Only alphanumeric characters, dashes, and underscores.</p>
+                            </div>
+
+                            <div>
+                                <label className="block theme-text-soft text-sm font-semibold mb-2">Select Engine</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {availableEngines.length > 0 ? availableEngines.map(engine => (
+                                        <label 
+                                            key={engine.id} 
+                                            className={`relative flex flex-col p-3 rounded-xl border cursor-pointer transition ${newSessionEngine === engine.id ? 'border-cyan-400 bg-cyan-400/10 shadow-[0_0_15px_rgba(34,211,238,0.15)]' : 'theme-card hover:border-[color:var(--border-soft)]'} ${!engine.enabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+                                        >
+                                            <input 
+                                                type="radio" 
+                                                name="engineType" 
+                                                value={engine.id} 
+                                                disabled={!engine.enabled}
+                                                checked={newSessionEngine === engine.id} 
+                                                onChange={() => setNewSessionEngine(engine.id)}
+                                                className="sr-only" 
+                                            />
+                                            <div className="flex flex-col h-full">
+                                                <span className="font-semibold text-sm theme-text-main mb-1">
+                                                    {engine.label.split(' ')[0]} 
+                                                    {engine.id === 'baileys' && <span className="ml-1 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded uppercase tracking-wide">Rec</span>}
+                                                </span>
+                                                <span className="text-[11px] theme-text-soft leading-tight">
+                                                    {engine.id === 'baileys' ? 'WebSocket based. Ultra fast and low CPU/RAM usage.' : 'Browser based. High compatibility for edge features.'}
+                                                </span>
+                                            </div>
+                                            {!engine.enabled && (
+                                                <div className="absolute top-2 right-2 flex h-2 w-2">
+                                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-400"></span>
+                                                </div>
+                                            )}
+                                        </label>
+                                    )) : (
+                                        <p className="col-span-2 text-sm theme-text-soft">Loading engines...</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3 mt-8">
+                            <button 
+                                onClick={() => setAddDeviceModalOpen(false)}
+                                className="px-5 py-2 rounded-xl text-sm font-semibold theme-text-muted hover:bg-[color:var(--surface-muted)] transition"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleCreateSession}
+                                disabled={!newSessionId || isCreating}
+                                className="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-500 transition shadow-[0_0_15px_rgba(22,163,74,0.3)] disabled:opacity-50"
+                            >
+                                {isCreating ? 'Creating...' : 'Create Device'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
