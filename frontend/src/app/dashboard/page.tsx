@@ -25,7 +25,6 @@ interface Session {
 
 export default function Dashboard() {
     const { t } = useTranslation();
-    const [mounted, setMounted] = useState(false);
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [newSessionId, setNewSessionId] = useState('');
@@ -38,7 +37,6 @@ export default function Dashboard() {
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
-        setMounted(true);
         const t = localStorage.getItem('token');
         if (t === null) {
             globalThis.location.href = '/?auth=login';
@@ -46,8 +44,6 @@ export default function Dashboard() {
             setToken(t);
         }
     }, []);
-
-    if (!mounted) return null;
 
     const authorizedFetch = useCallback(async (url: string, options: RequestInit = {}) => {
         if (!token) return null;
