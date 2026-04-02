@@ -44,6 +44,7 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
     // Force cleanup if requested
     if (options.deleteOld) {
         try {
+            retryCounts.set(sessionId, 0); // Explicitly reset retries
             if (fs.existsSync(sessionDir)) {
                 fs.rmSync(sessionDir, { recursive: true, force: true });
                 console.log(`[Connect] Forced cleanup of session '${sessionId}' before start.`);
@@ -134,9 +135,18 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
 
             if (shouldReconnect) {
                 const currentRetry = retryCounts.get(sessionId) || 0;
+                
+                // Error 515 (restart required) is a specific edge case where the session needs to be restarted
+                // It usually resolves on immediate reconnect, but if it cycles, we should clean up.
+                const statusCode = (lastDisconnect?.error)?.output?.statusCode;
+                if (statusCode === 515 && currentRetry >= 3) {
+                     console.error(`Error 515 persists for ${sessionId}. Purging session to force clean login.`);
+                     if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true });
+                }
+
                 if (currentRetry < MAX_RETRIES) {
                     retryCounts.set(sessionId, currentRetry + 1);
-                    setTimeout(() => connectToWhatsApp(sessionId), (currentRetry + 1) * 1000);
+                    setTimeout(() => connectToWhatsApp(sessionId), (currentRetry + 1) * 2000);
                 } else {
                     console.error(`Max retries reached for session ${sessionId}.`);
                 }

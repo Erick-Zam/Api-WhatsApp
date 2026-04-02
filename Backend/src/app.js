@@ -102,69 +102,38 @@ app.get('/qr', verifyJwt, async (req, res) => {
 // List all active sessions (Filtered by User)
 app.get('/sessions', verifyJwt, async (req, res) => {
     try {
-        const wa = await import('./whatsapp.js');
-        const { listAllSessionKeys } = await import('./services/apiKeys.js');
+        const { getSessionAdapter } = await import('./services/sessionOrchestrator.js');
         const userId = req.user.id;
 
         // Fetch user's sessions from DB
         const userSessions = await db.default.query('SELECT * FROM whatsapp_sessions WHERE user_id = $1', [userId]);
-        const userSessionIds = userSessions.rows.map(row => row.session_id);
 
-        const activeSessions = wa.listSessions();
-
-        // Filter active sessions to only those belonging to user
-        const visibleActiveSessions = activeSessions.filter(s => userSessionIds.includes(s.id));
-
-        // Map stored keys for easy lookup
-        const keyMap = new Map();
-        const metaMap = new Map();
-        userSessions.rows.forEach((row) => {
-            keyMap.set(row.session_id, row.api_key);
-            metaMap.set(row.session_id, {
+        const merged = await Promise.all(userSessions.rows.map(async (row) => {
+            const id = row.session_id;
+            const key = row.api_key;
+            const meta = {
                 engineType: row.engine_type || 'baileys',
                 healthStatus: row.health_status || 'unknown',
                 lastHeartbeatAt: row.last_heartbeat_at || null,
-            });
-        });
+            };
 
-        // Merge active sessions with keys
-        const merged = Promise.all(visibleActiveSessions.map(async s => {
-            let key = keyMap.get(s.id);
-            const meta = metaMap.get(s.id) || { engineType: 'baileys', healthStatus: 'unknown', lastHeartbeatAt: null };
-            
-            // To get accurate status, query the appropriate adapter
-            const { getSessionAdapter } = await import('./services/sessionOrchestrator.js');
-            const { adapter } = await getSessionAdapter(s.id, userId);
-            const realStatus = adapter.getConnectionStatus ? adapter.getConnectionStatus(s.id) : s.status;
+            // Query the appropriate adapter
+            const { adapter } = await getSessionAdapter(id, userId);
+            const realStatus = adapter.getConnectionStatus ? adapter.getConnectionStatus(id) : 'DISCONNECTED';
+            const connectedUser = adapter.getConnectedUser ? adapter.getConnectedUser(id) : null;
 
             return {
-                ...s,
+                id,
                 status: realStatus,
+                user: connectedUser,
                 apiKey: key || null,
                 engineType: meta.engineType,
                 healthStatus: meta.healthStatus,
                 lastHeartbeatAt: meta.lastHeartbeatAt,
             };
         }));
-        
-        const resolvedMerged = await merged;
 
-        // Also include stored sessions that might be disconnected but belong to user
-        userSessionIds.forEach(id => {
-            if (!visibleActiveSessions.find(s => s.id === id)) {
-                resolvedMerged.push({
-                    id: id,
-                    status: 'DISCONNECTED',
-                    user: null,
-                    apiKey: keyMap.get(id),
-                    engineType: (metaMap.get(id)?.engineType || 'baileys'),
-                    healthStatus: (metaMap.get(id)?.healthStatus || 'unknown'),
-                    lastHeartbeatAt: (metaMap.get(id)?.lastHeartbeatAt || null),
-                });
-            }
-        });
-
-        res.json(resolvedMerged);
+        res.json(merged);
     } catch (e) {
         console.error('SERVER ERROR in GET /sessions:', e);
         res.status(500).json({ error: e.message });
