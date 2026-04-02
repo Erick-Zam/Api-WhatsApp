@@ -1,7 +1,7 @@
 import * as db from '../db.js';
 
 const ALLOWED_ENGINES = ['baileys', 'puppeteer'];
-const PUPPETEER_ENABLED = String(process.env.PUPPETEER_ENABLED || '').toLowerCase() === 'true';
+const isPuppeteerEnabled = () => String(process.env.PUPPETEER_ENABLED || 'true').trim().toLowerCase() === 'true';
 let queryRunner = db.query;
 
 export const __setSessionEngineQueryRunnerForTests = (runner) => {
@@ -22,8 +22,8 @@ export const getAvailableEngines = () => ([
     {
         id: 'puppeteer',
         label: 'Puppeteer (Browser)',
-        enabled: PUPPETEER_ENABLED,
-        rollout: PUPPETEER_ENABLED ? 10 : 0,
+        enabled: isPuppeteerEnabled(),
+        rollout: isPuppeteerEnabled() ? 10 : 0,
     },
 ]);
 
