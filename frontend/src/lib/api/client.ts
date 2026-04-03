@@ -34,18 +34,17 @@ export const getStoredToken = () => {
     return localStorage.getItem('token') || '';
 };
 
-const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-};
-
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
     const { method = 'GET', body, token, headers = {}, signal } = options;
 
     const authToken = token !== undefined ? token : getStoredToken();
     const mergedHeaders: Record<string, string> = {
-        ...defaultHeaders,
         ...headers,
     };
+
+    if (body !== undefined && !mergedHeaders['Content-Type']) {
+        mergedHeaders['Content-Type'] = 'application/json';
+    }
 
     if (authToken) {
         mergedHeaders.Authorization = `Bearer ${authToken}`;
@@ -58,7 +57,21 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
         signal,
     });
 
-    const data = (await response.json().catch(() => ({}))) as T & ApiErrorPayload;
+    const contentType = response.headers.get('content-type') || '';
+    const rawBody = await response.text();
+
+    let data = {} as T & ApiErrorPayload;
+    if (rawBody) {
+        if (contentType.includes('application/json')) {
+            try {
+                data = (JSON.parse(rawBody) as T & ApiErrorPayload);
+            } catch {
+                data = { message: rawBody } as T & ApiErrorPayload;
+            }
+        } else {
+            data = { message: rawBody } as T & ApiErrorPayload;
+        }
+    }
 
     if (!response.ok) {
         const message = data.error || data.message || `Request failed with status ${response.status}`;

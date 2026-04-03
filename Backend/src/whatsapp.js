@@ -17,6 +17,7 @@ const STORE_DIR = 'store_baileys';
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_MESSAGES_PER_MINUTE = 10;
 const messageTracking = new Map(); // sessionId -> { timestamp, count }
+const DEBUG_WA_UPDATES = process.env.DEBUG_WA_UPDATES === 'true';
 
 // Store setup
 const store = makeInMemoryStore({ logger: pino({ level: 'silent' }) });
@@ -103,8 +104,14 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        // DEBUG: Force print everything
-        console.log(`[DEBUG_CONNECTION] Session ${sessionId} Update:`, JSON.stringify(update, null, 2));
+        if (DEBUG_WA_UPDATES) {
+            console.log(`[DEBUG_CONNECTION] Session ${sessionId} Update:`, JSON.stringify(update, null, 2));
+        } else if (connection || qr) {
+            console.log(`[CONNECTION] Session ${sessionId}:`, {
+                connection: connection || 'update',
+                hasQr: Boolean(qr),
+            });
+        }
 
         // Trigger generic connection update webhook
         triggerWebhooks(sessionId, 'connection.update', { connection, qr: qr ? 'QR_RECEIVED' : undefined });
@@ -124,6 +131,8 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
             // Generate API Key ONLY on successful connection
             import('./services/apiKeys.js').then(({ createSessionKey }) => {
                 createSessionKey(sessionId).catch(e => console.error(`Error creating key for ${sessionId}:`, e));
+            }).catch((e) => {
+                console.error(`Error loading apiKeys module for ${sessionId}:`, e);
             });
 
         } else if (connection === 'close') {
@@ -146,7 +155,11 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
 
                 if (currentRetry < MAX_RETRIES) {
                     retryCounts.set(sessionId, currentRetry + 1);
-                    setTimeout(() => connectToWhatsApp(sessionId), (currentRetry + 1) * 2000);
+                    setTimeout(() => {
+                        connectToWhatsApp(sessionId).catch((err) => {
+                            console.error(`Reconnect failed for ${sessionId}:`, err);
+                        });
+                    }, (currentRetry + 1) * 2000);
                 } else {
                     console.error(`Max retries reached for session ${sessionId}.`);
                 }
@@ -164,7 +177,15 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
         if (type === 'notify') {
             for (const msg of messages) {
                 if (!msg.key.fromMe) {
-                    console.log(`[${sessionId}] New Message:`, JSON.stringify(msg, null, 2));
+                    if (msg.key.remoteJid !== 'status@broadcast') {
+                        const messageType = msg.message ? Object.keys(msg.message)[0] : 'unknown';
+                        console.log(`[${sessionId}] New Message`, {
+                            jid: msg.key.remoteJid,
+                            id: msg.key.id,
+                            type: messageType,
+                            timestamp: msg.messageTimestamp,
+                        });
+                    }
                     // Trigger webhook for new message
                     triggerWebhooks(sessionId, 'messages.upsert', msg);
                 }
@@ -229,6 +250,8 @@ const deleteSession = async (sessionId) => {
         // Ensure key is nuked
         import('./services/apiKeys.js').then(({ deleteSessionKey }) => {
             deleteSessionKey(sessionId).catch(e => console.error(`Error deleting key for ${sessionId}:`, e));
+        }).catch((e) => {
+            console.error(`Error loading apiKeys module for delete ${sessionId}:`, e);
         });
     } catch (e) {
         console.error(`Error deleting session ${sessionId}:`, e);

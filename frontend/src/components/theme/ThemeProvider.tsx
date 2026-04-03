@@ -12,23 +12,23 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'ui_theme';
+const APP_THEMES: AppTheme[] = ['dark', 'light', 'midnight', 'ocean', 'graphite'];
+
+const getInitialTheme = (): AppTheme => {
+    if (typeof window === 'undefined') {
+        return 'dark';
+    }
+
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) as AppTheme | null;
+    return storedTheme && APP_THEMES.includes(storedTheme) ? storedTheme : 'dark';
+};
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setThemeState] = useState<AppTheme>('dark');
+    const [theme, setThemeState] = useState<AppTheme>(getInitialTheme);
 
     useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) as AppTheme | null;
-        const resolvedTheme: AppTheme = storedTheme && ['dark', 'light', 'midnight', 'ocean', 'graphite'].includes(storedTheme)
-            ? storedTheme
-            : 'dark';
-
-        setThemeState(resolvedTheme);
-        document.documentElement.setAttribute('data-theme', resolvedTheme);
-    }, []);
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
 
     const setTheme = (nextTheme: AppTheme) => {
         setThemeState(nextTheme);

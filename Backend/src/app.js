@@ -24,6 +24,7 @@ import {
 } from './middleware/auditLog.js';
 import gdprRoutes from './routes/gdpr.js';
 import { connectSession, disconnectSession } from './services/sessionOrchestrator.js';
+import { verifyJwt } from './middleware/jwtAuth.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -73,8 +74,6 @@ app.use('/auth', authRoutes);
 // But the Dashboard Session Management usually uses the JWT token.
 // let's update routes to use verifyJwt for management endpoints.
 
-import { verifyJwt } from './middleware/jwtAuth.js';
-
 // --- GDPR & Compliance Routes (Protected by JWT) ---
 app.use('/api/gdpr', gdprRoutes);
 
@@ -89,14 +88,18 @@ app.get('/qr', verifyJwt, async (req, res) => {
     // For simplicity, we assume session name matches, or we check DB.
     // Ideally, we check if this sessionId belongs to user.
 
-    import('./services/sessionOrchestrator.js').then(async (orchestrator) => {
+    try {
+        const orchestrator = await import('./services/sessionOrchestrator.js');
         const id = sessionId || 'default';
         const { adapter } = await orchestrator.getSessionAdapter(id, userId);
         const qr = adapter.getQRCode ? adapter.getQRCode(id) : null;
         const status = adapter.getConnectionStatus ? adapter.getConnectionStatus(id) : 'DISCONNECTED';
         const user = adapter.getConnectedUser ? adapter.getConnectedUser(id) : null;
         res.json({ qr, status, user, sessionId: id });
-    });
+    } catch (error) {
+        console.error('SERVER ERROR in GET /qr:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 // List all active sessions (Filtered by User)
@@ -251,13 +254,32 @@ app.use('/chats', authenticate, chatRoutes);
 // Must be placed after routes to capture response status and time
 app.use(auditLogger);
 
+app.use((err, req, res, next) => {
+    console.error('Unhandled app error:', err);
+    if (res.headersSent) {
+        return next(err);
+    }
+    res.status(err.status || 500).json({
+        error: err.message || 'Internal Server Error',
+    });
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled promise rejection:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught exception:', error);
+});
+
 // Start the server
 app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
 
     // Test DB connection
     try {
-        const { rows } = await import('./db.js').then(m => m.default.query('SELECT NOW()'));
+        const dbModule = await import('./db.js');
+        const { rows } = await dbModule.default.query('SELECT NOW()');
         console.log('Database connected:', rows[0].now);
     } catch (err) {
         console.error('Database connection failed:', err);
@@ -265,7 +287,12 @@ app.listen(PORT, async () => {
 
     // Initialize all sessions
     // Note: This might resurrect sessions that don't belong to currently active users, logic in whatsapp.js handles files.
-    import('./whatsapp.js').then(wa => wa.initSessions());
+    try {
+        const wa = await import('./whatsapp.js');
+        await wa.initSessions();
+    } catch (err) {
+        console.error('Failed to initialize WhatsApp sessions:', err);
+    }
 
     // Initialize Scheduler
     initScheduler();

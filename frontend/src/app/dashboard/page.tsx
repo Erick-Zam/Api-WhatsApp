@@ -23,6 +23,18 @@ interface Session {
     };
 }
 
+interface EngineOption {
+    id: string;
+    label: string;
+    enabled: boolean;
+    description?: string;
+}
+
+interface ApiErrorLike {
+    error?: string;
+    message?: string;
+}
+
 export default function Dashboard() {
     const { t } = useTranslation();
     const [sessions, setSessions] = useState<Session[]>([]);
@@ -31,10 +43,26 @@ export default function Dashboard() {
     const [newSessionEngine, setNewSessionEngine] = useState('baileys');
     const [isCreating, setIsCreating] = useState(false);
     const [addDeviceModalOpen, setAddDeviceModalOpen] = useState(false);
-    const [availableEngines, setAvailableEngines] = useState<any[]>([]);
+    const [availableEngines, setAvailableEngines] = useState<EngineOption[]>([]);
     const [qrCodes, setQrCodes] = useState<{ [key: string]: string }>({});
     const [qrLoading, setQrLoading] = useState<{ [key: string]: boolean }>({});
     const [token, setToken] = useState<string | null>(null);
+
+    const parseJsonResponse = useCallback(async (res: Response) => {
+        const raw = await res.text();
+        if (!raw) return {};
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return { error: raw };
+        }
+    }, []);
+
+    const getResponseError = (payload: ApiErrorLike | null | undefined, fallback: string) => {
+        if (payload?.error) return String(payload.error);
+        if (payload?.message) return String(payload.message);
+        return fallback;
+    };
 
     useEffect(() => {
         const t = localStorage.getItem('token');
@@ -69,13 +97,13 @@ export default function Dashboard() {
         try {
             const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions/available-engines`);
             if (res && res.ok) {
-                const data = await res.json();
+                const data = await parseJsonResponse(res);
                 if (data.engines) setAvailableEngines(data.engines);
             }
         } catch (error) {
             console.error('Error fetching engines:', error);
         }
-    }, [token, authorizedFetch]);
+    }, [token, authorizedFetch, parseJsonResponse]);
 
     // Fetch sessions first, but it will need fetchQr
     const fetchSessions = useCallback(async (signal?: AbortSignal) => {
@@ -84,7 +112,7 @@ export default function Dashboard() {
             const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions`, { signal });
             if (res?.ok === false || res === null) return;
 
-            const data = await res.json();
+            const data = await parseJsonResponse(res);
             if (Array.isArray(data)) {
                 setSessions(data);
                 // Clear QR codes for sessions that are now connected
@@ -101,32 +129,12 @@ export default function Dashboard() {
                 console.error('Invalid sessions data:', data);
             }
             setLoading(false);
-        } catch (error: any) {
-            if (error?.name === 'AbortError') return; // ignore cancelled requests
+        } catch (error: unknown) {
+            if (error instanceof DOMException && error.name === 'AbortError') return; // ignore cancelled requests
             console.error('Error fetching sessions:', error);
             setLoading(false);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token, authorizedFetch]);
-
-    const fetchQr = useCallback(async (sessionId: string) => {
-        if (!token) return;
-        try {
-            const res = await authorizedFetch(`/api/qr?sessionId=${sessionId}`);
-            if (res?.ok === false || res === null) return;
-
-            const data = await res.json();
-            if (data.qr) {
-                setQrCodes(prev => ({ ...prev, [sessionId]: data.qr }));
-            } else if (data.status === 'CONNECTED') {
-                // Remove immediate fetchSessions() call to break circular dependency.
-                // The 5-second polling interval will refresh the UI automatically.
-                console.log(`Session ${sessionId} connected, waiting for poll refresh...`);
-            }
-        } catch (error) {
-            console.error(`Error fetching QR for ${sessionId}:`, error);
-        }
-    }, [token, authorizedFetch]);
+    }, [token, authorizedFetch, parseJsonResponse]);
 
 
     useEffect(() => {
@@ -152,10 +160,14 @@ export default function Dashboard() {
         if (!newSessionId || isCreating || !token) return;
         setIsCreating(true);
         try {
-            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/connect`, {
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/connect`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId: newSessionId, engineType: newSessionEngine })
             });
+            if (!res || !res.ok) {
+                const payload = res ? await parseJsonResponse(res) : null;
+                throw new Error(getResponseError(payload, 'Failed to create session'));
+            }
             setNewSessionId('');
             setAddDeviceModalOpen(false);
             fetchSessions();
@@ -181,9 +193,13 @@ export default function Dashboard() {
         });
         if (!result.isConfirmed) return;
         try {
-            await authorizedFetch(`/api/sessions/${sessionId}`, {
+            const res = await authorizedFetch(`/api/sessions/${sessionId}`, {
                 method: 'DELETE'
             });
+            if (!res || !res.ok) {
+                const payload = res ? await parseJsonResponse(res) : null;
+                throw new Error(getResponseError(payload, 'Failed to delete session'));
+            }
             // Clear QR code if exists
             setQrCodes(prev => {
                 const newCodes = { ...prev };
@@ -211,10 +227,14 @@ export default function Dashboard() {
         });
         if (!result.isConfirmed) return;
         try {
-            await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/logout`, {
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/whatsapp/logout`, {
                 method: 'POST',
                 body: JSON.stringify({ sessionId })
             });
+            if (!res || !res.ok) {
+                const payload = res ? await parseJsonResponse(res) : null;
+                throw new Error(getResponseError(payload, 'Failed to disconnect session'));
+            }
             fetchSessions();
         } catch (err) {
             console.error('Error disconnecting:', err);
@@ -250,7 +270,7 @@ export default function Dashboard() {
                 try {
                     const qrRes = await authorizedFetch(`/api/qr?sessionId=${sessionId}`);
                     if (qrRes?.ok === true) {
-                        const data = await qrRes.json();
+                        const data = await parseJsonResponse(qrRes);
                         if (data.qr) {
                             console.log(`[Dashboard] QR Code received for ${sessionId}`);
                             setQrCodes(prev => ({ ...prev, [sessionId]: data.qr }));

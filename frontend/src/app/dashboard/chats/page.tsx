@@ -12,6 +12,23 @@ import ChatWindow from '../../../components/chats/ChatWindow';
 import MobileChatDrawer from '../../../components/chats/MobileChatDrawer';
 import { type Chat, type Message, type WASession } from '../../../components/chats/types';
 import Button from '@/components/ui/Button';
+import { ApiError, apiRequest } from '@/lib/api/client';
+
+const toDisplayName = (chat: Partial<Chat>) => {
+    const fallbackId = typeof chat.id === 'string' ? chat.id : '';
+    const phoneFallback = fallbackId.replace('@s.whatsapp.net', '').replace('@g.us', '');
+    const candidates = [chat.name, phoneFallback, fallbackId].filter((value) => typeof value === 'string' && value.trim().length > 0);
+    return candidates[0] || 'Unknown contact';
+};
+
+const normalizeChat = (chat: Partial<Chat>): Chat => ({
+    id: String(chat.id || ''),
+    name: toDisplayName(chat),
+    unreadCount: typeof chat.unreadCount === 'number' ? chat.unreadCount : 0,
+    conversationTimestamp: typeof chat.conversationTimestamp === 'number' ? chat.conversationTimestamp : 0,
+    lastMessage: typeof chat.lastMessage === 'string' ? chat.lastMessage : '',
+    isGroup: Boolean(chat.isGroup),
+});
 
 export default function ChatsPage() {
     const [sessions, setSessions] = useState<WASession[]>([]);
@@ -20,17 +37,14 @@ export default function ChatsPage() {
     const [selectedChat, setSelectedChat] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
-    const [loadingChats, setLoadingChats] = useState(false);
+    const [loadingChats, setLoadingChats] = useState(true);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [apiKey, setApiKey] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [showMobileDrawer, setShowMobileDrawer] = useState(false);
     const [showDesktopRail, setShowDesktopRail] = useState(true);
     const [showDetailsPanel, setShowDetailsPanel] = useState(true);
-    const [showConsentModal, setShowConsentModal] = useState(() => {
-        if (typeof window === 'undefined') return false;
-        return !localStorage.getItem('chat_data_consent');
-    });
+    const [showConsentModal, setShowConsentModal] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -63,58 +77,75 @@ export default function ChatsPage() {
     };
 
     useEffect(() => {
+        const timer = window.setTimeout(() => {
+            setShowConsentModal(!localStorage.getItem('chat_data_consent'));
+        }, 0);
+        return () => window.clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
         const token = localStorage.getItem('token');
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
         if (!token) return;
 
-        fetch(`${apiBase}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((r) => r.json())
+        apiRequest<{ user?: { api_key?: string } }>('/auth/me', { token })
             .then((data) => {
                 if (data.user?.api_key) setApiKey(data.user.api_key);
             })
-            .catch(console.error);
+            .catch((error) => {
+                console.error('Failed to load /auth/me:', error);
+            });
 
-        fetch(`${apiBase}/sessions`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((r) => r.json())
+        apiRequest<WASession[]>('/sessions', { token })
             .then((data) => {
                 if (!Array.isArray(data)) return;
                 setSessions(data);
                 const connected = data.find((s: WASession) => s.status === 'CONNECTED');
-                if (connected) setSelectedSession(connected.id);
+                if (connected) {
+                    setLoadingChats(true);
+                    setSelectedSession(connected.id);
+                }
             })
-            .catch(console.error);
+            .catch((error) => {
+                console.error('Failed to load /sessions:', error);
+            });
     }, []);
 
     useEffect(() => {
         if (!selectedSession || !apiKey) return;
-        fetch(`/api/chats?sessionId=${encodeURIComponent(selectedSession)}`, {
+        apiRequest<{ success?: boolean; chats?: Partial<Chat>[] }>(`/chats?sessionId=${encodeURIComponent(selectedSession)}`, {
             headers: { 'x-api-key': apiKey },
+            token: '',
         })
-            .then((r) => r.json())
             .then((data) => {
-                if (data.success) setChatsSource(data.chats || []);
+                if (!data.success || !Array.isArray(data.chats)) {
+                    setChatsSource([]);
+                    return;
+                }
+                setChatsSource(data.chats.map(normalizeChat).filter((chat) => chat.id));
             })
-            .catch(console.error)
+            .catch((error) => {
+                console.error('Failed to load chats:', error);
+                setChatsSource([]);
+            })
             .finally(() => setLoadingChats(false));
     }, [selectedSession, apiKey]);
 
     useEffect(() => {
         if (!selectedChat || !selectedSession || !apiKey) return;
-        fetch(`/api/chats/${encodeURIComponent(selectedChat)}/messages?sessionId=${encodeURIComponent(selectedSession)}&limit=50`, {
+        apiRequest<{ success?: boolean; messages?: Message[] }>(`/chats/${encodeURIComponent(selectedChat)}/messages?sessionId=${encodeURIComponent(selectedSession)}&limit=50`, {
             headers: { 'x-api-key': apiKey },
+            token: '',
         })
-            .then((r) => r.json())
             .then((data) => {
                 if (data.success) {
                     setMessages(data.messages || []);
                     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
                 }
             })
-            .catch(console.error)
+            .catch((error) => {
+                console.error('Failed to load messages:', error);
+                setMessages([]);
+            })
             .finally(() => setLoadingMessages(false));
     }, [selectedChat, selectedSession, apiKey]);
 
@@ -122,21 +153,19 @@ export default function ChatsPage() {
         e.preventDefault();
         if (!newMessage.trim() || !selectedChat || !apiKey) return;
 
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || '/api';
         try {
-            const res = await fetch(`${apiBase}/messages/text`, {
+            const data = await apiRequest<{ success?: boolean; error?: string }>('/messages/text', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'x-api-key': apiKey,
                 },
-                body: JSON.stringify({
+                token: '',
+                body: {
                     sessionId: selectedSession,
                     phone: selectedChat.replace('@s.whatsapp.net', ''),
                     message: newMessage,
-                }),
+                },
             });
-            const data = await res.json();
             if (!data.success) return;
 
             const sent = newMessage;
@@ -151,6 +180,10 @@ export default function ChatsPage() {
             ]);
             setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
         } catch (err) {
+            if (err instanceof ApiError) {
+                console.error(`Failed to send message (${err.status}): ${err.message}`);
+                return;
+            }
             console.error(err);
         }
     };

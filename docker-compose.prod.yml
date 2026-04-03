@@ -5,8 +5,6 @@
 # All variables MUST be set in Dokploy environment tab
 # This file inherits Dokploy's Traefik networking
 
-version: '3.9'
-
 services:
   # ============================================================
   # 1. PostgreSQL Database
@@ -92,6 +90,7 @@ services:
       LOG_LEVEL: warn
       LOG_FORMAT: json
       PINO_LOG_LEVEL: warn
+      DATA_EXPORTS_DIR: /app/exports
       
       # Encryption
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
@@ -158,12 +157,16 @@ services:
     volumes:
       # Persist WhatsApp sessions (encrypted)
       - whatsapp_sessions_prod:/app/auth_info_baileys
+      # Persist Baileys message store
+      - whatsapp_store_prod:/app/store_baileys
       # Persist Puppeteer sessions
       - whatsapp_puppeteer_prod:/app/store_puppeteer
       # Persist backups
       - backups_data_prod:/app/backups
       # Persist logs
       - logs_data_prod:/app/logs
+      # Persist GDPR exports
+      - data_exports_prod:/app/exports
     
     depends_on:
       db:
@@ -286,6 +289,10 @@ volumes:
   whatsapp_sessions_prod:
     driver: local
 
+  # Baileys message store
+  whatsapp_store_prod:
+    driver: local
+
   # Puppeteer sessions
   whatsapp_puppeteer_prod:
     driver: local
@@ -296,6 +303,10 @@ volumes:
 
   # Logs (encrypted)
   logs_data_prod:
+    driver: local
+
+  # GDPR exports
+  data_exports_prod:
     driver: local
 
 # ============================================================

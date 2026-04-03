@@ -84,6 +84,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       LOG_FORMAT: ${LOG_FORMAT}
       PINO_LOG_LEVEL: ${PINO_LOG_LEVEL}
+      DATA_EXPORTS_DIR: /app/exports
       
       # Encryption
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
@@ -163,12 +164,16 @@ services:
     volumes:
       # Persist WhatsApp sessions (encrypted)
       - whatsapp_sessions:/app/auth_info_baileys
+      # Persist Baileys message store
+      - whatsapp_store:/app/store_baileys
       # Persist Puppeteer sessions
       - whatsapp_puppeteer:/app/store_puppeteer
       # Persist backups
       - backups_data:/app/backups
       # Persist logs
       - logs_data:/app/logs
+      # Persist GDPR exports
+      - data_exports:/app/exports
     
     depends_on:
       db:
@@ -264,6 +269,10 @@ volumes:
   # WhatsApp sessions (should be encrypted)
   whatsapp_sessions:
     driver: local
+
+  # Baileys message store
+  whatsapp_store:
+    driver: local
     
   # Puppeteer sessions
   whatsapp_puppeteer:
@@ -275,6 +284,10 @@ volumes:
   
   # Logs
   logs_data:
+    driver: local
+
+  # GDPR exports
+  data_exports:
     driver: local
 
 # ============================================================
