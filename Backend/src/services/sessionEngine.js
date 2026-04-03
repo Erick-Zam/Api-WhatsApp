@@ -128,7 +128,7 @@ export const setSessionEngineConfig = async ({ sessionId, userId, engineType, en
 
     await runQuery(
         `INSERT INTO session_engine_events (session_id, user_id, old_engine_type, new_engine_type, reason, created_at)
-         VALUES ($1, $2, NULL, $3, $4, NOW())`,
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
         [sessionId, userId, previousEngine, engineType, 'manual_update']
     ).catch(() => {
         // Table might not exist yet in some environments; do not fail config update.

@@ -78,33 +78,36 @@ export default function Dashboard() {
     }, [token, authorizedFetch]);
 
     // Fetch sessions first, but it will need fetchQr
-    const fetchSessions = useCallback(async () => {
+    const fetchSessions = useCallback(async (signal?: AbortSignal) => {
         if (!token) return;
         try {
-            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions`);
+            const res = await authorizedFetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/sessions`, { signal });
             if (res?.ok === false || res === null) return;
 
             const data = await res.json();
             if (Array.isArray(data)) {
                 setSessions(data);
-
-                // For any session not connected, try to fetch its QR
+                // Clear QR codes for sessions that are now connected
                 data.forEach((s: Session) => {
-                    if (s.status !== 'CONNECTED' && !qrLoading[s.id]) {
-                        // Using a function reference that will be defined below
-                        fetchQr(s.id);
+                    if (s.status === 'CONNECTED') {
+                        setQrCodes(prev => {
+                            const next = { ...prev };
+                            delete next[s.id];
+                            return next;
+                        });
                     }
                 });
             } else {
                 console.error('Invalid sessions data:', data);
             }
             setLoading(false);
-        } catch (error) {
+        } catch (error: any) {
+            if (error?.name === 'AbortError') return; // ignore cancelled requests
             console.error('Error fetching sessions:', error);
             setLoading(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token, authorizedFetch, qrLoading]); // We'll add fetchQr to deps after fixing circularity or ignore it
+    }, [token, authorizedFetch]);
 
     const fetchQr = useCallback(async (sessionId: string) => {
         if (!token) return;
@@ -127,13 +130,23 @@ export default function Dashboard() {
 
 
     useEffect(() => {
-        if (token) {
-            fetchSessions();
-            fetchEngines();
-            const interval = setInterval(fetchSessions, 5000);
-            return () => clearInterval(interval);
-        }
-    }, [token, fetchSessions]);
+        if (!token) return;
+        let abortController = new AbortController();
+
+        const poll = async () => {
+            abortController.abort(); // cancel previous in-flight request
+            abortController = new AbortController();
+            await fetchSessions(abortController.signal);
+        };
+
+        poll(); // initial fetch
+        fetchEngines();
+        const interval = setInterval(poll, 10000); // poll every 10s
+        return () => {
+            clearInterval(interval);
+            abortController.abort();
+        };
+    }, [token, fetchSessions, fetchEngines]);
 
     const handleCreateSession = async () => {
         if (!newSessionId || isCreating || !token) return;
