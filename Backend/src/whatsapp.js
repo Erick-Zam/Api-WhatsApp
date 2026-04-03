@@ -174,13 +174,15 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
 
     // Listen for contacts update
     sock.ev.on('contacts.update', (update) => {
-        console.log(`[${sessionId}] Contacts Update:`, update.length);
-        triggerWebhooks(sessionId, 'contacts.update', update);
+        // Suppress massive logging and webhook trigger during sync to prevent event loop blockage
+        // console.log(`[${sessionId}] Contacts Update:`, update.length);
+        // triggerWebhooks(sessionId, 'contacts.update', update);
     });
 
     sock.ev.on('contacts.upsert', (contacts) => {
-        console.log(`[${sessionId}] Contacts Upsert:`, contacts.length);
-        triggerWebhooks(sessionId, 'contacts.upsert', contacts);
+        // Suppress massive logging and webhook trigger during sync to prevent event loop blockage
+        // console.log(`[${sessionId}] Contacts Upsert:`, contacts.length);
+        // triggerWebhooks(sessionId, 'contacts.upsert', contacts);
     });
 
     // Listen for status updates (read receipts etc)
