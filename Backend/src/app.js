@@ -28,7 +28,7 @@ import { verifyJwt } from './middleware/jwtAuth.js';
 import { ensureCriticalSchema } from './startup/ensureCriticalSchema.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.BACKEND_PORT || process.env.PORT || 3001);
 
 // --- Security Middleware ---
 app.use(helmet()); // Set secure HTTP headers
@@ -54,6 +54,15 @@ app.use(activityLogger); // Log all requests
 
 app.get('/', (req, res) => {
     res.send('WhatsApp API Backend SaaS is running! Visit <a href="/admin/">/admin/</a> for the dashboard.');
+});
+
+app.get('/health', (_req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'backend',
+        port: PORT,
+        timestamp: new Date().toISOString(),
+    });
 });
 
 // Admin Routes (Protected inside)

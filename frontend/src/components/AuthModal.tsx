@@ -54,7 +54,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onRegistered }:
         return 'Access your dashboard, sessions, and delivery analytics.';
     }, [mode]);
 
-    const startOAuth = async (provider: 'google' | 'github') => {
+    const startOAuth = async (provider: 'google' | 'github' | 'microsoft') => {
         setError('');
         setSuccess('');
 

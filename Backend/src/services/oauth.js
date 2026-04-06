@@ -28,6 +28,16 @@ const OAUTH_CONFIG = {
         userEmailsUrl: 'https://api.github.com/user/emails',
         scopes: ['read:user', 'user:email'],
     },
+    microsoft: {
+        enabled: process.env.MICROSOFT_OAUTH_ENABLED === 'true',
+        clientId: process.env.MICROSOFT_CLIENT_ID,
+        clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+        callbackUrl: process.env.MICROSOFT_CALLBACK_URL,
+        authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+        tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+        userInfoUrl: 'https://graph.microsoft.com/v1.0/me',
+        scopes: ['openid', 'profile', 'email', 'User.Read'],
+    },
 };
 
 const cleanupStateStore = () => {
@@ -71,6 +81,17 @@ const buildGithubAuthUrl = (config, state) => {
     url.searchParams.set('redirect_uri', config.callbackUrl);
     url.searchParams.set('scope', config.scopes.join(' '));
     url.searchParams.set('state', state);
+    return url.toString();
+};
+
+const buildMicrosoftAuthUrl = (config, state) => {
+    const url = new URL(config.authUrl);
+    url.searchParams.set('client_id', config.clientId);
+    url.searchParams.set('redirect_uri', config.callbackUrl);
+    url.searchParams.set('response_type', 'code');
+    url.searchParams.set('scope', config.scopes.join(' '));
+    url.searchParams.set('state', state);
+    url.searchParams.set('response_mode', 'query');
     return url.toString();
 };
 
@@ -156,6 +177,41 @@ const getProviderProfile = async (provider, code) => {
         };
     }
 
+    if (provider === 'microsoft') {
+        const tokenRes = await axios.post(config.tokenUrl, new URLSearchParams({
+            client_id: config.clientId,
+            client_secret: config.clientSecret,
+            code,
+            redirect_uri: config.callbackUrl,
+            grant_type: 'authorization_code',
+        }), {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            timeout: 15000,
+        });
+
+        const accessToken = tokenRes.data.access_token;
+        if (!accessToken) {
+            throw new Error('Microsoft token exchange failed');
+        }
+
+        const profileRes = await axios.get(config.userInfoUrl, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            timeout: 15000,
+        });
+
+        const profile = profileRes.data;
+        const email = (profile.mail || profile.userPrincipalName || '').toLowerCase();
+        if (!profile?.id || !email) {
+            throw new Error('Microsoft profile is missing required email or id');
+        }
+
+        return {
+            providerUserId: String(profile.id),
+            email,
+            displayName: profile.displayName || email.split('@')[0],
+        };
+    }
+
     throw new Error('Unsupported OAuth provider');
 };
 
@@ -210,6 +266,10 @@ export const generateOAuthUrl = (provider) => {
 
     if (provider === 'github') {
         return { url: buildGithubAuthUrl(config, state), state };
+    }
+
+    if (provider === 'microsoft') {
+        return { url: buildMicrosoftAuthUrl(config, state), state };
     }
 
     throw new Error('Unsupported OAuth provider');

@@ -12,7 +12,7 @@ interface RegisterFormProps {
     onEmailChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
     onPasswordConfirmChange: (value: string) => void;
-    onOAuth: (provider: 'google' | 'github') => void;
+    onOAuth: (provider: 'google' | 'github' | 'microsoft') => void;
     onSwitchToLogin: () => void;
 }
 
@@ -76,12 +76,15 @@ export default function RegisterForm({
                 <span className="h-px bg-[color:color-mix(in_srgb,var(--border-soft)_80%,transparent)]" />
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-3">
                 <Button onClick={() => onOAuth('google')} variant="secondary" className="bg-transparent">
                     Google
                 </Button>
                 <Button onClick={() => onOAuth('github')} variant="secondary" className="bg-transparent">
                     GitHub
+                </Button>
+                <Button onClick={() => onOAuth('microsoft')} variant="secondary" className="bg-transparent">
+                    Microsoft
                 </Button>
             </div>
 
