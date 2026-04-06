@@ -4,15 +4,16 @@ import pino from 'pino';
 import fs from 'node:fs';
 import path from 'node:path';
 import { triggerWebhooks } from './services/webhooks.js';
+import { initializeSessionHealth, startHeartbeatMonitoring, stopHeartbeatMonitoring, cleanupZombieSessions, startZombieCleanupSchedule, shutdownHealthMonitoring } from './services/sessionHealthMonitor.js';
 
 // Session storage
 const sessions = new Map(); // sessionId -> socket
 const qrCodes = new Map(); // sessionId -> qrCode
 const retryCounts = new Map(); // sessionId -> retryCount
 const sessionStoreFlushIntervals = new Map(); // sessionId -> intervalId
-const MAX_RETRIES = 10;
+const MAX_RETRIES = 3; // Reduced from 10 for faster failure detection (~15 min total instead of 70+)
 const BASE_RETRY_DELAY_MS = 5000;
-const MAX_RETRY_DELAY_MS = 60000;
+const MAX_RETRY_DELAY_MS = 180000; // 3 minutes max retry delay (capped to 15 min total)
 const AUTH_DIR = 'auth_info_baileys';
 const STORE_DIR = 'store_baileys';
 
@@ -34,6 +35,17 @@ store.readFromFile(storeFile);
 setInterval(() => {
     store.writeToFile(storeFile);
 }, 10_000);
+
+// Initialize health monitoring on startup
+let zombieCleanupInterval = null;
+const initializeHealthMonitoring = () => {
+    if (!zombieCleanupInterval) {
+        zombieCleanupInterval = startZombieCleanupSchedule(sessions, sessionStores, sessionStoreFlushIntervals);
+    }
+};
+
+// Call on startup
+initializeHealthMonitoring();
 
 // Helper to get session ID from request or default
 const getSession = (sessionId = 'default') => sessions.get(sessionId);
@@ -139,6 +151,10 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
             retryCounts.set(sessionId, 0);
             console.log(`Session '${sessionId}' connected to WhatsApp!`);
 
+            // Start heartbeat monitoring for this session
+            initializeSessionHealth(sessionId);
+            startHeartbeatMonitoring(sessionId, sock);
+
             // Generate API Key ONLY on successful connection
             import('./services/apiKeys.js').then(({ createSessionKey }) => {
                 createSessionKey(sessionId).catch(e => console.error(`Error creating key for ${sessionId}:`, e));
@@ -149,6 +165,10 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
         } else if (connection === 'close') {
             qrCodes.delete(sessionId);
             sessions.delete(sessionId); // Remove closed session
+            
+            // Stop heartbeat monitoring
+            stopHeartbeatMonitoring(sessionId);
+            
             const flushInterval = sessionStoreFlushIntervals.get(sessionId);
             if (flushInterval) {
                 clearInterval(flushInterval);
@@ -670,6 +690,25 @@ const groupLeave = async (sessionId, jid) => {
     if (!sock) throw new Error(`Session '${sessionId}' not connected`);
     return await sock.groupLeave(jid);
 };
+
+// Graceful shutdown handlers
+process.on('SIGINT', () => {
+    console.log('[Shutdown] SIGINT received, cleaning up...');
+    shutdownHealthMonitoring();
+    if (zombieCleanupInterval) {
+        clearInterval(zombieCleanupInterval);
+    }
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('[Shutdown] SIGTERM received, cleaning up...');
+    shutdownHealthMonitoring();
+    if (zombieCleanupInterval) {
+        clearInterval(zombieCleanupInterval);
+    }
+    process.exit(0);
+});
 
 export {
     connectToWhatsApp,

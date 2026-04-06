@@ -8,12 +8,26 @@ import {
     setSessionEngineConfig,
 } from '../services/sessionEngine.js';
 import { getSessionHealth } from '../services/sessionOrchestrator.js';
+import { getAllSessionHealth } from '../services/sessionHealthMonitor.js';
 
 const router = express.Router();
 
 router.get('/available-engines', async (_req, res) => {
     try {
         return res.json({ engines: getAvailableEngines() });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/health/all', async (_req, res) => {
+    try {
+        const allHealth = getAllSessionHealth();
+        return res.json({
+            count: allHealth.length,
+            sessions: allHealth,
+            timestamp: new Date().toISOString(),
+        });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
