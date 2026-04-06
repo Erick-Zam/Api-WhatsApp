@@ -9,6 +9,7 @@ import schedulerRoutes from './routes/scheduler.js';
 import templateRoutes from './routes/templates.js';
 import webhookRoutes from './routes/webhooks.js';
 import chatRoutes from './routes/chats.js';
+import messageArchiveRoutes from './routes/messageArchive.js';
 import sessionEngineRoutes from './routes/sessionEngine.js';
 import { initScheduler } from './services/scheduler.js';
 import * as db from './db.js'; // Import DB to check ownership
@@ -255,6 +256,7 @@ app.post('/whatsapp/logout', verifyJwt, async (req, res) => {
 // These are used by external systems or the Playground (which simulates external usage)
 
 app.use('/messages', authenticate, messageRoutes);
+app.use('/message-archive', authenticate, messageArchiveRoutes);
 app.use('/scheduler', authenticate, schedulerRoutes);
 app.use('/templates', authenticate, templateRoutes);
 app.use('/webhooks', authenticate, webhookRoutes);

@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { triggerWebhooks } from './services/webhooks.js';
 import { initializeSessionHealth, startHeartbeatMonitoring, stopHeartbeatMonitoring, cleanupZombieSessions, startZombieCleanupSchedule, shutdownHealthMonitoring } from './services/sessionHealthMonitor.js';
+import { initializeMessageArchive, saveMessage, getSessionMessages, scheduleCleanup as scheduleMessageCleanup } from './services/messageArchive.js';
 
 // Session storage
 const sessions = new Map(); // sessionId -> socket
@@ -38,11 +39,18 @@ setInterval(() => {
 
 // Initialize health monitoring on startup
 let zombieCleanupInterval = null;
+let messageCleanupInterval = null;
 const initializeHealthMonitoring = () => {
     if (!zombieCleanupInterval) {
         zombieCleanupInterval = startZombieCleanupSchedule(sessions, sessionStores, sessionStoreFlushIntervals);
     }
+    if (!messageCleanupInterval) {
+        messageCleanupInterval = scheduleMessageCleanup();
+    }
 };
+
+// Initialize message archive on startup
+await initializeMessageArchive();
 
 // Call on startup
 initializeHealthMonitoring();
@@ -155,6 +163,36 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
             initializeSessionHealth(sessionId);
             startHeartbeatMonitoring(sessionId, sock);
 
+            // Restore messages from database archive
+            (async () => {
+                try {
+                    console.log(`[MessageArchive] Restoring messages for session '${sessionId}'...`);
+                    const archivedMessages = await getSessionMessages(sessionId);
+                    
+                    if (archivedMessages.length > 0) {
+                        // Restore to in-memory store
+                        const sessionStore = sessionStores.get(sessionId);
+                        if (sessionStore && sessionStore.messages) {
+                            for (const msg of archivedMessages) {
+                                if (msg.key && msg.key.remoteJid) {
+                                    const jid = msg.key.remoteJid;
+                                    if (!sessionStore.messages[jid]) {
+                                        sessionStore.messages[jid] = { array: [] };
+                                    }
+                                    const exists = sessionStore.messages[jid].array.find(m => m.key.id === msg.key.id);
+                                    if (!exists) {
+                                        sessionStore.messages[jid].array.push(msg);
+                                    }
+                                }
+                            }
+                            console.log(`[MessageArchive] Restored ${archivedMessages.length} messages for session '${sessionId}'`);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`[MessageArchive] Error restoring messages for '${sessionId}':`, error.message);
+                }
+            })();
+
             // Generate API Key ONLY on successful connection
             import('./services/apiKeys.js').then(({ createSessionKey }) => {
                 createSessionKey(sessionId).catch(e => console.error(`Error creating key for ${sessionId}:`, e));
@@ -224,8 +262,17 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
                             timestamp: msg.messageTimestamp,
                         });
                     }
+                    // Save to archive (fire-and-forget, don't block)
+                    saveMessage(sessionId, msg).catch(err => 
+                        console.error(`[MessageArchive] Error saving message for ${sessionId}:`, err.message)
+                    );
                     // Trigger webhook for new message
                     triggerWebhooks(sessionId, 'messages.upsert', msg);
+                } else {
+                    // Also archive outbound messages
+                    saveMessage(sessionId, msg).catch(err =>
+                        console.error(`[MessageArchive] Error saving outbound message for ${sessionId}:`, err.message)
+                    );
                 }
             }
         }
@@ -698,6 +745,9 @@ process.on('SIGINT', () => {
     if (zombieCleanupInterval) {
         clearInterval(zombieCleanupInterval);
     }
+    if (messageCleanupInterval) {
+        clearInterval(messageCleanupInterval);
+    }
     process.exit(0);
 });
 
@@ -706,6 +756,9 @@ process.on('SIGTERM', () => {
     shutdownHealthMonitoring();
     if (zombieCleanupInterval) {
         clearInterval(zombieCleanupInterval);
+    }
+    if (messageCleanupInterval) {
+        clearInterval(messageCleanupInterval);
     }
     process.exit(0);
 });
