@@ -103,5 +103,51 @@
     "auth": "Autenticación",
     "authDesc": "Todas las peticiones a los endpoints de mensajería requieren autenticación usando el header x-api-key.",
     "howToGet": "Cómo obtener tu Llave API:"
+  },
+  "chats": {
+    "labels": {
+      "inbox": "Bandeja",
+      "conversations": "Conversaciones",
+      "session": "Sesión",
+      "noSessions": "Sin sesiones disponibles",
+      "searchPlaceholder": "Buscar por nombre o número",
+      "loadingMoreChats": "Cargando más conversaciones...",
+      "noChatsFound": "No se encontraron chats.",
+      "noMessagesYet": "Aún no hay mensajes",
+      "activeNow": "Activo ahora"
+    },
+    "actions": {
+      "retry": "Reintentar",
+      "refreshChats": "Recargar chats",
+      "loadMoreChats": "Cargar más conversaciones",
+      "send": "Enviar",
+      "showConversations": "Mostrar conversaciones",
+      "browseChats": "Explorar chats",
+      "collapseConversations": "Colapsar conversaciones",
+      "expandConversations": "Expandir conversaciones",
+      "collapseDetails": "Colapsar detalles",
+      "expandDetails": "Expandir detalles",
+      "closeDrawer": "Cerrar panel"
+    },
+    "messages": {
+      "loading": "Cargando mensajes...",
+      "empty": "No hay mensajes todavía.",
+      "loadingOlder": "Cargando historial...",
+      "loadOlder": "Cargar mensajes anteriores",
+      "typeMessage": "Escribe un mensaje"
+    },
+    "emptyState": {
+      "title": "Elige una conversación",
+      "subtitle": "Abre un hilo desde el panel izquierdo para empezar a escribir.",
+      "mobileTitle": "Selecciona un chat para comenzar"
+    },
+    "errors": {
+      "title": "Error de carga",
+      "authRequired": "Tu sesión web no está disponible. Inicia sesión nuevamente.",
+      "apiKeyMissing": "No se pudo obtener la llave API de la sesión.",
+      "sessionsLoadFailed": "No se pudieron cargar las sesiones.",
+      "chatsLoadFailed": "No se pudieron cargar los chats.",
+      "messagesLoadFailed": "No se pudo cargar el historial de mensajes."
+    }
   }
 }

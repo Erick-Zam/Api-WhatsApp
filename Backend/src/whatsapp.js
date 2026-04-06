@@ -9,7 +9,10 @@ import { triggerWebhooks } from './services/webhooks.js';
 const sessions = new Map(); // sessionId -> socket
 const qrCodes = new Map(); // sessionId -> qrCode
 const retryCounts = new Map(); // sessionId -> retryCount
-const MAX_RETRIES = 5;
+const sessionStoreFlushIntervals = new Map(); // sessionId -> intervalId
+const MAX_RETRIES = 10;
+const BASE_RETRY_DELAY_MS = 5000;
+const MAX_RETRY_DELAY_MS = 60000;
 const AUTH_DIR = 'auth_info_baileys';
 const STORE_DIR = 'store_baileys';
 
@@ -34,6 +37,7 @@ setInterval(() => {
 
 // Helper to get session ID from request or default
 const getSession = (sessionId = 'default') => sessions.get(sessionId);
+const getReconnectDelayMs = (retryCount) => Math.min((retryCount + 1) * BASE_RETRY_DELAY_MS, MAX_RETRY_DELAY_MS);
 
 /**
  * Connect to WhatsApp with a specific session ID
@@ -93,10 +97,17 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
     // Create per-session store
     const sessionStore = makeInMemoryStore({ logger: pino({ level: 'silent' }) });
     const sessionStoreFile = path.join(STORE_DIR, `${sessionId}_store.json`);
+    const oldInterval = sessionStoreFlushIntervals.get(sessionId);
+    if (oldInterval) {
+        clearInterval(oldInterval);
+        sessionStoreFlushIntervals.delete(sessionId);
+    }
+
     sessionStore.readFromFile(sessionStoreFile);
-    setInterval(() => {
+    const flushInterval = setInterval(() => {
         sessionStore.writeToFile(sessionStoreFile);
     }, 10_000);
+    sessionStoreFlushIntervals.set(sessionId, flushInterval);
 
     sessionStore.bind(sock.ev);
     sessionStores.set(sessionId, sessionStore);
@@ -138,6 +149,11 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
         } else if (connection === 'close') {
             qrCodes.delete(sessionId);
             sessions.delete(sessionId); // Remove closed session
+            const flushInterval = sessionStoreFlushIntervals.get(sessionId);
+            if (flushInterval) {
+                clearInterval(flushInterval);
+                sessionStoreFlushIntervals.delete(sessionId);
+            }
 
             const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
             console.log(`Session '${sessionId}' closed. Reconnecting: ${shouldReconnect}`);
@@ -155,11 +171,13 @@ async function connectToWhatsApp(sessionId = 'default', options = {}) {
 
                 if (currentRetry < MAX_RETRIES) {
                     retryCounts.set(sessionId, currentRetry + 1);
+                    const retryDelayMs = getReconnectDelayMs(currentRetry);
+                    console.log(`Reconnect attempt ${currentRetry + 1}/${MAX_RETRIES} for ${sessionId} in ${retryDelayMs}ms.`);
                     setTimeout(() => {
                         connectToWhatsApp(sessionId).catch((err) => {
                             console.error(`Reconnect failed for ${sessionId}:`, err);
                         });
-                    }, (currentRetry + 1) * 2000);
+                    }, retryDelayMs);
                 } else {
                     console.error(`Max retries reached for session ${sessionId}.`);
                 }
@@ -494,15 +512,29 @@ const getChatSnippet = (msg) => {
     return `[${type.replace('Message', '')}]`;
 };
 
-const getChats = (sessionId) => {
+const toTimestamp = (value) => {
+    const parsed = Number.parseInt(String(value || ''), 10);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+const getMessageTimestamp = (msg) => {
+    const ts = msg?.messageTimestamp;
+    if (typeof ts === 'number') return ts;
+    if (typeof ts === 'string') return toTimestamp(ts) || 0;
+    if (typeof ts?.toString === 'function') return toTimestamp(ts.toString()) || 0;
+    return 0;
+};
+
+const getChats = (sessionId, options = {}) => {
+    const { limit = 100, before } = options;
     const store = sessionStores.get(sessionId);
-    if (!store) return [];
+    if (!store) return { items: [], hasMore: false, nextCursor: null };
 
     const chats = store.chats.all();
     const contacts = store.contacts;
 
     // Enrich with names and last message snippets
-    return chats.map(chat => {
+    const enriched = chats.map(chat => {
         const contact = contacts[chat.id];
 
         // Priority: Chat Name > Contact Name > PushName > Verified Name > Phone Number
@@ -524,6 +556,23 @@ const getChats = (sessionId) => {
             isGroup: chat.id.endsWith('@g.us')
         };
     }).sort((a, b) => (b.conversationTimestamp || 0) - (a.conversationTimestamp || 0));
+
+    const beforeTimestamp = toTimestamp(before);
+    const filtered = beforeTimestamp
+        ? enriched.filter((chat) => (chat.conversationTimestamp || 0) < beforeTimestamp)
+        : enriched;
+
+    const chunk = filtered.slice(0, Math.max(1, Math.min(limit, 500)));
+    const hasMore = filtered.length > chunk.length;
+    const nextCursor = hasMore && chunk.length > 0
+        ? String(chunk[chunk.length - 1].conversationTimestamp || 0)
+        : null;
+
+    return {
+        items: chunk,
+        hasMore,
+        nextCursor,
+    };
 };
 
 const getContacts = (sessionId) => {
@@ -532,23 +581,46 @@ const getContacts = (sessionId) => {
     return store.contacts;
 };
 
-const getMessages = (sessionId, jid, limit = 50) => {
+const getMessages = (sessionId, jid, options = {}) => {
+    const { limit = 50, before } = options;
     const store = sessionStores.get(sessionId);
-    if (!store) return [];
+    if (!store) return { items: [], hasMore: false, nextCursor: null };
     
     // Baileys structure: messages[jid].array
     const messages = store.messages[jid]?.array || [];
+    const beforeTimestamp = toTimestamp(before);
+    const maxItems = Math.max(1, Math.min(limit, 500));
+
+    let filteredMessages = messages;
+    if (beforeTimestamp) {
+        filteredMessages = messages.filter((msg) => getMessageTimestamp(msg) < beforeTimestamp);
+    }
+
+    const chunk = filteredMessages.slice(-maxItems);
+    const hasMore = filteredMessages.length > chunk.length;
+    const nextCursor = hasMore && chunk.length > 0
+        ? String(getMessageTimestamp(chunk[0]))
+        : null;
     
     // For each message, if it's from someone else and store has contact, add pushName if missing
-    return messages.slice(-limit).map(msg => {
+    const items = chunk.map((msg) => {
         if (!msg.key.fromMe && !msg.pushName) {
             const contact = store.contacts[msg.key.remoteJid];
             if (contact) {
-                msg.pushName = contact.name || contact.notify;
+                return {
+                    ...msg,
+                    pushName: contact.name || contact.notify,
+                };
             }
         }
         return msg;
     });
+
+    return {
+        items,
+        hasMore,
+        nextCursor,
+    };
 };
 
 const createGroup = async (sessionId, subject, participants) => {

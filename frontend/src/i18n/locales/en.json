@@ -103,5 +103,51 @@
     "auth": "Authentication",
     "authDesc": "All requests to the messaging endpoints require authentication using the x-api-key header.",
     "howToGet": "How to get your API Key:"
+  },
+  "chats": {
+    "labels": {
+      "inbox": "Inbox",
+      "conversations": "Conversations",
+      "session": "Session",
+      "noSessions": "No sessions available",
+      "searchPlaceholder": "Search by name or number",
+      "loadingMoreChats": "Loading more conversations...",
+      "noChatsFound": "No chats found.",
+      "noMessagesYet": "No messages yet",
+      "activeNow": "Active now"
+    },
+    "actions": {
+      "retry": "Retry",
+      "refreshChats": "Refresh chats",
+      "loadMoreChats": "Load more conversations",
+      "send": "Send",
+      "showConversations": "Show conversations",
+      "browseChats": "Browse chats",
+      "collapseConversations": "Collapse conversations",
+      "expandConversations": "Expand conversations",
+      "collapseDetails": "Collapse details",
+      "expandDetails": "Expand details",
+      "closeDrawer": "Close drawer"
+    },
+    "messages": {
+      "loading": "Loading messages...",
+      "empty": "No messages yet.",
+      "loadingOlder": "Loading history...",
+      "loadOlder": "Load older messages",
+      "typeMessage": "Type a message"
+    },
+    "emptyState": {
+      "title": "Choose a conversation",
+      "subtitle": "Open a thread from the left panel to start messaging.",
+      "mobileTitle": "Select a chat to start messaging"
+    },
+    "errors": {
+      "title": "Loading error",
+      "authRequired": "Your web session is missing. Please sign in again.",
+      "apiKeyMissing": "Could not load the session API key.",
+      "sessionsLoadFailed": "Failed to load sessions.",
+      "chatsLoadFailed": "Failed to load chats.",
+      "messagesLoadFailed": "Failed to load message history."
+    }
   }
 }

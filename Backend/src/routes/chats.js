@@ -32,10 +32,16 @@ router.use(validateSession);
 // Get all chats
 router.get('/', async (req, res) => {
     try {
-        const chats = await getChats(req.sessionId);
-        // Sort by last message timestamp if available, usually handled by frontend or pre-sorted by store?
-        // Baileys store returns all chats, order might vary.
-        res.json({ success: true, count: chats.length, chats });
+        const limit = Number.parseInt(req.query.limit, 10) || 100;
+        const before = typeof req.query.before === 'string' ? req.query.before : undefined;
+        const result = await getChats(req.sessionId, { limit, before });
+        res.json({
+            success: true,
+            count: result.items.length,
+            chats: result.items,
+            hasMore: result.hasMore,
+            nextCursor: result.nextCursor,
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -44,14 +50,21 @@ router.get('/', async (req, res) => {
 // Get messages for a specific chat
 router.get('/:jid/messages', async (req, res) => {
     const { jid } = req.params;
-    const limit = parseInt(req.query.limit) || 50;
+    const limit = Number.parseInt(req.query.limit, 10) || 50;
+    const before = typeof req.query.before === 'string' ? req.query.before : undefined;
 
     // Format JID just in case
     const formattedJid = formatJid(jid);
 
     try {
-        const messages = await getMessages(req.sessionId, formattedJid, limit);
-        res.json({ success: true, count: messages.length, messages });
+        const result = await getMessages(req.sessionId, formattedJid, { limit, before });
+        res.json({
+            success: true,
+            count: result.items.length,
+            messages: result.items,
+            hasMore: result.hasMore,
+            nextCursor: result.nextCursor,
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

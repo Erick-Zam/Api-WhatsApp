@@ -18,7 +18,9 @@
     "migrate:engine-modes": "node src/scripts/migrate_engine_modes.js",
     "migrate:auth-phase4": "node src/scripts/migrate_auth_phase4.js",
     "setup": "node src/scripts/setup_admin_db.js",
-    "backup": "node src/scripts/backup.js"
+    "backup": "node src/scripts/backup.js",
+    "db:health": "node src/scripts/verify_db_health.js",
+    "db:cleanup": "node src/scripts/cleanup_db.js"
   },
   "dependencies": {
     "@whatsapp/shared": "file:../packages/shared",

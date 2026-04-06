@@ -6,6 +6,7 @@ import {
     PhoneIcon,
     VideoCameraIcon,
 } from '@heroicons/react/24/solid';
+import { useTranslation } from 'react-i18next';
 import type { Chat, Message } from './types';
 import MessageInput from './MessageInput';
 import MessageThread from './MessageThread';
@@ -14,6 +15,10 @@ interface ChatWindowProps {
     selectedChat: string;
     currentChat?: Chat;
     loadingMessages: boolean;
+    loadingOlderMessages: boolean;
+    hasMoreMessages: boolean;
+    messagesError?: string | null;
+    onLoadOlderMessages?: () => void;
     messages: Message[];
     messagesEndRef: React.RefObject<HTMLDivElement | null>;
     onOpenDrawer: () => void;
@@ -30,6 +35,10 @@ export default function ChatWindow({
     selectedChat,
     currentChat,
     loadingMessages,
+    loadingOlderMessages,
+    hasMoreMessages,
+    messagesError,
+    onLoadOlderMessages,
     messages,
     messagesEndRef,
     onOpenDrawer,
@@ -41,6 +50,8 @@ export default function ChatWindow({
     onNewMessageChange,
     onSendMessage,
 }: ChatWindowProps) {
+    const { t } = useTranslation();
+
     return (
         <>
             <div className="border-b border-slate-800/70 bg-slate-950/80 px-3 py-2.5 backdrop-blur md:px-5">
@@ -54,7 +65,7 @@ export default function ChatWindow({
                     </div>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-slate-100">{currentChat?.name || selectedChat}</p>
-                        <p className="text-xs text-emerald-300/85">Active now</p>
+                        <p className="text-xs text-emerald-300/85">{t('chats.labels.activeNow')}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -62,7 +73,7 @@ export default function ChatWindow({
                         type="button"
                         className="hidden rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white lg:inline-flex"
                         onClick={onToggleDesktopRail}
-                        title={showDesktopRail ? 'Collapse conversations' : 'Expand conversations'}
+                        title={showDesktopRail ? t('chats.actions.collapseConversations') : t('chats.actions.expandConversations')}
                     >
                         {showDesktopRail ? <ArrowsPointingInIcon className="h-5 w-5" /> : <Bars3BottomLeftIcon className="h-5 w-5" />}
                     </button>
@@ -72,7 +83,7 @@ export default function ChatWindow({
                         type="button"
                         className="rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-300 transition hover:border-slate-600 hover:text-white"
                         onClick={onToggleDetailsPanel}
-                        title={showDetailsPanel ? 'Collapse details' : 'Expand details'}
+                        title={showDetailsPanel ? t('chats.actions.collapseDetails') : t('chats.actions.expandDetails')}
                     >
                         {showDetailsPanel ? <ArrowsPointingInIcon className="h-5 w-5" /> : <InformationCircleIcon className="h-5 w-5" />}
                     </button>
@@ -80,7 +91,15 @@ export default function ChatWindow({
                 </div>
             </div>
 
-            <MessageThread messages={messages} loadingMessages={loadingMessages} endRef={messagesEndRef} />
+            <MessageThread
+                messages={messages}
+                loadingMessages={loadingMessages}
+                loadingOlderMessages={loadingOlderMessages}
+                hasMoreMessages={hasMoreMessages}
+                messagesError={messagesError}
+                onLoadOlderMessages={onLoadOlderMessages}
+                endRef={messagesEndRef}
+            />
             <MessageInput newMessage={newMessage} onChange={onNewMessageChange} onSubmit={onSendMessage} />
         </>
     );

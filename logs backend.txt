@@ -1,0 +1,325 @@
+2026-04-06T16:20:36.041Z > @whatsapp/backend@1.0.0 start
+2026-04-06T16:20:36.041Z > node src/app.js
+2026-04-06T16:20:38.154Z [schema] ok: pgcrypto extension
+2026-04-06T16:20:38.161Z [schema] ok: api_users.email_verified
+2026-04-06T16:20:38.162Z [schema] ok: trusted_devices table
+2026-04-06T16:20:38.166Z [schema] ok: trusted_devices indexes
+2026-04-06T16:20:38.168Z [schema] ok: audit_events table
+2026-04-06T16:20:38.170Z [schema] ok: audit_events indexes
+2026-04-06T16:20:38.171Z [schema] ok: security_events table
+2026-04-06T16:20:38.173Z [schema] ok: security_events indexes
+2026-04-06T16:20:38.178Z [schema] ok: whatsapp_sessions engine columns
+2026-04-06T16:20:38.182Z [schema] ok: session_engine_events table
+2026-04-06T16:20:38.184Z [schema] ok: session_engine_events indexes
+2026-04-06T16:20:38.186Z [schema] ok: session_engine_health_metrics table
+2026-04-06T16:20:38.187Z [schema] ok: session_engine_health_metrics indexes
+2026-04-06T16:20:38.190Z Server is running on port 3001
+2026-04-06T16:20:38.195Z Database connected: 2026-04-06T16:20:38.190Z
+2026-04-06T16:20:38.196Z No sessions found in volume. Waiting for user to create one.
+2026-04-06T16:21:31.391Z [AUDIT] User: ccfd7a6e-f972-4c17-9c98-50faa4647da5 | Action: LOGIN_OAUTH | IP: ::ffff:10.0.1.23 | Details: { provider: 'google', email: 'evimu150@gmail.com' }
+2026-04-06T16:21:44.507Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:21:44.530Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:21:44.531Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:21:44.806Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:21:44.807Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:22:16.352Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:22:44.809Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:22:44.809Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:22:58.140Z [Connect] Forced cleanup of session 'baileys' before start.
+2026-04-06T16:22:58.205Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:22:58.231Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:22:58.233Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:22:58.859Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:22:58.859Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:23:04.811Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:23:04.812Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:23:16.041Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:23:24.812Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:23:24.814Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:23:36.040Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:23:44.816Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:23:44.816Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:23:56.048Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:23:58.860Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:23:58.860Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:24:04.815Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:24:04.816Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:24:16.049Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:24:18.861Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:24:18.861Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:24:24.819Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:24:24.819Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:24:24.819Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:24:26.881Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:24:26.894Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:24:26.894Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:24:27.310Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:24:27.310Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:24:36.053Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:24:38.862Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:24:38.862Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:24:58.863Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:24:58.863Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:25:18.864Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:25:18.864Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:25:27.313Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:25:27.313Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:25:38.866Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:25:38.866Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:25:38.866Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:25:42.899Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:25:42.908Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:25:42.908Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:25:43.222Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:25:43.223Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:25:46.868Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:25:47.313Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:25:47.314Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:26:07.314Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:26:07.314Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:26:27.314Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:26:27.315Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:26:43.226Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:26:43.226Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:26:46.881Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:26:47.316Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:26:47.316Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:27:03.225Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:27:03.225Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:27:06.877Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:27:07.319Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:27:07.319Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:27:07.319Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:27:13.372Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:27:13.395Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:27:13.395Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:27:13.974Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:27:13.974Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:27:23.226Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:27:23.226Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:27:26.878Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:27:43.227Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:27:43.227Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:27:46.886Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:28:03.228Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:28:03.228Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:28:06.885Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:28:13.975Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:28:13.976Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:28:23.229Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:28:23.229Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:28:23.229Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:28:31.270Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:28:31.279Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:28:31.279Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:28:31.595Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:28:31.595Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:28:33.977Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:28:33.977Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:28:53.977Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:28:53.977Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:29:13.979Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:29:13.979Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:29:17.593Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:29:31.597Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:29:31.597Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:29:33.979Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:29:33.979Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:29:51.598Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:29:51.599Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:29:53.982Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:29:53.982Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:29:53.982Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:30:04.057Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:30:04.069Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:30:04.070Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:30:04.417Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:30:04.417Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:30:11.600Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:30:11.600Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:30:17.599Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:30:31.600Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:30:31.600Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:30:37.604Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:30:51.599Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:30:51.599Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:30:57.603Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:31:04.429Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:31:04.429Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:31:11.601Z Max retries reached for session baileys.
+2026-04-06T16:31:11.601Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:31:11.601Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:31:11.601Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:31:17.605Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:31:24.418Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:31:24.418Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:31:37.617Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:31:44.420Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:31:44.420Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:32:04.420Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:32:04.421Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:32:13.906Z [Connect] Forced cleanup of session 'baileys' before start.
+2026-04-06T16:32:14.004Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:32:14.030Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:32:14.031Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:32:14.297Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:32:14.299Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:32:24.422Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:32:24.422Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:32:44.423Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:32:44.423Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:32:44.423Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:32:46.469Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:32:46.481Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:32:46.482Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:32:46.731Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:32:46.731Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:32:48.859Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:33:14.301Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:33:14.301Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:33:34.300Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:33:34.300Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:33:46.732Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:33:46.733Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:33:48.870Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:33:54.302Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:33:54.302Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:34:06.734Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:34:06.735Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:34:08.877Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:34:14.302Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:34:14.302Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:34:26.735Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:34:26.736Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:34:28.879Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:34:34.303Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:34:34.303Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:34:46.738Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:34:46.738Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:34:48.882Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:34:54.304Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:34:54.304Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:34:54.304Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:34:58.372Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:34:58.404Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:34:58.405Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:34:59.444Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:34:59.444Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:35:06.740Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:35:06.740Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:35:08.885Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:35:26.741Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:35:26.742Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:35:26.742Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:35:32.776Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:35:32.781Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:35:32.781Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:35:33.037Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:35:33.038Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:35:59.447Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:35:59.447Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:36:19.408Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:36:19.447Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:36:19.451Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:36:33.039Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:36:33.040Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:36:39.453Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:36:39.453Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:36:53.042Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:36:53.042Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:36:59.454Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:36:59.454Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:37:13.042Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:37:13.043Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:37:19.413Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:37:19.457Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:37:19.458Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:37:33.045Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:37:33.047Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:37:39.414Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:37:39.472Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:37:39.475Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:37:39.480Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:37:47.701Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:37:47.746Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:37:47.746Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:37:48.076Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:37:48.076Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:37:53.048Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:37:53.049Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:37:59.417Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:38:13.049Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:38:13.050Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:38:13.050Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:38:19.418Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:38:23.100Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:38:23.108Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:38:23.109Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:38:23.437Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:38:23.438Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:38:39.419Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:38:48.078Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:38:48.078Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:39:08.078Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:39:08.078Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:39:23.438Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:39:23.439Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:39:28.079Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:39:28.079Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:39:43.440Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:39:43.442Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:39:48.080Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:39:48.080Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:39:50.092Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:40:03.443Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:40:03.444Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:40:08.083Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:40:08.083Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:40:23.444Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:40:23.445Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:40:28.087Z Max retries reached for session baileys.
+2026-04-06T16:40:28.087Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:40:28.087Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:40:28.087Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:40:43.447Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:40:43.448Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:40:50.093Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:41:03.450Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:41:03.450Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:41:03.451Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:41:03.451Z Max retries reached for session baileys.
+2026-04-06T16:41:10.100Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:41:30.110Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:41:40.994Z [WARN] Suspicious path access detected | meta={"path":"/config.json","ipAddress":"::ffff:118.194.234.29","method":"GET"}
+2026-04-06T16:41:41.007Z [WARN] Security event: UNAUTHORIZED_ACCESS | meta={"severity":"MEDIUM","ipAddress":"::ffff:118.194.234.29"}
+2026-04-06T16:41:50.116Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:42:10.118Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:43:20.951Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:44:20.958Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:44:40.957Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:45:00.966Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:45:20.969Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:45:40.972Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:46:50.691Z [Connect] Forced cleanup of session 'baileys' before start.
+2026-04-06T16:46:50.774Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:46:50.806Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:46:50.809Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:46:51.425Z [CONNECTION] Session baileys: { connection: 'update', hasQr: true }
+2026-04-06T16:46:51.425Z [QR GENERATED] Session 'baileys' - Length: 237
+2026-04-06T16:46:52.114Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:47:07.915Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:47:08.399Z [CONNECTION] Session baileys: { connection: 'close', hasQr: false }
+2026-04-06T16:47:08.400Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:47:08.400Z Session 'baileys' closed. Reconnecting: true
+2026-04-06T16:47:10.416Z [Connect] Using WA v2.3000.1035194821 (isLatest: true)
+2026-04-06T16:47:10.424Z [CONNECTION] Session baileys: { connection: 'connecting', hasQr: false }
+2026-04-06T16:47:10.425Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:47:11.029Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:47:11.332Z [CONNECTION] Session baileys: { connection: 'open', hasQr: false }
+2026-04-06T16:47:11.332Z [QR UPDATE] Session 'baileys' - Updates (no QR in this packet)
+2026-04-06T16:47:11.333Z Session 'baileys' connected to WhatsApp!
+2026-04-06T16:47:58.527Z [QR GENERATED] Puppeteer Session 'puppeteer' - Length: 239
+2026-04-06T16:49:02.295Z [2026-04-06T16:49:02.291Z] [PID: 18] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Mon Apr 06 2026 16:49:00 GMT+0000 (Coordinated Universal Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+2026-04-06T16:49:50.802Z [Puppeteer] Session 'puppeteer' authenticated!
+2026-04-06T16:50:06.126Z [2026-04-06T16:50:06.126Z] [PID: 18] [32m[NODE-CRON][32m [33m[WARN][0m missed execution at Mon Apr 06 2026 16:50:00 GMT+0000 (Coordinated Universal Time)! Possible blocking IO or high CPU user at the same process used by node-cron.
+2026-04-06T16:50:14.686Z [Puppeteer] Session 'puppeteer' connected to WhatsApp!

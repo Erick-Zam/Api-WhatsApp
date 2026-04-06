@@ -1,0 +1,1535 @@
+2026-03-30T17:46:43.352Z The files belonging to this database system will be owned by user "postgres".
+2026-03-30T17:46:43.352Z This user must also own the server process.
+2026-03-30T17:46:43.352Z The database cluster will be initialized with locale "C".
+2026-03-30T17:46:43.352Z The default text search configuration will be set to "english".
+2026-03-30T17:46:43.352Z Data page checksums are disabled.
+2026-03-30T17:46:43.353Z fixing permissions on existing directory /var/lib/postgresql/data ... ok
+2026-03-30T17:46:43.353Z creating subdirectories ... ok
+2026-03-30T17:46:43.353Z selecting dynamic shared memory implementation ... posix
+2026-03-30T17:46:43.374Z selecting default max_connections ... 100
+2026-03-30T17:46:43.399Z selecting default shared_buffers ... 128MB
+2026-03-30T17:46:43.533Z selecting default time zone ... UTC
+2026-03-30T17:46:43.544Z creating configuration files ... ok
+2026-03-30T17:46:43.702Z running bootstrap script ... ok
+2026-03-30T17:46:43.968Z sh: locale: not found
+2026-03-30T17:46:43.968Z 2026-03-30 17:46:43.968 UTC [33] WARNING:  no usable system locales were found
+2026-03-30T17:46:44.532Z performing post-bootstrap initialization ... ok
+2026-03-30T17:46:44.607Z syncing data to disk ... ok
+2026-03-30T17:46:44.607Z initdb: warning: enabling "trust" authentication for local connections
+2026-03-30T17:46:44.607Z initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+2026-03-30T17:46:44.607Z Success. You can now start the database server using:
+2026-03-30T17:46:44.607Z pg_ctl -D /var/lib/postgresql/data -l logfile start
+2026-03-30T17:46:44.661Z waiting for server to start....2026-03-30 17:46:44.661 UTC [39] LOG:  starting PostgreSQL 15.17 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+2026-03-30T17:46:44.662Z 2026-03-30 17:46:44.662 UTC [39] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-03-30T17:46:44.668Z 2026-03-30 17:46:44.667 UTC [42] LOG:  database system was shut down at 2026-03-30 17:46:44 UTC
+2026-03-30T17:46:44.673Z 2026-03-30 17:46:44.673 UTC [39] LOG:  database system is ready to accept connections
+2026-03-30T17:46:44.738Z done
+2026-03-30T17:46:44.738Z server started
+2026-03-30T17:46:44.825Z CREATE DATABASE
+2026-03-30T17:46:44.828Z /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/01-init.sql
+2026-03-30T17:46:44.860Z CREATE TABLE
+2026-03-30T17:46:44.861Z INSERT 0 2
+2026-03-30T17:46:44.875Z CREATE TABLE
+2026-03-30T17:46:44.886Z CREATE TABLE
+2026-03-30T17:46:44.895Z CREATE TABLE
+2026-03-30T17:46:44.906Z CREATE TABLE
+2026-03-30T17:46:44.913Z CREATE TABLE
+2026-03-30T17:46:44.920Z CREATE TABLE
+2026-03-30T17:46:44.926Z CREATE TABLE
+2026-03-30T17:46:44.933Z CREATE TABLE
+2026-03-30T17:46:44.939Z CREATE TABLE
+2026-03-30T17:46:44.941Z CREATE INDEX
+2026-03-30T17:46:44.943Z CREATE INDEX
+2026-03-30T17:46:44.947Z waiting for server to shut down....2026-03-30 17:46:44.947 UTC [39] LOG:  received fast shutdown request
+2026-03-30T17:46:44.949Z 2026-03-30 17:46:44.949 UTC [39] LOG:  aborting any active transactions
+2026-03-30T17:46:44.957Z 2026-03-30 17:46:44.957 UTC [39] LOG:  background worker "logical replication launcher" (PID 45) exited with exit code 1
+2026-03-30T17:46:44.959Z 2026-03-30 17:46:44.959 UTC [40] LOG:  shutting down
+2026-03-30T17:46:44.960Z 2026-03-30 17:46:44.960 UTC [40] LOG:  checkpoint starting: shutdown immediate
+2026-03-30T17:46:44.989Z 2026-03-30 17:46:44.988 UTC [40] LOG:  checkpoint complete: wrote 948 buffers (5.8%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.016 s, sync=0.011 s, total=0.030 s; sync files=351, longest=0.002 s, average=0.001 s; distance=4485 kB, estimate=4485 kB
+2026-03-30T17:46:44.995Z 2026-03-30 17:46:44.995 UTC [39] LOG:  database system is shut down
+2026-03-30T17:46:45.047Z done
+2026-03-30T17:46:45.047Z server stopped
+2026-03-30T17:46:45.048Z PostgreSQL init process complete; ready for start up.
+2026-03-30T17:46:45.071Z 2026-03-30 17:46:45.071 UTC [1] LOG:  starting PostgreSQL 15.17 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+2026-03-30T17:46:45.071Z 2026-03-30 17:46:45.071 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-03-30T17:46:45.072Z 2026-03-30 17:46:45.071 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-03-30T17:46:45.073Z 2026-03-30 17:46:45.073 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-03-30T17:46:45.078Z 2026-03-30 17:46:45.078 UTC [57] LOG:  database system was shut down at 2026-03-30 17:46:44 UTC
+2026-03-30T17:46:45.085Z 2026-03-30 17:46:45.085 UTC [1] LOG:  database system is ready to accept connections
+2026-03-30T17:51:45.179Z 2026-03-30 17:51:45.178 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T17:51:51.708Z 2026-03-30 17:51:51.708 UTC [55] LOG:  checkpoint complete: wrote 68 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=6.521 s, sync=0.003 s, total=6.530 s; sync files=27, longest=0.002 s, average=0.001 s; distance=265 kB, estimate=265 kB
+2026-03-30T18:31:46.486Z 2026-03-30 18:31:46.485 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T18:31:46.709Z 2026-03-30 18:31:46.708 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.214 s, sync=0.002 s, total=0.224 s; sync files=3, longest=0.002 s, average=0.001 s; distance=3 kB, estimate=239 kB
+2026-03-30T18:41:46.898Z 2026-03-30 18:41:46.897 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T18:41:53.236Z 2026-03-30 18:41:53.236 UTC [55] LOG:  checkpoint complete: wrote 64 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=6.328 s, sync=0.005 s, total=6.339 s; sync files=53, longest=0.002 s, average=0.001 s; distance=290 kB, estimate=290 kB
+2026-03-30T19:16:46.892Z 2026-03-30 19:16:46.889 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T19:16:47.210Z 2026-03-30 19:16:47.210 UTC [55] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.308 s, sync=0.003 s, total=0.321 s; sync files=4, longest=0.002 s, average=0.001 s; distance=4 kB, estimate=261 kB
+2026-03-30T19:21:46.306Z 2026-03-30 19:21:46.305 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T19:21:48.623Z 2026-03-30 19:21:48.623 UTC [55] LOG:  checkpoint complete: wrote 24 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.310 s, sync=0.003 s, total=2.319 s; sync files=19, longest=0.001 s, average=0.001 s; distance=11 kB, estimate=236 kB
+2026-03-30T19:26:46.723Z 2026-03-30 19:26:46.722 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T19:26:46.932Z 2026-03-30 19:26:46.932 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.002 s, total=0.210 s; sync files=3, longest=0.002 s, average=0.001 s; distance=8 kB, estimate=213 kB
+2026-03-30T19:31:47.024Z 2026-03-30 19:31:47.023 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T19:31:47.432Z 2026-03-30 19:31:47.432 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.403 s, sync=0.002 s, total=0.409 s; sync files=4, longest=0.002 s, average=0.001 s; distance=10 kB, estimate=193 kB
+2026-03-30T19:36:47.535Z 2026-03-30 19:36:47.533 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T19:36:49.367Z 2026-03-30 19:36:49.366 UTC [55] LOG:  checkpoint complete: wrote 19 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.823 s, sync=0.004 s, total=1.834 s; sync files=16, longest=0.002 s, average=0.001 s; distance=29 kB, estimate=177 kB
+2026-03-30T19:41:47.467Z 2026-03-30 19:41:47.466 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T19:41:49.201Z 2026-03-30 19:41:49.201 UTC [55] LOG:  checkpoint complete: wrote 18 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.717 s, sync=0.005 s, total=1.735 s; sync files=14, longest=0.003 s, average=0.001 s; distance=28 kB, estimate=162 kB
+2026-03-30T19:45:33.134Z 2026-03-30 19:45:33.134 UTC [5526] ERROR:  duplicate key value violates unique constraint "api_users_username_key"
+2026-03-30T19:45:33.134Z 2026-03-30 19:45:33.134 UTC [5526] DETAIL:  Key (username)=(Erick) already exists.
+2026-03-30T19:45:33.134Z 2026-03-30 19:45:33.134 UTC [5526] STATEMENT:  INSERT INTO api_users (username, email, password_hash, api_key, role_id)
+2026-03-30T19:45:33.134Z VALUES ($1, $2, $3, $4, $5)
+2026-03-30T19:45:33.134Z RETURNING id, username, email, api_key, created_at
+2026-03-30T19:46:47.302Z 2026-03-30 19:46:47.301 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T19:46:49.530Z 2026-03-30 19:46:49.529 UTC [55] LOG:  checkpoint complete: wrote 23 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.209 s, sync=0.008 s, total=2.229 s; sync files=19, longest=0.002 s, average=0.001 s; distance=54 kB, estimate=151 kB
+2026-03-30T20:14:57.609Z 2026-03-30 20:14:57.606 UTC [6779] FATAL:  canceling authentication due to timeout
+2026-03-30T20:15:39.744Z 2026-03-30 20:15:39.744 UTC [6872] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:15:39.744Z 2026-03-30 20:15:39.744 UTC [6872] STATEMENT:
+2026-03-30T20:15:39.744Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:15:39.744Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:15:39.744Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:15:39.744Z FROM api_users u
+2026-03-30T20:15:39.744Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:15:39.744Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:15:39.744Z WHERE u.id = $1
+2026-03-30T20:15:39.765Z 2026-03-30 20:15:39.765 UTC [6874] ERROR:  relation "trusted_devices" does not exist at character 72
+2026-03-30T20:15:39.765Z 2026-03-30 20:15:39.765 UTC [6874] STATEMENT:
+2026-03-30T20:15:39.765Z SELECT id, device_name, last_used_at, trusted_at
+2026-03-30T20:15:39.765Z FROM trusted_devices
+2026-03-30T20:15:39.765Z WHERE user_id = $1
+2026-03-30T20:15:39.765Z ORDER BY last_used_at DESC
+2026-03-30T20:15:40.029Z 2026-03-30 20:15:40.029 UTC [6876] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:15:40.029Z 2026-03-30 20:15:40.029 UTC [6876] STATEMENT:
+2026-03-30T20:15:40.029Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:15:40.029Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:15:40.029Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:15:40.029Z FROM api_users u
+2026-03-30T20:15:40.029Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:15:40.029Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:15:40.029Z WHERE u.id = $1
+2026-03-30T20:15:50.255Z 2026-03-30 20:15:50.254 UTC [6892] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:15:50.255Z 2026-03-30 20:15:50.254 UTC [6892] STATEMENT:
+2026-03-30T20:15:50.255Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:15:50.255Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:15:50.255Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:15:50.255Z FROM api_users u
+2026-03-30T20:15:50.255Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:15:50.255Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:15:50.255Z WHERE u.id = $1
+2026-03-30T20:15:52.431Z 2026-03-30 20:15:52.431 UTC [6893] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:15:52.431Z 2026-03-30 20:15:52.431 UTC [6893] STATEMENT:
+2026-03-30T20:15:52.431Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:15:52.431Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:15:52.431Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:15:52.431Z FROM api_users u
+2026-03-30T20:15:52.431Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:15:52.431Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:15:52.431Z WHERE u.id = $1
+2026-03-30T20:15:52.442Z 2026-03-30 20:15:52.442 UTC [6894] ERROR:  relation "trusted_devices" does not exist at character 72
+2026-03-30T20:15:52.442Z 2026-03-30 20:15:52.442 UTC [6894] STATEMENT:
+2026-03-30T20:15:52.442Z SELECT id, device_name, last_used_at, trusted_at
+2026-03-30T20:15:52.442Z FROM trusted_devices
+2026-03-30T20:15:52.442Z WHERE user_id = $1
+2026-03-30T20:15:52.442Z ORDER BY last_used_at DESC
+2026-03-30T20:16:04.448Z 2026-03-30 20:16:04.445 UTC [6895] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:16:04.448Z 2026-03-30 20:16:04.445 UTC [6895] STATEMENT:
+2026-03-30T20:16:04.448Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:16:04.448Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:16:04.448Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:16:04.448Z FROM api_users u
+2026-03-30T20:16:04.448Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:16:04.448Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:16:04.448Z WHERE u.id = $1
+2026-03-30T20:16:07.786Z 2026-03-30 20:16:07.785 UTC [6904] ERROR:  relation "trusted_devices" does not exist at character 72
+2026-03-30T20:16:07.786Z 2026-03-30 20:16:07.785 UTC [6904] STATEMENT:
+2026-03-30T20:16:07.786Z SELECT id, device_name, last_used_at, trusted_at
+2026-03-30T20:16:07.786Z FROM trusted_devices
+2026-03-30T20:16:07.786Z WHERE user_id = $1
+2026-03-30T20:16:07.786Z ORDER BY last_used_at DESC
+2026-03-30T20:16:07.836Z 2026-03-30 20:16:07.836 UTC [6906] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:16:07.836Z 2026-03-30 20:16:07.836 UTC [6906] STATEMENT:
+2026-03-30T20:16:07.836Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:16:07.836Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:16:07.836Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:16:07.836Z FROM api_users u
+2026-03-30T20:16:07.836Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:16:07.836Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:16:07.836Z WHERE u.id = $1
+2026-03-30T20:16:16.826Z 2026-03-30 20:16:16.826 UTC [6903] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:16:16.826Z 2026-03-30 20:16:16.826 UTC [6903] STATEMENT:
+2026-03-30T20:16:16.826Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:16:16.826Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:16:16.826Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:16:16.826Z FROM api_users u
+2026-03-30T20:16:16.826Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:16:16.826Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:16:16.826Z WHERE u.id = $1
+2026-03-30T20:16:18.615Z 2026-03-30 20:16:18.615 UTC [6915] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:16:18.615Z 2026-03-30 20:16:18.615 UTC [6915] STATEMENT:
+2026-03-30T20:16:18.615Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:16:18.615Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:16:18.615Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:16:18.615Z FROM api_users u
+2026-03-30T20:16:18.615Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:16:18.615Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:16:18.615Z WHERE u.id = $1
+2026-03-30T20:16:20.823Z 2026-03-30 20:16:20.822 UTC [6914] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:16:20.823Z 2026-03-30 20:16:20.822 UTC [6914] STATEMENT:
+2026-03-30T20:16:20.823Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:16:20.823Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:16:20.823Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:16:20.823Z FROM api_users u
+2026-03-30T20:16:20.823Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:16:20.823Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:16:20.823Z WHERE u.id = $1
+2026-03-30T20:16:24.005Z 2026-03-30 20:16:24.005 UTC [6916] ERROR:  relation "trusted_devices" does not exist at character 72
+2026-03-30T20:16:24.005Z 2026-03-30 20:16:24.005 UTC [6916] STATEMENT:
+2026-03-30T20:16:24.005Z SELECT id, device_name, last_used_at, trusted_at
+2026-03-30T20:16:24.005Z FROM trusted_devices
+2026-03-30T20:16:24.005Z WHERE user_id = $1
+2026-03-30T20:16:24.005Z ORDER BY last_used_at DESC
+2026-03-30T20:16:24.065Z 2026-03-30 20:16:24.065 UTC [6924] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:16:24.065Z 2026-03-30 20:16:24.065 UTC [6924] STATEMENT:
+2026-03-30T20:16:24.065Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:16:24.065Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:16:24.065Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:16:24.065Z FROM api_users u
+2026-03-30T20:16:24.065Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:16:24.065Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:16:24.065Z WHERE u.id = $1
+2026-03-30T20:16:48.139Z 2026-03-30 20:16:48.139 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T20:16:49.270Z 2026-03-30 20:16:49.270 UTC [55] LOG:  checkpoint complete: wrote 12 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.123 s, sync=0.004 s, total=1.133 s; sync files=9, longest=0.002 s, average=0.001 s; distance=29 kB, estimate=139 kB
+2026-03-30T20:17:08.298Z 2026-03-30 20:17:08.297 UTC [6944] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:17:08.298Z 2026-03-30 20:17:08.297 UTC [6944] STATEMENT:
+2026-03-30T20:17:08.298Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:17:08.298Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:17:08.298Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:17:08.298Z FROM api_users u
+2026-03-30T20:17:08.298Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:17:08.298Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:17:08.298Z WHERE u.id = $1
+2026-03-30T20:17:10.673Z 2026-03-30 20:17:10.671 UTC [6952] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:17:10.673Z 2026-03-30 20:17:10.671 UTC [6952] STATEMENT:
+2026-03-30T20:17:10.673Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:17:10.673Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:17:10.673Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:17:10.673Z FROM api_users u
+2026-03-30T20:17:10.673Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:17:10.673Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:17:10.673Z WHERE u.id = $1
+2026-03-30T20:17:10.743Z 2026-03-30 20:17:10.743 UTC [6962] ERROR:  relation "trusted_devices" does not exist at character 72
+2026-03-30T20:17:10.744Z 2026-03-30 20:17:10.743 UTC [6962] STATEMENT:
+2026-03-30T20:17:10.744Z SELECT id, device_name, last_used_at, trusted_at
+2026-03-30T20:17:10.744Z FROM trusted_devices
+2026-03-30T20:17:10.744Z WHERE user_id = $1
+2026-03-30T20:17:10.744Z ORDER BY last_used_at DESC
+2026-03-30T20:17:39.862Z 2026-03-30 20:17:39.862 UTC [6987] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:17:39.862Z 2026-03-30 20:17:39.862 UTC [6987] STATEMENT:
+2026-03-30T20:17:39.862Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:17:39.862Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:17:39.862Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:17:39.862Z FROM api_users u
+2026-03-30T20:17:39.862Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:17:39.862Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:17:39.862Z WHERE u.id = $1
+2026-03-30T20:17:41.234Z 2026-03-30 20:17:41.234 UTC [6989] ERROR:  relation "trusted_devices" does not exist at character 72
+2026-03-30T20:17:41.234Z 2026-03-30 20:17:41.234 UTC [6989] STATEMENT:
+2026-03-30T20:17:41.234Z SELECT id, device_name, last_used_at, trusted_at
+2026-03-30T20:17:41.234Z FROM trusted_devices
+2026-03-30T20:17:41.234Z WHERE user_id = $1
+2026-03-30T20:17:41.234Z ORDER BY last_used_at DESC
+2026-03-30T20:17:41.266Z 2026-03-30 20:17:41.266 UTC [6988] ERROR:  column u.email_verified does not exist at character 90
+2026-03-30T20:17:41.266Z 2026-03-30 20:17:41.266 UTC [6988] STATEMENT:
+2026-03-30T20:17:41.266Z SELECT u.id, u.username, u.email, u.api_key, r.name as role, u.created_at, u.email_verified,
+2026-03-30T20:17:41.266Z (u.password_hash IS NOT NULL) as has_password,
+2026-03-30T20:17:41.266Z COALESCE(ms.is_enabled, false) as mfa_enabled
+2026-03-30T20:17:41.266Z FROM api_users u
+2026-03-30T20:17:41.266Z LEFT JOIN roles r ON u.role_id = r.id
+2026-03-30T20:17:41.266Z LEFT JOIN mfa_settings ms ON ms.user_id = u.id
+2026-03-30T20:17:41.266Z WHERE u.id = $1
+2026-03-30T20:21:48.364Z 2026-03-30 20:21:48.363 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T20:21:49.480Z 2026-03-30 20:21:49.479 UTC [55] LOG:  checkpoint complete: wrote 12 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.106 s, sync=0.004 s, total=1.117 s; sync files=9, longest=0.002 s, average=0.001 s; distance=44 kB, estimate=129 kB
+2026-03-30T20:26:00.996Z 2026-03-30 20:26:00.996 UTC [7392] FATAL:  role "postgres" does not exist
+2026-03-30T20:26:48.580Z 2026-03-30 20:26:48.580 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T20:26:55.927Z 2026-03-30 20:26:55.927 UTC [55] LOG:  checkpoint complete: wrote 74 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=7.333 s, sync=0.006 s, total=7.348 s; sync files=53, longest=0.002 s, average=0.001 s; distance=384 kB, estimate=384 kB
+2026-03-30T20:36:49.127Z 2026-03-30 20:36:49.127 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T20:36:51.042Z 2026-03-30 20:36:51.042 UTC [55] LOG:  checkpoint complete: wrote 20 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.908 s, sync=0.002 s, total=1.916 s; sync files=15, longest=0.001 s, average=0.001 s; distance=40 kB, estimate=350 kB
+2026-03-30T20:41:49.139Z 2026-03-30 20:41:49.138 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T20:41:49.348Z 2026-03-30 20:41:49.348 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.002 s, total=0.210 s; sync files=3, longest=0.002 s, average=0.001 s; distance=14 kB, estimate=316 kB
+2026-03-30T20:46:49.449Z 2026-03-30 20:46:49.449 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T20:46:49.961Z 2026-03-30 20:46:49.961 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.504 s, sync=0.002 s, total=0.513 s; sync files=5, longest=0.002 s, average=0.001 s; distance=20 kB, estimate=287 kB
+2026-03-30T20:51:50.061Z 2026-03-30 20:51:50.061 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T20:51:50.370Z 2026-03-30 20:51:50.370 UTC [55] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.302 s, sync=0.002 s, total=0.310 s; sync files=4, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=259 kB
+2026-03-30T21:06:50.666Z 2026-03-30 21:06:50.665 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T21:06:51.076Z 2026-03-30 21:06:51.076 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.403 s, sync=0.002 s, total=0.411 s; sync files=4, longest=0.002 s, average=0.001 s; distance=19 kB, estimate=235 kB
+2026-03-30T21:16:50.255Z 2026-03-30 21:16:50.254 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T21:16:51.067Z 2026-03-30 21:16:51.067 UTC [55] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.805 s, sync=0.002 s, total=0.813 s; sync files=6, longest=0.002 s, average=0.001 s; distance=54 kB, estimate=217 kB
+2026-03-30T21:41:50.517Z 2026-03-30 21:41:50.516 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T21:41:50.727Z 2026-03-30 21:41:50.727 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.003 s, total=0.211 s; sync files=3, longest=0.002 s, average=0.001 s; distance=15 kB, estimate=197 kB
+2026-03-30T22:56:52.077Z 2026-03-30 22:56:52.076 UTC [55] LOG:  checkpoint starting: time
+2026-03-30T22:56:52.486Z 2026-03-30 22:56:52.486 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.403 s, sync=0.002 s, total=0.410 s; sync files=4, longest=0.002 s, average=0.001 s; distance=15 kB, estimate=179 kB
+2026-03-31T02:26:56.464Z 2026-03-31 02:26:56.464 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T02:26:56.673Z 2026-03-31 02:26:56.672 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.002 s, total=0.209 s; sync files=3, longest=0.002 s, average=0.001 s; distance=7 kB, estimate=161 kB
+2026-03-31T02:36:56.863Z 2026-03-31 02:36:56.862 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T02:36:57.073Z 2026-03-31 02:36:57.073 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.002 s, total=0.211 s; sync files=3, longest=0.002 s, average=0.001 s; distance=8 kB, estimate=146 kB
+2026-03-31T03:01:56.517Z 2026-03-31 03:01:56.516 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T03:01:57.129Z 2026-03-31 03:01:57.128 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.603 s, sync=0.003 s, total=0.612 s; sync files=4, longest=0.003 s, average=0.001 s; distance=6 kB, estimate=132 kB
+2026-03-31T03:56:57.163Z 2026-03-31 03:56:57.163 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T03:56:57.372Z 2026-03-31 03:56:57.372 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.002 s, total=0.210 s; sync files=3, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=120 kB
+2026-03-31T07:52:01.878Z 2026-03-31 07:52:01.878 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T07:52:02.089Z 2026-03-31 07:52:02.089 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.003 s, total=0.212 s; sync files=3, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=109 kB
+2026-03-31T09:22:02.801Z 2026-03-31 09:22:02.801 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T09:22:03.013Z 2026-03-31 09:22:03.013 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.002 s, total=0.212 s; sync files=3, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=99 kB
+2026-03-31T13:47:06.983Z 2026-03-31 13:47:06.982 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T13:47:07.196Z 2026-03-31 13:47:07.195 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.002 s, total=0.213 s; sync files=3, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=90 kB
+2026-03-31T14:27:06.893Z 2026-03-31 14:27:06.893 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T14:27:07.102Z 2026-03-31 14:27:07.102 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.002 s, total=0.210 s; sync files=3, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=83 kB
+2026-03-31T15:47:07.583Z 2026-03-31 15:47:07.582 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T15:47:07.795Z 2026-03-31 15:47:07.794 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.003 s, total=0.213 s; sync files=3, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=76 kB
+2026-03-31T17:57:10.183Z 2026-03-31 17:57:10.183 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T17:57:10.395Z 2026-03-31 17:57:10.394 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.003 s, total=0.212 s; sync files=3, longest=0.002 s, average=0.001 s; distance=13 kB, estimate=69 kB
+2026-03-31T18:32:11.063Z 2026-03-31 18:32:11.062 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T18:32:11.274Z 2026-03-31 18:32:11.274 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.002 s, total=0.212 s; sync files=3, longest=0.002 s, average=0.001 s; distance=13 kB, estimate=64 kB
+2026-03-31T21:57:15.026Z 2026-03-31 21:57:15.025 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T21:57:15.857Z 2026-03-31 21:57:15.857 UTC [55] LOG:  checkpoint complete: wrote 11 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.820 s, sync=0.004 s, total=0.833 s; sync files=7, longest=0.003 s, average=0.001 s; distance=21 kB, estimate=59 kB
+2026-03-31T22:02:15.957Z 2026-03-31 22:02:15.956 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:02:16.384Z 2026-03-31 22:02:16.383 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.408 s, sync=0.010 s, total=0.427 s; sync files=13, longest=0.004 s, average=0.001 s; distance=12 kB, estimate=55 kB
+2026-03-31T22:07:15.480Z 2026-03-31 22:07:15.480 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:07:20.211Z 2026-03-31 22:07:20.211 UTC [55] LOG:  checkpoint complete: wrote 48 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.721 s, sync=0.004 s, total=4.732 s; sync files=33, longest=0.002 s, average=0.001 s; distance=249 kB, estimate=249 kB
+2026-03-31T22:13:10.682Z 2026-03-31 22:13:10.681 UTC [78121] ERROR:  column "admin" does not exist at character 46
+2026-03-31T22:13:10.682Z 2026-03-31 22:13:10.681 UTC [78121] STATEMENT:  INSERT INTO roles (name, description) SELECT admin, Administrator WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = admin); UPDATE api_users u SET role_id = r.id FROM roles r WHERE r.name = admin AND lower(u.email)=lower(evimu150@gmail.com);
+2026-03-31T22:17:15.400Z 2026-03-31 22:17:15.399 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:17:15.609Z 2026-03-31 22:17:15.608 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.002 s, total=0.210 s; sync files=3, longest=0.002 s, average=0.001 s; distance=10 kB, estimate=225 kB
+2026-03-31T22:22:15.707Z 2026-03-31 22:22:15.707 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:22:16.119Z 2026-03-31 22:22:16.119 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.403 s, sync=0.002 s, total=0.413 s; sync files=5, longest=0.002 s, average=0.001 s; distance=15 kB, estimate=204 kB
+2026-03-31T22:27:15.207Z 2026-03-31 22:27:15.206 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:27:16.521Z 2026-03-31 22:27:16.521 UTC [55] LOG:  checkpoint complete: wrote 14 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.306 s, sync=0.003 s, total=1.315 s; sync files=9, longest=0.002 s, average=0.001 s; distance=17 kB, estimate=186 kB
+2026-03-31T22:32:15.619Z 2026-03-31 22:32:15.618 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:32:17.034Z 2026-03-31 22:32:17.034 UTC [55] LOG:  checkpoint complete: wrote 15 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.407 s, sync=0.003 s, total=1.416 s; sync files=8, longest=0.002 s, average=0.001 s; distance=63 kB, estimate=173 kB
+2026-03-31T22:36:40.055Z 2026-03-31 22:36:40.055 UTC [79258] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:36:40.056Z 2026-03-31 22:36:40.055 UTC [79258] STATEMENT:
+2026-03-31T22:36:40.056Z INSERT INTO security_events (
+2026-03-31T22:36:40.056Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:36:40.056Z description, action_taken
+2026-03-31T22:36:40.056Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:36:48.743Z 2026-03-31 22:36:48.743 UTC [79261] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:36:48.743Z 2026-03-31 22:36:48.743 UTC [79261] STATEMENT:
+2026-03-31T22:36:48.743Z INSERT INTO security_events (
+2026-03-31T22:36:48.743Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:36:48.743Z description, action_taken
+2026-03-31T22:36:48.743Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:36:49.388Z 2026-03-31 22:36:49.388 UTC [79259] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:36:49.389Z 2026-03-31 22:36:49.388 UTC [79259] STATEMENT:
+2026-03-31T22:36:49.389Z INSERT INTO security_events (
+2026-03-31T22:36:49.389Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:36:49.389Z description, action_taken
+2026-03-31T22:36:49.389Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:36:50.140Z 2026-03-31 22:36:50.140 UTC [79260] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:36:50.140Z 2026-03-31 22:36:50.140 UTC [79260] STATEMENT:
+2026-03-31T22:36:50.140Z INSERT INTO security_events (
+2026-03-31T22:36:50.140Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:36:50.140Z description, action_taken
+2026-03-31T22:36:50.140Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:36:50.918Z 2026-03-31 22:36:50.917 UTC [79262] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:36:50.918Z 2026-03-31 22:36:50.917 UTC [79262] STATEMENT:
+2026-03-31T22:36:50.918Z INSERT INTO security_events (
+2026-03-31T22:36:50.918Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:36:50.918Z description, action_taken
+2026-03-31T22:36:50.918Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:37:15.129Z 2026-03-31 22:37:15.129 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:37:17.046Z 2026-03-31 22:37:17.046 UTC [55] LOG:  checkpoint complete: wrote 20 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.908 s, sync=0.004 s, total=1.918 s; sync files=13, longest=0.002 s, average=0.001 s; distance=38 kB, estimate=160 kB
+2026-03-31T22:47:02.385Z 2026-03-31 22:47:02.385 UTC [79741] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:02.385Z 2026-03-31 22:47:02.385 UTC [79741] STATEMENT:
+2026-03-31T22:47:02.385Z INSERT INTO security_events (
+2026-03-31T22:47:02.385Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:02.385Z description, action_taken
+2026-03-31T22:47:02.385Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:09.894Z 2026-03-31 22:47:09.894 UTC [79745] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:09.894Z 2026-03-31 22:47:09.894 UTC [79745] STATEMENT:
+2026-03-31T22:47:09.894Z INSERT INTO security_events (
+2026-03-31T22:47:09.894Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:09.894Z description, action_taken
+2026-03-31T22:47:09.894Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:12.373Z 2026-03-31 22:47:12.373 UTC [79744] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:12.373Z 2026-03-31 22:47:12.373 UTC [79744] STATEMENT:
+2026-03-31T22:47:12.373Z INSERT INTO security_events (
+2026-03-31T22:47:12.373Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:12.373Z description, action_taken
+2026-03-31T22:47:12.373Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:12.940Z 2026-03-31 22:47:12.940 UTC [79743] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:12.940Z 2026-03-31 22:47:12.940 UTC [79743] STATEMENT:
+2026-03-31T22:47:12.940Z INSERT INTO security_events (
+2026-03-31T22:47:12.940Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:12.940Z description, action_taken
+2026-03-31T22:47:12.940Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:13.966Z 2026-03-31 22:47:13.966 UTC [79753] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:13.966Z 2026-03-31 22:47:13.966 UTC [79753] STATEMENT:
+2026-03-31T22:47:13.966Z INSERT INTO security_events (
+2026-03-31T22:47:13.966Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:13.966Z description, action_taken
+2026-03-31T22:47:13.966Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:15.237Z 2026-03-31 22:47:15.237 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:47:15.647Z 2026-03-31 22:47:15.647 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.403 s, sync=0.002 s, total=0.411 s; sync files=4, longest=0.002 s, average=0.001 s; distance=15 kB, estimate=145 kB
+2026-03-31T22:47:18.300Z 2026-03-31 22:47:18.300 UTC [79755] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:18.300Z 2026-03-31 22:47:18.300 UTC [79755] STATEMENT:
+2026-03-31T22:47:18.300Z INSERT INTO security_events (
+2026-03-31T22:47:18.300Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:18.300Z description, action_taken
+2026-03-31T22:47:18.300Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:19.075Z 2026-03-31 22:47:19.075 UTC [79763] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:19.075Z 2026-03-31 22:47:19.075 UTC [79763] STATEMENT:
+2026-03-31T22:47:19.075Z INSERT INTO security_events (
+2026-03-31T22:47:19.075Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:19.075Z description, action_taken
+2026-03-31T22:47:19.075Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:19.717Z 2026-03-31 22:47:19.716 UTC [79764] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:19.717Z 2026-03-31 22:47:19.716 UTC [79764] STATEMENT:
+2026-03-31T22:47:19.717Z INSERT INTO security_events (
+2026-03-31T22:47:19.717Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:19.717Z description, action_taken
+2026-03-31T22:47:19.717Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:20.211Z 2026-03-31 22:47:20.211 UTC [79765] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:20.211Z 2026-03-31 22:47:20.211 UTC [79765] STATEMENT:
+2026-03-31T22:47:20.211Z INSERT INTO security_events (
+2026-03-31T22:47:20.211Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:20.211Z description, action_taken
+2026-03-31T22:47:20.211Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:47:24.581Z 2026-03-31 22:47:24.581 UTC [79766] ERROR:  relation "security_events" does not exist at character 22
+2026-03-31T22:47:24.581Z 2026-03-31 22:47:24.581 UTC [79766] STATEMENT:
+2026-03-31T22:47:24.581Z INSERT INTO security_events (
+2026-03-31T22:47:24.581Z event_type, severity, email, ip_address, user_agent,
+2026-03-31T22:47:24.581Z description, action_taken
+2026-03-31T22:47:24.581Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-03-31T22:52:15.746Z 2026-03-31 22:52:15.746 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T22:52:16.157Z 2026-03-31 22:52:16.157 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.403 s, sync=0.002 s, total=0.411 s; sync files=4, longest=0.002 s, average=0.001 s; distance=16 kB, estimate=132 kB
+2026-03-31T23:32:15.908Z 2026-03-31 23:32:15.907 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T23:32:16.132Z 2026-03-31 23:32:16.132 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.214 s, sync=0.002 s, total=0.225 s; sync files=3, longest=0.002 s, average=0.001 s; distance=9 kB, estimate=120 kB
+2026-03-31T23:37:15.232Z 2026-03-31 23:37:15.232 UTC [55] LOG:  checkpoint starting: time
+2026-03-31T23:37:15.443Z 2026-03-31 23:37:15.443 UTC [55] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.203 s, sync=0.002 s, total=0.212 s; sync files=3, longest=0.002 s, average=0.001 s; distance=9 kB, estimate=109 kB
+2026-04-01T00:07:15.997Z 2026-04-01 00:07:15.997 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T00:07:16.308Z 2026-04-01 00:07:16.308 UTC [55] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.302 s, sync=0.002 s, total=0.312 s; sync files=3, longest=0.002 s, average=0.001 s; distance=14 kB, estimate=99 kB
+2026-04-01T00:37:15.896Z 2026-04-01 00:37:15.896 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T00:37:16.207Z 2026-04-01 00:37:16.207 UTC [55] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.303 s, sync=0.002 s, total=0.312 s; sync files=3, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=91 kB
+2026-04-01T00:44:15.433Z 2026-04-01 00:44:15.433 UTC [85121] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:15.434Z 2026-04-01 00:44:15.433 UTC [85121] STATEMENT:
+2026-04-01T00:44:15.434Z INSERT INTO security_events (
+2026-04-01T00:44:15.434Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:15.434Z description, action_taken
+2026-04-01T00:44:15.434Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:17.909Z 2026-04-01 00:44:17.909 UTC [85125] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:17.909Z 2026-04-01 00:44:17.909 UTC [85125] STATEMENT:
+2026-04-01T00:44:17.909Z INSERT INTO security_events (
+2026-04-01T00:44:17.909Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:17.909Z description, action_taken
+2026-04-01T00:44:17.909Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:18.917Z 2026-04-01 00:44:18.917 UTC [85123] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:18.917Z 2026-04-01 00:44:18.917 UTC [85123] STATEMENT:
+2026-04-01T00:44:18.917Z INSERT INTO security_events (
+2026-04-01T00:44:18.917Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:18.917Z description, action_taken
+2026-04-01T00:44:18.917Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:19.669Z 2026-04-01 00:44:19.668 UTC [85124] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:19.669Z 2026-04-01 00:44:19.668 UTC [85124] STATEMENT:
+2026-04-01T00:44:19.669Z INSERT INTO security_events (
+2026-04-01T00:44:19.669Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:19.669Z description, action_taken
+2026-04-01T00:44:19.669Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:20.421Z 2026-04-01 00:44:20.421 UTC [85122] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:20.421Z 2026-04-01 00:44:20.421 UTC [85122] STATEMENT:
+2026-04-01T00:44:20.421Z INSERT INTO security_events (
+2026-04-01T00:44:20.421Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:20.421Z description, action_taken
+2026-04-01T00:44:20.421Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:21.734Z 2026-04-01 00:44:21.734 UTC [85129] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:21.734Z 2026-04-01 00:44:21.734 UTC [85129] STATEMENT:
+2026-04-01T00:44:21.734Z INSERT INTO security_events (
+2026-04-01T00:44:21.734Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:21.734Z description, action_taken
+2026-04-01T00:44:21.734Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:22.356Z 2026-04-01 00:44:22.356 UTC [85128] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:22.356Z 2026-04-01 00:44:22.356 UTC [85128] STATEMENT:
+2026-04-01T00:44:22.356Z INSERT INTO security_events (
+2026-04-01T00:44:22.356Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:22.356Z description, action_taken
+2026-04-01T00:44:22.356Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:22.989Z 2026-04-01 00:44:22.989 UTC [85126] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:22.989Z 2026-04-01 00:44:22.989 UTC [85126] STATEMENT:
+2026-04-01T00:44:22.989Z INSERT INTO security_events (
+2026-04-01T00:44:22.989Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:22.989Z description, action_taken
+2026-04-01T00:44:22.989Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:23.653Z 2026-04-01 00:44:23.653 UTC [85127] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:23.653Z 2026-04-01 00:44:23.653 UTC [85127] STATEMENT:
+2026-04-01T00:44:23.653Z INSERT INTO security_events (
+2026-04-01T00:44:23.653Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:23.653Z description, action_taken
+2026-04-01T00:44:23.653Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:44:24.862Z 2026-04-01 00:44:24.862 UTC [85139] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:44:24.862Z 2026-04-01 00:44:24.862 UTC [85139] STATEMENT:
+2026-04-01T00:44:24.862Z INSERT INTO security_events (
+2026-04-01T00:44:24.862Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:44:24.862Z description, action_taken
+2026-04-01T00:44:24.862Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:46:37.322Z 2026-04-01 00:46:37.321 UTC [85233] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:46:37.323Z 2026-04-01 00:46:37.321 UTC [85233] STATEMENT:
+2026-04-01T00:46:37.323Z INSERT INTO security_events (
+2026-04-01T00:46:37.323Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:46:37.323Z description, action_taken
+2026-04-01T00:46:37.323Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:46:37.677Z 2026-04-01 00:46:37.677 UTC [85245] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:46:37.677Z 2026-04-01 00:46:37.677 UTC [85245] STATEMENT:
+2026-04-01T00:46:37.677Z INSERT INTO security_events (
+2026-04-01T00:46:37.677Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:46:37.677Z description, action_taken
+2026-04-01T00:46:37.677Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:46:59.284Z 2026-04-01 00:46:59.282 UTC [85253] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:46:59.284Z 2026-04-01 00:46:59.282 UTC [85253] STATEMENT:
+2026-04-01T00:46:59.284Z INSERT INTO security_events (
+2026-04-01T00:46:59.284Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:46:59.284Z description, action_taken
+2026-04-01T00:46:59.284Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:46:59.564Z 2026-04-01 00:46:59.563 UTC [85254] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:46:59.564Z 2026-04-01 00:46:59.563 UTC [85254] STATEMENT:
+2026-04-01T00:46:59.564Z INSERT INTO security_events (
+2026-04-01T00:46:59.564Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:46:59.564Z description, action_taken
+2026-04-01T00:46:59.564Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:47:00.343Z 2026-04-01 00:47:00.342 UTC [85263] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:47:00.343Z 2026-04-01 00:47:00.342 UTC [85263] STATEMENT:
+2026-04-01T00:47:00.343Z INSERT INTO security_events (
+2026-04-01T00:47:00.343Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:47:00.343Z description, action_taken
+2026-04-01T00:47:00.343Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:47:00.932Z 2026-04-01 00:47:00.925 UTC [85265] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:47:00.932Z 2026-04-01 00:47:00.925 UTC [85265] STATEMENT:
+2026-04-01T00:47:00.932Z INSERT INTO security_events (
+2026-04-01T00:47:00.932Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:47:00.932Z description, action_taken
+2026-04-01T00:47:00.932Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:47:02.996Z 2026-04-01 00:47:02.996 UTC [85264] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:47:02.996Z 2026-04-01 00:47:02.996 UTC [85264] STATEMENT:
+2026-04-01T00:47:02.996Z INSERT INTO security_events (
+2026-04-01T00:47:02.996Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:47:02.996Z description, action_taken
+2026-04-01T00:47:02.996Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:47:04.267Z 2026-04-01 00:47:04.267 UTC [85269] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:47:04.267Z 2026-04-01 00:47:04.267 UTC [85269] STATEMENT:
+2026-04-01T00:47:04.267Z INSERT INTO security_events (
+2026-04-01T00:47:04.267Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:47:04.267Z description, action_taken
+2026-04-01T00:47:04.267Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:47:15.402Z 2026-04-01 00:47:15.402 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T00:47:16.234Z 2026-04-01 00:47:16.234 UTC [55] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.808 s, sync=0.002 s, total=0.833 s; sync files=5, longest=0.001 s, average=0.001 s; distance=39 kB, estimate=85 kB
+2026-04-01T00:50:44.986Z 2026-04-01 00:50:44.984 UTC [85445] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:50:44.986Z 2026-04-01 00:50:44.984 UTC [85445] STATEMENT:
+2026-04-01T00:50:44.986Z INSERT INTO security_events (
+2026-04-01T00:50:44.986Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:50:44.986Z description, action_taken
+2026-04-01T00:50:44.986Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:50:45.140Z 2026-04-01 00:50:45.140 UTC [85450] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:50:45.140Z 2026-04-01 00:50:45.140 UTC [85450] STATEMENT:
+2026-04-01T00:50:45.140Z INSERT INTO security_events (
+2026-04-01T00:50:45.140Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:50:45.140Z description, action_taken
+2026-04-01T00:50:45.140Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:50:47.243Z 2026-04-01 00:50:47.238 UTC [85453] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:50:47.243Z 2026-04-01 00:50:47.238 UTC [85453] STATEMENT:
+2026-04-01T00:50:47.243Z INSERT INTO security_events (
+2026-04-01T00:50:47.243Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:50:47.243Z description, action_taken
+2026-04-01T00:50:47.243Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:50:48.212Z 2026-04-01 00:50:48.212 UTC [85452] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:50:48.212Z 2026-04-01 00:50:48.212 UTC [85452] STATEMENT:
+2026-04-01T00:50:48.212Z INSERT INTO security_events (
+2026-04-01T00:50:48.212Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:50:48.212Z description, action_taken
+2026-04-01T00:50:48.212Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:50:48.931Z 2026-04-01 00:50:48.930 UTC [85451] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:50:48.931Z 2026-04-01 00:50:48.930 UTC [85451] STATEMENT:
+2026-04-01T00:50:48.931Z INSERT INTO security_events (
+2026-04-01T00:50:48.931Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:50:48.931Z description, action_taken
+2026-04-01T00:50:48.931Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:50:49.482Z 2026-04-01 00:50:49.482 UTC [85447] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:50:49.482Z 2026-04-01 00:50:49.482 UTC [85447] STATEMENT:
+2026-04-01T00:50:49.482Z INSERT INTO security_events (
+2026-04-01T00:50:49.482Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:50:49.482Z description, action_taken
+2026-04-01T00:50:49.482Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:50:49.571Z 2026-04-01 00:50:49.571 UTC [85461] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T00:50:49.572Z 2026-04-01 00:50:49.571 UTC [85461] STATEMENT:
+2026-04-01T00:50:49.572Z INSERT INTO security_events (
+2026-04-01T00:50:49.572Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T00:50:49.572Z description, action_taken
+2026-04-01T00:50:49.572Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T00:52:15.333Z 2026-04-01 00:52:15.332 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T00:52:16.952Z 2026-04-01 00:52:16.951 UTC [55] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.608 s, sync=0.005 s, total=1.619 s; sync files=11, longest=0.003 s, average=0.001 s; distance=64 kB, estimate=83 kB
+2026-04-01T00:57:16.035Z 2026-04-01 00:57:16.035 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T00:57:16.546Z 2026-04-01 00:57:16.546 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.503 s, sync=0.002 s, total=0.511 s; sync files=4, longest=0.002 s, average=0.001 s; distance=22 kB, estimate=77 kB
+2026-04-01T01:02:16.640Z 2026-04-01 01:02:16.639 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:02:17.153Z 2026-04-01 01:02:17.153 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.503 s, sync=0.003 s, total=0.514 s; sync files=4, longest=0.002 s, average=0.001 s; distance=26 kB, estimate=72 kB
+2026-04-01T01:07:16.237Z 2026-04-01 01:07:16.237 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:07:16.948Z 2026-04-01 01:07:16.948 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.704 s, sync=0.002 s, total=0.712 s; sync files=5, longest=0.002 s, average=0.001 s; distance=29 kB, estimate=68 kB
+2026-04-01T01:12:17.039Z 2026-04-01 01:12:17.038 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:12:17.450Z 2026-04-01 01:12:17.450 UTC [55] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.403 s, sync=0.003 s, total=0.412 s; sync files=4, longest=0.002 s, average=0.001 s; distance=24 kB, estimate=63 kB
+2026-04-01T01:17:17.541Z 2026-04-01 01:17:17.541 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:17:19.056Z 2026-04-01 01:17:19.056 UTC [55] LOG:  checkpoint complete: wrote 16 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.506 s, sync=0.003 s, total=1.516 s; sync files=8, longest=0.002 s, average=0.001 s; distance=64 kB, estimate=64 kB
+2026-04-01T01:22:17.156Z 2026-04-01 01:22:17.155 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:22:17.665Z 2026-04-01 01:22:17.665 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.503 s, sync=0.002 s, total=0.510 s; sync files=4, longest=0.002 s, average=0.001 s; distance=25 kB, estimate=60 kB
+2026-04-01T01:27:17.756Z 2026-04-01 01:27:17.755 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:27:18.266Z 2026-04-01 01:27:18.266 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.503 s, sync=0.002 s, total=0.511 s; sync files=4, longest=0.002 s, average=0.001 s; distance=28 kB, estimate=57 kB
+2026-04-01T01:32:17.362Z 2026-04-01 01:32:17.362 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:32:18.072Z 2026-04-01 01:32:18.072 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.703 s, sync=0.002 s, total=0.711 s; sync files=5, longest=0.002 s, average=0.001 s; distance=32 kB, estimate=54 kB
+2026-04-01T01:37:17.172Z 2026-04-01 01:37:17.172 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:37:17.685Z 2026-04-01 01:37:17.685 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.505 s, sync=0.003 s, total=0.514 s; sync files=6, longest=0.002 s, average=0.001 s; distance=28 kB, estimate=52 kB
+2026-04-01T01:42:17.784Z 2026-04-01 01:42:17.784 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:42:18.494Z 2026-04-01 01:42:18.494 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.703 s, sync=0.002 s, total=0.711 s; sync files=5, longest=0.002 s, average=0.001 s; distance=32 kB, estimate=50 kB
+2026-04-01T01:47:17.591Z 2026-04-01 01:47:17.590 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:47:18.100Z 2026-04-01 01:47:18.100 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.503 s, sync=0.002 s, total=0.510 s; sync files=4, longest=0.002 s, average=0.001 s; distance=27 kB, estimate=47 kB
+2026-04-01T01:52:17.198Z 2026-04-01 01:52:17.198 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:52:18.913Z 2026-04-01 01:52:18.913 UTC [55] LOG:  checkpoint complete: wrote 18 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.707 s, sync=0.004 s, total=1.716 s; sync files=8, longest=0.003 s, average=0.001 s; distance=65 kB, estimate=65 kB
+2026-04-01T01:57:18.010Z 2026-04-01 01:57:18.010 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T01:57:18.620Z 2026-04-01 01:57:18.620 UTC [55] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.603 s, sync=0.002 s, total=0.611 s; sync files=4, longest=0.002 s, average=0.001 s; distance=27 kB, estimate=61 kB
+2026-04-01T02:02:18.712Z 2026-04-01 02:02:18.712 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:02:19.322Z 2026-04-01 02:02:19.322 UTC [55] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.603 s, sync=0.002 s, total=0.611 s; sync files=4, longest=0.002 s, average=0.001 s; distance=31 kB, estimate=58 kB
+2026-04-01T02:07:18.409Z 2026-04-01 02:07:18.409 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:07:19.219Z 2026-04-01 02:07:19.219 UTC [55] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.804 s, sync=0.002 s, total=0.811 s; sync files=5, longest=0.002 s, average=0.001 s; distance=34 kB, estimate=56 kB
+2026-04-01T02:12:18.306Z 2026-04-01 02:12:18.305 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:12:18.916Z 2026-04-01 02:12:18.916 UTC [55] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.603 s, sync=0.003 s, total=0.612 s; sync files=4, longest=0.002 s, average=0.001 s; distance=30 kB, estimate=53 kB
+2026-04-01T02:17:19.007Z 2026-04-01 02:17:19.007 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:17:20.055Z 2026-04-01 02:17:20.054 UTC [55] LOG:  checkpoint complete: wrote 11 buffers (0.1%); 1 WAL file(s) added, 0 removed, 0 recycled; write=1.005 s, sync=0.003 s, total=1.048 s; sync files=5, longest=0.002 s, average=0.001 s; distance=38 kB, estimate=51 kB
+2026-04-01T02:22:19.151Z 2026-04-01 02:22:19.151 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:22:19.862Z 2026-04-01 02:22:19.862 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.704 s, sync=0.002 s, total=0.711 s; sync files=4, longest=0.002 s, average=0.001 s; distance=30 kB, estimate=49 kB
+2026-04-01T02:27:19.952Z 2026-04-01 02:27:19.952 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:27:20.562Z 2026-04-01 02:27:20.562 UTC [55] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.603 s, sync=0.002 s, total=0.610 s; sync files=4, longest=0.002 s, average=0.001 s; distance=31 kB, estimate=47 kB
+2026-04-01T02:32:19.657Z 2026-04-01 02:32:19.657 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:32:21.586Z 2026-04-01 02:32:21.585 UTC [55] LOG:  checkpoint complete: wrote 20 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.919 s, sync=0.003 s, total=1.929 s; sync files=9, longest=0.002 s, average=0.001 s; distance=77 kB, estimate=77 kB
+2026-04-01T02:37:19.668Z 2026-04-01 02:37:19.667 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:37:20.379Z 2026-04-01 02:37:20.379 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.704 s, sync=0.002 s, total=0.712 s; sync files=4, longest=0.002 s, average=0.001 s; distance=33 kB, estimate=73 kB
+2026-04-01T02:42:19.474Z 2026-04-01 02:42:19.474 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:42:20.384Z 2026-04-01 02:42:20.384 UTC [55] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.904 s, sync=0.002 s, total=0.911 s; sync files=5, longest=0.002 s, average=0.001 s; distance=37 kB, estimate=69 kB
+2026-04-01T02:47:19.485Z 2026-04-01 02:47:19.484 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:47:20.195Z 2026-04-01 02:47:20.195 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.704 s, sync=0.002 s, total=0.711 s; sync files=4, longest=0.002 s, average=0.001 s; distance=32 kB, estimate=66 kB
+2026-04-01T02:52:19.293Z 2026-04-01 02:52:19.292 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:52:20.204Z 2026-04-01 02:52:20.204 UTC [55] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.904 s, sync=0.003 s, total=0.912 s; sync files=5, longest=0.002 s, average=0.001 s; distance=36 kB, estimate=63 kB
+2026-04-01T02:57:19.304Z 2026-04-01 02:57:19.303 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T02:57:19.813Z 2026-04-01 02:57:19.813 UTC [55] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.503 s, sync=0.003 s, total=0.510 s; sync files=4, longest=0.002 s, average=0.001 s; distance=24 kB, estimate=59 kB
+2026-04-01T03:02:19.907Z 2026-04-01 03:02:19.907 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:02:20.922Z 2026-04-01 03:02:20.922 UTC [55] LOG:  checkpoint complete: wrote 13 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.007 s, sync=0.003 s, total=1.015 s; sync files=7, longest=0.002 s, average=0.001 s; distance=36 kB, estimate=57 kB
+2026-04-01T03:07:20.022Z 2026-04-01 03:07:20.022 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:07:20.934Z 2026-04-01 03:07:20.934 UTC [55] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.904 s, sync=0.003 s, total=0.912 s; sync files=5, longest=0.002 s, average=0.001 s; distance=39 kB, estimate=55 kB
+2026-04-01T03:12:21.034Z 2026-04-01 03:12:21.034 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:12:22.548Z 2026-04-01 03:12:22.547 UTC [55] LOG:  checkpoint complete: wrote 16 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.506 s, sync=0.002 s, total=1.514 s; sync files=7, longest=0.002 s, average=0.001 s; distance=75 kB, estimate=75 kB
+2026-04-01T03:17:21.647Z 2026-04-01 03:17:21.647 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:17:23.866Z 2026-04-01 03:17:23.865 UTC [55] LOG:  checkpoint complete: wrote 23 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.209 s, sync=0.003 s, total=2.219 s; sync files=14, longest=0.002 s, average=0.001 s; distance=55 kB, estimate=73 kB
+2026-04-01T03:22:21.964Z 2026-04-01 03:22:21.964 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:22:22.674Z 2026-04-01 03:22:22.674 UTC [55] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.703 s, sync=0.002 s, total=0.711 s; sync files=4, longest=0.002 s, average=0.001 s; distance=35 kB, estimate=69 kB
+2026-04-01T03:27:21.765Z 2026-04-01 03:27:21.764 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:27:28.598Z 2026-04-01 03:27:28.598 UTC [55] LOG:  checkpoint complete: wrote 69 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=6.824 s, sync=0.005 s, total=6.834 s; sync files=46, longest=0.002 s, average=0.001 s; distance=317 kB, estimate=317 kB
+2026-04-01T03:32:21.696Z 2026-04-01 03:32:21.695 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:32:22.613Z 2026-04-01 03:32:22.609 UTC [55] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.905 s, sync=0.003 s, total=0.914 s; sync files=5, longest=0.002 s, average=0.001 s; distance=44 kB, estimate=290 kB
+2026-04-01T03:37:21.704Z 2026-04-01 03:37:21.704 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:37:22.315Z 2026-04-01 03:37:22.314 UTC [55] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.603 s, sync=0.003 s, total=0.611 s; sync files=4, longest=0.002 s, average=0.001 s; distance=36 kB, estimate=264 kB
+2026-04-01T03:40:11.696Z 2026-04-01 03:40:11.695 UTC [93393] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:11.699Z 2026-04-01 03:40:11.695 UTC [93393] STATEMENT:
+2026-04-01T03:40:11.699Z INSERT INTO security_events (
+2026-04-01T03:40:11.699Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:11.699Z description, action_taken
+2026-04-01T03:40:11.699Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:11.718Z 2026-04-01 03:40:11.718 UTC [93385] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:11.718Z 2026-04-01 03:40:11.718 UTC [93385] STATEMENT:
+2026-04-01T03:40:11.718Z INSERT INTO security_events (
+2026-04-01T03:40:11.718Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:11.718Z description, action_taken
+2026-04-01T03:40:11.718Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:18.983Z 2026-04-01 03:40:18.983 UTC [93403] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:18.983Z 2026-04-01 03:40:18.983 UTC [93403] STATEMENT:
+2026-04-01T03:40:18.983Z INSERT INTO security_events (
+2026-04-01T03:40:18.983Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:18.983Z description, action_taken
+2026-04-01T03:40:18.983Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:19.086Z 2026-04-01 03:40:19.086 UTC [93406] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:19.086Z 2026-04-01 03:40:19.086 UTC [93406] STATEMENT:
+2026-04-01T03:40:19.086Z INSERT INTO security_events (
+2026-04-01T03:40:19.086Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:19.086Z description, action_taken
+2026-04-01T03:40:19.086Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:23.199Z 2026-04-01 03:40:23.198 UTC [93405] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:23.199Z 2026-04-01 03:40:23.198 UTC [93405] STATEMENT:
+2026-04-01T03:40:23.199Z INSERT INTO security_events (
+2026-04-01T03:40:23.199Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:23.199Z description, action_taken
+2026-04-01T03:40:23.199Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:23.211Z 2026-04-01 03:40:23.211 UTC [93408] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:23.211Z 2026-04-01 03:40:23.211 UTC [93408] STATEMENT:
+2026-04-01T03:40:23.211Z INSERT INTO security_events (
+2026-04-01T03:40:23.211Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:23.211Z description, action_taken
+2026-04-01T03:40:23.211Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:24.558Z 2026-04-01 03:40:24.558 UTC [93419] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:24.558Z 2026-04-01 03:40:24.558 UTC [93419] STATEMENT:
+2026-04-01T03:40:24.558Z INSERT INTO security_events (
+2026-04-01T03:40:24.558Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:24.558Z description, action_taken
+2026-04-01T03:40:24.558Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:25.336Z 2026-04-01 03:40:25.335 UTC [93418] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:25.336Z 2026-04-01 03:40:25.335 UTC [93418] STATEMENT:
+2026-04-01T03:40:25.336Z INSERT INTO security_events (
+2026-04-01T03:40:25.336Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:25.336Z description, action_taken
+2026-04-01T03:40:25.336Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:40:25.763Z 2026-04-01 03:40:25.763 UTC [93409] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:40:25.763Z 2026-04-01 03:40:25.763 UTC [93409] STATEMENT:
+2026-04-01T03:40:25.763Z INSERT INTO security_events (
+2026-04-01T03:40:25.763Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:40:25.763Z description, action_taken
+2026-04-01T03:40:25.763Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:41:35.639Z 2026-04-01 03:41:35.638 UTC [93469] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:41:35.639Z 2026-04-01 03:41:35.638 UTC [93469] STATEMENT:
+2026-04-01T03:41:35.639Z INSERT INTO security_events (
+2026-04-01T03:41:35.639Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:41:35.639Z description, action_taken
+2026-04-01T03:41:35.639Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:41:35.655Z 2026-04-01 03:41:35.654 UTC [93468] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:41:35.655Z 2026-04-01 03:41:35.654 UTC [93468] STATEMENT:
+2026-04-01T03:41:35.655Z INSERT INTO security_events (
+2026-04-01T03:41:35.655Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:41:35.655Z description, action_taken
+2026-04-01T03:41:35.655Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:42:21.413Z 2026-04-01 03:42:21.412 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:42:23.130Z 2026-04-01 03:42:23.129 UTC [55] LOG:  checkpoint complete: wrote 18 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.707 s, sync=0.002 s, total=1.717 s; sync files=6, longest=0.002 s, average=0.001 s; distance=64 kB, estimate=244 kB
+2026-04-01T03:47:21.228Z 2026-04-01 03:47:21.227 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:47:22.944Z 2026-04-01 03:47:22.944 UTC [55] LOG:  checkpoint complete: wrote 20 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.708 s, sync=0.003 s, total=1.717 s; sync files=9, longest=0.002 s, average=0.001 s; distance=96 kB, estimate=229 kB
+2026-04-01T03:52:22.038Z 2026-04-01 03:52:22.038 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:52:23.052Z 2026-04-01 03:52:23.052 UTC [55] LOG:  checkpoint complete: wrote 13 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.006 s, sync=0.003 s, total=1.014 s; sync files=7, longest=0.002 s, average=0.001 s; distance=49 kB, estimate=211 kB
+2026-04-01T03:57:22.151Z 2026-04-01 03:57:22.151 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T03:57:23.566Z 2026-04-01 03:57:23.566 UTC [55] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.407 s, sync=0.003 s, total=1.416 s; sync files=7, longest=0.001 s, average=0.001 s; distance=49 kB, estimate=195 kB
+2026-04-01T03:58:33.004Z 2026-04-01 03:58:33.003 UTC [94300] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:58:33.004Z 2026-04-01 03:58:33.003 UTC [94300] STATEMENT:
+2026-04-01T03:58:33.004Z INSERT INTO security_events (
+2026-04-01T03:58:33.004Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:58:33.004Z description, action_taken
+2026-04-01T03:58:33.004Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T03:58:33.114Z 2026-04-01 03:58:33.113 UTC [94302] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T03:58:33.114Z 2026-04-01 03:58:33.113 UTC [94302] STATEMENT:
+2026-04-01T03:58:33.114Z INSERT INTO security_events (
+2026-04-01T03:58:33.114Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T03:58:33.114Z description, action_taken
+2026-04-01T03:58:33.114Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:02:22.663Z 2026-04-01 04:02:22.662 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:02:26.381Z 2026-04-01 04:02:26.381 UTC [55] LOG:  checkpoint complete: wrote 38 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.711 s, sync=0.003 s, total=3.719 s; sync files=5, longest=0.002 s, average=0.001 s; distance=74 kB, estimate=183 kB
+2026-04-01T04:05:38.857Z 2026-04-01 04:05:38.857 UTC [94642] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:05:38.859Z 2026-04-01 04:05:38.857 UTC [94642] STATEMENT:
+2026-04-01T04:05:38.859Z INSERT INTO security_events (
+2026-04-01T04:05:38.859Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:05:38.859Z description, action_taken
+2026-04-01T04:05:38.859Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:05:38.934Z 2026-04-01 04:05:38.934 UTC [94654] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:05:38.934Z 2026-04-01 04:05:38.934 UTC [94654] STATEMENT:
+2026-04-01T04:05:38.934Z INSERT INTO security_events (
+2026-04-01T04:05:38.934Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:05:38.934Z description, action_taken
+2026-04-01T04:05:38.934Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:05:39.138Z 2026-04-01 04:05:39.138 UTC [94655] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:05:39.138Z 2026-04-01 04:05:39.138 UTC [94655] STATEMENT:
+2026-04-01T04:05:39.138Z INSERT INTO security_events (
+2026-04-01T04:05:39.138Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:05:39.138Z description, action_taken
+2026-04-01T04:05:39.138Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:05:39.142Z 2026-04-01 04:05:39.141 UTC [94653] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T04:05:39.142Z 2026-04-01 04:05:39.141 UTC [94653] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T04:05:39.142Z FROM security_events
+2026-04-01T04:05:39.142Z ORDER BY timestamp DESC
+2026-04-01T04:05:39.142Z LIMIT $1 OFFSET $2
+2026-04-01T04:05:39.142Z 2026-04-01 04:05:39.142 UTC [94652] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:05:39.142Z 2026-04-01 04:05:39.142 UTC [94652] STATEMENT:
+2026-04-01T04:05:39.142Z INSERT INTO security_events (
+2026-04-01T04:05:39.142Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:05:39.142Z description, action_taken
+2026-04-01T04:05:39.142Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:05:39.145Z 2026-04-01 04:05:39.145 UTC [94651] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T04:05:39.145Z 2026-04-01 04:05:39.145 UTC [94651] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T04:05:39.145Z FROM audit_events
+2026-04-01T04:05:39.145Z ORDER BY timestamp DESC
+2026-04-01T04:05:39.145Z LIMIT $1 OFFSET $2
+2026-04-01T04:05:39.146Z 2026-04-01 04:05:39.146 UTC [94641] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:05:39.146Z 2026-04-01 04:05:39.146 UTC [94641] STATEMENT:
+2026-04-01T04:05:39.146Z INSERT INTO security_events (
+2026-04-01T04:05:39.146Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:05:39.146Z description, action_taken
+2026-04-01T04:05:39.146Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:05:39.272Z 2026-04-01 04:05:39.272 UTC [94657] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:05:39.272Z 2026-04-01 04:05:39.272 UTC [94657] STATEMENT:
+2026-04-01T04:05:39.272Z INSERT INTO security_events (
+2026-04-01T04:05:39.272Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:05:39.272Z description, action_taken
+2026-04-01T04:05:39.272Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:06:23.657Z 2026-04-01 04:06:23.657 UTC [94696] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:06:23.657Z 2026-04-01 04:06:23.657 UTC [94696] STATEMENT:
+2026-04-01T04:06:23.657Z INSERT INTO security_events (
+2026-04-01T04:06:23.657Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:06:23.657Z description, action_taken
+2026-04-01T04:06:23.657Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:06:23.808Z 2026-04-01 04:06:23.808 UTC [94701] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:06:23.808Z 2026-04-01 04:06:23.808 UTC [94701] STATEMENT:
+2026-04-01T04:06:23.808Z INSERT INTO security_events (
+2026-04-01T04:06:23.808Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:06:23.808Z description, action_taken
+2026-04-01T04:06:23.808Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:06:24.692Z 2026-04-01 04:06:24.692 UTC [94703] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:06:24.692Z 2026-04-01 04:06:24.692 UTC [94703] STATEMENT:
+2026-04-01T04:06:24.692Z INSERT INTO security_events (
+2026-04-01T04:06:24.692Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:06:24.692Z description, action_taken
+2026-04-01T04:06:24.692Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:06:25.530Z 2026-04-01 04:06:25.516 UTC [94700] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:06:25.530Z 2026-04-01 04:06:25.516 UTC [94700] STATEMENT:
+2026-04-01T04:06:25.530Z INSERT INTO security_events (
+2026-04-01T04:06:25.530Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:06:25.530Z description, action_taken
+2026-04-01T04:06:25.530Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:06:26.020Z 2026-04-01 04:06:26.019 UTC [94704] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:06:26.020Z 2026-04-01 04:06:26.019 UTC [94704] STATEMENT:
+2026-04-01T04:06:26.020Z INSERT INTO security_events (
+2026-04-01T04:06:26.020Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:06:26.020Z description, action_taken
+2026-04-01T04:06:26.020Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:07:22.484Z 2026-04-01 04:07:22.484 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:07:26.024Z 2026-04-01 04:07:26.024 UTC [55] LOG:  checkpoint complete: wrote 38 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.529 s, sync=0.004 s, total=3.541 s; sync files=9, longest=0.002 s, average=0.001 s; distance=118 kB, estimate=177 kB
+2026-04-01T04:11:16.001Z 2026-04-01 04:11:16.000 UTC [94928] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:11:16.001Z 2026-04-01 04:11:16.000 UTC [94928] STATEMENT:
+2026-04-01T04:11:16.001Z INSERT INTO security_events (
+2026-04-01T04:11:16.001Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:11:16.001Z description, action_taken
+2026-04-01T04:11:16.001Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:11:16.017Z 2026-04-01 04:11:16.017 UTC [94929] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:11:16.017Z 2026-04-01 04:11:16.017 UTC [94929] STATEMENT:
+2026-04-01T04:11:16.017Z INSERT INTO security_events (
+2026-04-01T04:11:16.017Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:11:16.017Z description, action_taken
+2026-04-01T04:11:16.017Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:11:16.264Z 2026-04-01 04:11:16.264 UTC [94940] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:11:16.264Z 2026-04-01 04:11:16.264 UTC [94940] STATEMENT:
+2026-04-01T04:11:16.264Z INSERT INTO security_events (
+2026-04-01T04:11:16.264Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:11:16.264Z description, action_taken
+2026-04-01T04:11:16.264Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:11:16.272Z 2026-04-01 04:11:16.272 UTC [94938] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T04:11:16.272Z 2026-04-01 04:11:16.272 UTC [94938] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T04:11:16.272Z FROM audit_events
+2026-04-01T04:11:16.272Z ORDER BY timestamp DESC
+2026-04-01T04:11:16.272Z LIMIT $1 OFFSET $2
+2026-04-01T04:11:16.299Z 2026-04-01 04:11:16.298 UTC [94939] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:11:16.299Z 2026-04-01 04:11:16.298 UTC [94939] STATEMENT:
+2026-04-01T04:11:16.299Z INSERT INTO security_events (
+2026-04-01T04:11:16.299Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:11:16.299Z description, action_taken
+2026-04-01T04:11:16.299Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:11:16.413Z 2026-04-01 04:11:16.411 UTC [94941] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T04:11:16.413Z 2026-04-01 04:11:16.411 UTC [94941] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T04:11:16.413Z FROM security_events
+2026-04-01T04:11:16.413Z ORDER BY timestamp DESC
+2026-04-01T04:11:16.413Z LIMIT $1 OFFSET $2
+2026-04-01T04:11:16.413Z 2026-04-01 04:11:16.413 UTC [94942] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:11:16.413Z 2026-04-01 04:11:16.413 UTC [94942] STATEMENT:
+2026-04-01T04:11:16.413Z INSERT INTO security_events (
+2026-04-01T04:11:16.413Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:11:16.413Z description, action_taken
+2026-04-01T04:11:16.413Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:11:16.414Z 2026-04-01 04:11:16.414 UTC [94944] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:11:16.414Z 2026-04-01 04:11:16.414 UTC [94944] STATEMENT:
+2026-04-01T04:11:16.414Z INSERT INTO security_events (
+2026-04-01T04:11:16.414Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:11:16.414Z description, action_taken
+2026-04-01T04:11:16.414Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:12:22.116Z 2026-04-01 04:12:22.116 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:12:28.946Z 2026-04-01 04:12:28.946 UTC [55] LOG:  checkpoint complete: wrote 72 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=6.821 s, sync=0.004 s, total=6.830 s; sync files=9, longest=0.002 s, average=0.001 s; distance=94 kB, estimate=168 kB
+2026-04-01T04:17:23.045Z 2026-04-01 04:17:23.044 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:17:25.961Z 2026-04-01 04:17:25.960 UTC [55] LOG:  checkpoint complete: wrote 32 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.909 s, sync=0.003 s, total=2.916 s; sync files=7, longest=0.002 s, average=0.001 s; distance=81 kB, estimate=160 kB
+2026-04-01T04:22:24.061Z 2026-04-01 04:22:24.060 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:22:27.981Z 2026-04-01 04:22:27.981 UTC [55] LOG:  checkpoint complete: wrote 42 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.912 s, sync=0.003 s, total=3.921 s; sync files=8, longest=0.002 s, average=0.001 s; distance=132 kB, estimate=157 kB
+2026-04-01T04:27:25.076Z 2026-04-01 04:27:25.075 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:27:27.996Z 2026-04-01 04:27:27.996 UTC [55] LOG:  checkpoint complete: wrote 32 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.912 s, sync=0.003 s, total=2.921 s; sync files=6, longest=0.002 s, average=0.001 s; distance=97 kB, estimate=151 kB
+2026-04-01T04:32:26.085Z 2026-04-01 04:32:26.084 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:32:29.207Z 2026-04-01 04:32:29.207 UTC [55] LOG:  checkpoint complete: wrote 34 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.113 s, sync=0.003 s, total=3.123 s; sync files=6, longest=0.002 s, average=0.001 s; distance=106 kB, estimate=146 kB
+2026-04-01T04:37:26.302Z 2026-04-01 04:37:26.302 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:37:29.320Z 2026-04-01 04:37:29.320 UTC [55] LOG:  checkpoint complete: wrote 33 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.010 s, sync=0.003 s, total=3.018 s; sync files=6, longest=0.002 s, average=0.001 s; distance=110 kB, estimate=143 kB
+2026-04-01T04:39:28.323Z 2026-04-01 04:39:28.323 UTC [96302] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:39:28.325Z 2026-04-01 04:39:28.323 UTC [96302] STATEMENT:
+2026-04-01T04:39:28.325Z INSERT INTO security_events (
+2026-04-01T04:39:28.325Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:39:28.325Z description, action_taken
+2026-04-01T04:39:28.325Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:39:28.496Z 2026-04-01 04:39:28.496 UTC [96322] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:39:28.496Z 2026-04-01 04:39:28.496 UTC [96322] STATEMENT:
+2026-04-01T04:39:28.496Z INSERT INTO security_events (
+2026-04-01T04:39:28.496Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:39:28.496Z description, action_taken
+2026-04-01T04:39:28.496Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:39:28.746Z 2026-04-01 04:39:28.746 UTC [96323] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:39:28.747Z 2026-04-01 04:39:28.746 UTC [96323] STATEMENT:
+2026-04-01T04:39:28.747Z INSERT INTO security_events (
+2026-04-01T04:39:28.747Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:39:28.747Z description, action_taken
+2026-04-01T04:39:28.747Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:39:28.753Z 2026-04-01 04:39:28.753 UTC [96321] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T04:39:28.753Z 2026-04-01 04:39:28.753 UTC [96321] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T04:39:28.753Z FROM security_events
+2026-04-01T04:39:28.753Z ORDER BY timestamp DESC
+2026-04-01T04:39:28.753Z LIMIT $1 OFFSET $2
+2026-04-01T04:39:28.756Z 2026-04-01 04:39:28.755 UTC [96320] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:39:28.756Z 2026-04-01 04:39:28.755 UTC [96320] STATEMENT:
+2026-04-01T04:39:28.756Z INSERT INTO security_events (
+2026-04-01T04:39:28.756Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:39:28.756Z description, action_taken
+2026-04-01T04:39:28.756Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:39:28.760Z 2026-04-01 04:39:28.760 UTC [96319] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T04:39:28.761Z 2026-04-01 04:39:28.760 UTC [96319] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T04:39:28.761Z FROM audit_events
+2026-04-01T04:39:28.761Z ORDER BY timestamp DESC
+2026-04-01T04:39:28.761Z LIMIT $1 OFFSET $2
+2026-04-01T04:39:28.765Z 2026-04-01 04:39:28.764 UTC [96318] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:39:28.765Z 2026-04-01 04:39:28.764 UTC [96318] STATEMENT:
+2026-04-01T04:39:28.765Z INSERT INTO security_events (
+2026-04-01T04:39:28.765Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:39:28.765Z description, action_taken
+2026-04-01T04:39:28.765Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:39:28.983Z 2026-04-01 04:39:28.983 UTC [96329] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:39:28.983Z 2026-04-01 04:39:28.983 UTC [96329] STATEMENT:
+2026-04-01T04:39:28.983Z INSERT INTO security_events (
+2026-04-01T04:39:28.983Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:39:28.983Z description, action_taken
+2026-04-01T04:39:28.983Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:40:09.255Z 2026-04-01 04:40:09.255 UTC [96354] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:40:09.255Z 2026-04-01 04:40:09.255 UTC [96354] STATEMENT:
+2026-04-01T04:40:09.255Z INSERT INTO security_events (
+2026-04-01T04:40:09.255Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:40:09.255Z description, action_taken
+2026-04-01T04:40:09.255Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:40:09.344Z 2026-04-01 04:40:09.343 UTC [96364] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:40:09.344Z 2026-04-01 04:40:09.343 UTC [96364] STATEMENT:
+2026-04-01T04:40:09.344Z INSERT INTO security_events (
+2026-04-01T04:40:09.344Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:40:09.344Z description, action_taken
+2026-04-01T04:40:09.344Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:40:09.569Z 2026-04-01 04:40:09.569 UTC [96363] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:40:09.569Z 2026-04-01 04:40:09.569 UTC [96363] STATEMENT:
+2026-04-01T04:40:09.569Z INSERT INTO security_events (
+2026-04-01T04:40:09.569Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:40:09.569Z description, action_taken
+2026-04-01T04:40:09.569Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:40:09.573Z 2026-04-01 04:40:09.573 UTC [96368] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T04:40:09.573Z 2026-04-01 04:40:09.573 UTC [96368] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T04:40:09.573Z FROM audit_events
+2026-04-01T04:40:09.573Z ORDER BY timestamp DESC
+2026-04-01T04:40:09.573Z LIMIT $1 OFFSET $2
+2026-04-01T04:40:09.593Z 2026-04-01 04:40:09.592 UTC [96365] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:40:09.593Z 2026-04-01 04:40:09.592 UTC [96365] STATEMENT:
+2026-04-01T04:40:09.593Z INSERT INTO security_events (
+2026-04-01T04:40:09.593Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:40:09.593Z description, action_taken
+2026-04-01T04:40:09.593Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:40:09.694Z 2026-04-01 04:40:09.694 UTC [96371] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:40:09.694Z 2026-04-01 04:40:09.694 UTC [96371] STATEMENT:
+2026-04-01T04:40:09.694Z INSERT INTO security_events (
+2026-04-01T04:40:09.694Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:40:09.694Z description, action_taken
+2026-04-01T04:40:09.694Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:40:09.696Z 2026-04-01 04:40:09.696 UTC [96370] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T04:40:09.696Z 2026-04-01 04:40:09.696 UTC [96370] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T04:40:09.696Z FROM security_events
+2026-04-01T04:40:09.696Z ORDER BY timestamp DESC
+2026-04-01T04:40:09.696Z LIMIT $1 OFFSET $2
+2026-04-01T04:40:09.697Z 2026-04-01 04:40:09.697 UTC [96369] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:40:09.697Z 2026-04-01 04:40:09.697 UTC [96369] STATEMENT:
+2026-04-01T04:40:09.697Z INSERT INTO security_events (
+2026-04-01T04:40:09.697Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:40:09.697Z description, action_taken
+2026-04-01T04:40:09.697Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:42:26.423Z 2026-04-01 04:42:26.423 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:42:30.558Z 2026-04-01 04:42:30.558 UTC [55] LOG:  checkpoint complete: wrote 44 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.126 s, sync=0.003 s, total=4.136 s; sync files=7, longest=0.002 s, average=0.001 s; distance=167 kB, estimate=167 kB
+2026-04-01T04:47:26.654Z 2026-04-01 04:47:26.654 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:47:30.876Z 2026-04-01 04:47:30.876 UTC [55] LOG:  checkpoint complete: wrote 45 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.214 s, sync=0.003 s, total=4.222 s; sync files=8, longest=0.002 s, average=0.001 s; distance=198 kB, estimate=198 kB
+2026-04-01T04:52:26.979Z 2026-04-01 04:52:26.978 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:52:30.637Z 2026-04-01 04:52:30.637 UTC [55] LOG:  checkpoint complete: wrote 39 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.643 s, sync=0.004 s, total=3.660 s; sync files=6, longest=0.002 s, average=0.001 s; distance=163 kB, estimate=194 kB
+2026-04-01T04:56:02.734Z 2026-04-01 04:56:02.733 UTC [97162] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:56:02.734Z 2026-04-01 04:56:02.733 UTC [97162] STATEMENT:
+2026-04-01T04:56:02.734Z INSERT INTO security_events (
+2026-04-01T04:56:02.734Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:56:02.734Z description, action_taken
+2026-04-01T04:56:02.734Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:56:02.851Z 2026-04-01 04:56:02.851 UTC [97166] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:56:02.851Z 2026-04-01 04:56:02.851 UTC [97166] STATEMENT:
+2026-04-01T04:56:02.851Z INSERT INTO security_events (
+2026-04-01T04:56:02.851Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:56:02.851Z description, action_taken
+2026-04-01T04:56:02.851Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:56:03.094Z 2026-04-01 04:56:03.093 UTC [97167] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:56:03.094Z 2026-04-01 04:56:03.093 UTC [97167] STATEMENT:
+2026-04-01T04:56:03.094Z INSERT INTO security_events (
+2026-04-01T04:56:03.094Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:56:03.094Z description, action_taken
+2026-04-01T04:56:03.094Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:56:03.115Z 2026-04-01 04:56:03.115 UTC [97164] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:56:03.115Z 2026-04-01 04:56:03.115 UTC [97164] STATEMENT:
+2026-04-01T04:56:03.115Z INSERT INTO security_events (
+2026-04-01T04:56:03.115Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:56:03.115Z description, action_taken
+2026-04-01T04:56:03.115Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:56:03.121Z 2026-04-01 04:56:03.121 UTC [97163] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T04:56:03.122Z 2026-04-01 04:56:03.121 UTC [97163] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T04:56:03.122Z FROM audit_events
+2026-04-01T04:56:03.122Z ORDER BY timestamp DESC
+2026-04-01T04:56:03.122Z LIMIT $1 OFFSET $2
+2026-04-01T04:56:03.144Z 2026-04-01 04:56:03.143 UTC [97161] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:56:03.144Z 2026-04-01 04:56:03.143 UTC [97161] STATEMENT:
+2026-04-01T04:56:03.144Z INSERT INTO security_events (
+2026-04-01T04:56:03.144Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:56:03.144Z description, action_taken
+2026-04-01T04:56:03.144Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:56:03.152Z 2026-04-01 04:56:03.151 UTC [97165] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T04:56:03.152Z 2026-04-01 04:56:03.151 UTC [97165] STATEMENT:
+2026-04-01T04:56:03.152Z INSERT INTO security_events (
+2026-04-01T04:56:03.152Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T04:56:03.152Z description, action_taken
+2026-04-01T04:56:03.152Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T04:56:03.197Z 2026-04-01 04:56:03.196 UTC [97168] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T04:56:03.197Z 2026-04-01 04:56:03.196 UTC [97168] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T04:56:03.197Z FROM security_events
+2026-04-01T04:56:03.197Z ORDER BY timestamp DESC
+2026-04-01T04:56:03.197Z LIMIT $1 OFFSET $2
+2026-04-01T04:57:26.736Z 2026-04-01 04:57:26.736 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T04:57:30.557Z 2026-04-01 04:57:30.557 UTC [55] LOG:  checkpoint complete: wrote 41 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.813 s, sync=0.004 s, total=3.821 s; sync files=7, longest=0.003 s, average=0.001 s; distance=128 kB, estimate=187 kB
+2026-04-01T05:01:30.001Z 2026-04-01 05:01:30.000 UTC [97432] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:01:30.004Z 2026-04-01 05:01:30.000 UTC [97432] STATEMENT:
+2026-04-01T05:01:30.004Z INSERT INTO security_events (
+2026-04-01T05:01:30.004Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:01:30.004Z description, action_taken
+2026-04-01T05:01:30.004Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:01:30.134Z 2026-04-01 05:01:30.134 UTC [97437] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:01:30.134Z 2026-04-01 05:01:30.134 UTC [97437] STATEMENT:
+2026-04-01T05:01:30.134Z INSERT INTO security_events (
+2026-04-01T05:01:30.134Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:01:30.134Z description, action_taken
+2026-04-01T05:01:30.134Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:01:30.330Z 2026-04-01 05:01:30.330 UTC [97438] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:01:30.330Z 2026-04-01 05:01:30.330 UTC [97438] STATEMENT:
+2026-04-01T05:01:30.330Z INSERT INTO security_events (
+2026-04-01T05:01:30.330Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:01:30.330Z description, action_taken
+2026-04-01T05:01:30.330Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:01:30.335Z 2026-04-01 05:01:30.335 UTC [97436] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:01:30.335Z 2026-04-01 05:01:30.335 UTC [97436] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:01:30.335Z FROM audit_events
+2026-04-01T05:01:30.335Z ORDER BY timestamp DESC
+2026-04-01T05:01:30.335Z LIMIT $1 OFFSET $2
+2026-04-01T05:01:30.337Z 2026-04-01 05:01:30.336 UTC [97435] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:01:30.337Z 2026-04-01 05:01:30.336 UTC [97435] STATEMENT:
+2026-04-01T05:01:30.337Z INSERT INTO security_events (
+2026-04-01T05:01:30.337Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:01:30.337Z description, action_taken
+2026-04-01T05:01:30.337Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:01:30.340Z 2026-04-01 05:01:30.340 UTC [97434] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:01:30.340Z 2026-04-01 05:01:30.340 UTC [97434] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:01:30.340Z FROM security_events
+2026-04-01T05:01:30.340Z ORDER BY timestamp DESC
+2026-04-01T05:01:30.340Z LIMIT $1 OFFSET $2
+2026-04-01T05:01:30.486Z 2026-04-01 05:01:30.486 UTC [97440] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:01:30.486Z 2026-04-01 05:01:30.486 UTC [97440] STATEMENT:
+2026-04-01T05:01:30.486Z INSERT INTO security_events (
+2026-04-01T05:01:30.486Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:01:30.486Z description, action_taken
+2026-04-01T05:01:30.486Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:01:30.508Z 2026-04-01 05:01:30.508 UTC [97444] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:01:30.508Z 2026-04-01 05:01:30.508 UTC [97444] STATEMENT:
+2026-04-01T05:01:30.508Z INSERT INTO security_events (
+2026-04-01T05:01:30.508Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:01:30.508Z description, action_taken
+2026-04-01T05:01:30.508Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:02:26.652Z 2026-04-01 05:02:26.652 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:02:30.374Z 2026-04-01 05:02:30.374 UTC [55] LOG:  checkpoint complete: wrote 40 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.713 s, sync=0.003 s, total=3.722 s; sync files=7, longest=0.002 s, average=0.001 s; distance=183 kB, estimate=187 kB
+2026-04-01T05:07:11.983Z 2026-04-01 05:07:11.982 UTC [97727] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:07:11.983Z 2026-04-01 05:07:11.982 UTC [97727] STATEMENT:
+2026-04-01T05:07:11.983Z INSERT INTO security_events (
+2026-04-01T05:07:11.983Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:07:11.983Z description, action_taken
+2026-04-01T05:07:11.983Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:07:12.213Z 2026-04-01 05:07:12.213 UTC [97731] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:07:12.213Z 2026-04-01 05:07:12.213 UTC [97731] STATEMENT:
+2026-04-01T05:07:12.213Z INSERT INTO security_events (
+2026-04-01T05:07:12.213Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:07:12.213Z description, action_taken
+2026-04-01T05:07:12.213Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:07:12.468Z 2026-04-01 05:07:12.468 UTC [97730] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:07:12.468Z 2026-04-01 05:07:12.468 UTC [97730] STATEMENT:
+2026-04-01T05:07:12.468Z INSERT INTO security_events (
+2026-04-01T05:07:12.468Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:07:12.468Z description, action_taken
+2026-04-01T05:07:12.468Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:07:12.475Z 2026-04-01 05:07:12.475 UTC [97729] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:07:12.475Z 2026-04-01 05:07:12.475 UTC [97729] STATEMENT:
+2026-04-01T05:07:12.475Z INSERT INTO security_events (
+2026-04-01T05:07:12.475Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:07:12.475Z description, action_taken
+2026-04-01T05:07:12.475Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:07:12.475Z 2026-04-01 05:07:12.475 UTC [97732] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:07:12.475Z 2026-04-01 05:07:12.475 UTC [97732] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:07:12.475Z FROM security_events
+2026-04-01T05:07:12.475Z ORDER BY timestamp DESC
+2026-04-01T05:07:12.475Z LIMIT $1 OFFSET $2
+2026-04-01T05:07:12.481Z 2026-04-01 05:07:12.481 UTC [97728] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:07:12.481Z 2026-04-01 05:07:12.481 UTC [97728] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:07:12.481Z FROM audit_events
+2026-04-01T05:07:12.481Z ORDER BY timestamp DESC
+2026-04-01T05:07:12.481Z LIMIT $1 OFFSET $2
+2026-04-01T05:07:12.484Z 2026-04-01 05:07:12.484 UTC [97726] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:07:12.484Z 2026-04-01 05:07:12.484 UTC [97726] STATEMENT:
+2026-04-01T05:07:12.484Z INSERT INTO security_events (
+2026-04-01T05:07:12.484Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:07:12.484Z description, action_taken
+2026-04-01T05:07:12.484Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:07:12.623Z 2026-04-01 05:07:12.623 UTC [97736] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:07:12.623Z 2026-04-01 05:07:12.623 UTC [97736] STATEMENT:
+2026-04-01T05:07:12.623Z INSERT INTO security_events (
+2026-04-01T05:07:12.623Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:07:12.623Z description, action_taken
+2026-04-01T05:07:12.623Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:07:26.470Z 2026-04-01 05:07:26.470 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:07:29.993Z 2026-04-01 05:07:29.993 UTC [55] LOG:  checkpoint complete: wrote 38 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.514 s, sync=0.003 s, total=3.524 s; sync files=6, longest=0.002 s, average=0.001 s; distance=188 kB, estimate=188 kB
+2026-04-01T05:12:27.092Z 2026-04-01 05:12:27.092 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:12:31.416Z 2026-04-01 05:12:31.416 UTC [55] LOG:  checkpoint complete: wrote 46 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.317 s, sync=0.002 s, total=4.325 s; sync files=9, longest=0.002 s, average=0.001 s; distance=216 kB, estimate=216 kB
+2026-04-01T05:17:27.510Z 2026-04-01 05:17:27.510 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:17:30.255Z 2026-04-01 05:17:30.255 UTC [55] LOG:  checkpoint complete: wrote 30 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.735 s, sync=0.003 s, total=2.746 s; sync files=7, longest=0.002 s, average=0.001 s; distance=147 kB, estimate=209 kB
+2026-04-01T05:22:27.349Z 2026-04-01 05:22:27.349 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:22:30.671Z 2026-04-01 05:22:30.671 UTC [55] LOG:  checkpoint complete: wrote 36 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.312 s, sync=0.003 s, total=3.323 s; sync files=6, longest=0.002 s, average=0.001 s; distance=198 kB, estimate=208 kB
+2026-04-01T05:27:27.746Z 2026-04-01 05:27:27.746 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:27:31.165Z 2026-04-01 05:27:31.164 UTC [55] LOG:  checkpoint complete: wrote 37 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.411 s, sync=0.003 s, total=3.419 s; sync files=7, longest=0.002 s, average=0.001 s; distance=203 kB, estimate=208 kB
+2026-04-01T05:29:36.062Z 2026-04-01 05:29:36.062 UTC [98843] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:36.062Z 2026-04-01 05:29:36.062 UTC [98843] STATEMENT:
+2026-04-01T05:29:36.062Z INSERT INTO security_events (
+2026-04-01T05:29:36.062Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:36.062Z description, action_taken
+2026-04-01T05:29:36.062Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:36.135Z 2026-04-01 05:29:36.135 UTC [98847] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:36.135Z 2026-04-01 05:29:36.135 UTC [98847] STATEMENT:
+2026-04-01T05:29:36.135Z INSERT INTO security_events (
+2026-04-01T05:29:36.135Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:36.135Z description, action_taken
+2026-04-01T05:29:36.135Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:36.319Z 2026-04-01 05:29:36.319 UTC [98848] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:36.319Z 2026-04-01 05:29:36.319 UTC [98848] STATEMENT:
+2026-04-01T05:29:36.319Z INSERT INTO security_events (
+2026-04-01T05:29:36.319Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:36.319Z description, action_taken
+2026-04-01T05:29:36.319Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:36.322Z 2026-04-01 05:29:36.322 UTC [98846] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:29:36.322Z 2026-04-01 05:29:36.322 UTC [98846] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:29:36.322Z FROM security_events
+2026-04-01T05:29:36.322Z ORDER BY timestamp DESC
+2026-04-01T05:29:36.322Z LIMIT $1 OFFSET $2
+2026-04-01T05:29:36.324Z 2026-04-01 05:29:36.323 UTC [98845] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:36.324Z 2026-04-01 05:29:36.323 UTC [98845] STATEMENT:
+2026-04-01T05:29:36.324Z INSERT INTO security_events (
+2026-04-01T05:29:36.324Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:36.324Z description, action_taken
+2026-04-01T05:29:36.324Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:36.325Z 2026-04-01 05:29:36.325 UTC [98844] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:29:36.325Z 2026-04-01 05:29:36.325 UTC [98844] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:29:36.325Z FROM audit_events
+2026-04-01T05:29:36.325Z ORDER BY timestamp DESC
+2026-04-01T05:29:36.326Z LIMIT $1 OFFSET $2
+2026-04-01T05:29:36.327Z 2026-04-01 05:29:36.327 UTC [98842] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:36.327Z 2026-04-01 05:29:36.327 UTC [98842] STATEMENT:
+2026-04-01T05:29:36.327Z INSERT INTO security_events (
+2026-04-01T05:29:36.327Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:36.327Z description, action_taken
+2026-04-01T05:29:36.327Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:36.451Z 2026-04-01 05:29:36.451 UTC [98854] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:36.451Z 2026-04-01 05:29:36.451 UTC [98854] STATEMENT:
+2026-04-01T05:29:36.451Z INSERT INTO security_events (
+2026-04-01T05:29:36.451Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:36.451Z description, action_taken
+2026-04-01T05:29:36.451Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:53.866Z 2026-04-01 05:29:53.865 UTC [98872] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:53.866Z 2026-04-01 05:29:53.865 UTC [98872] STATEMENT:
+2026-04-01T05:29:53.866Z INSERT INTO security_events (
+2026-04-01T05:29:53.866Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:53.866Z description, action_taken
+2026-04-01T05:29:53.866Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:53.933Z 2026-04-01 05:29:53.933 UTC [98876] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:53.933Z 2026-04-01 05:29:53.933 UTC [98876] STATEMENT:
+2026-04-01T05:29:53.933Z INSERT INTO security_events (
+2026-04-01T05:29:53.933Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:53.933Z description, action_taken
+2026-04-01T05:29:53.933Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:54.126Z 2026-04-01 05:29:54.125 UTC [98877] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:54.126Z 2026-04-01 05:29:54.125 UTC [98877] STATEMENT:
+2026-04-01T05:29:54.126Z INSERT INTO security_events (
+2026-04-01T05:29:54.126Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:54.126Z description, action_taken
+2026-04-01T05:29:54.126Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:54.127Z 2026-04-01 05:29:54.127 UTC [98875] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:29:54.127Z 2026-04-01 05:29:54.127 UTC [98875] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:29:54.127Z FROM audit_events
+2026-04-01T05:29:54.127Z ORDER BY timestamp DESC
+2026-04-01T05:29:54.127Z LIMIT $1 OFFSET $2
+2026-04-01T05:29:54.143Z 2026-04-01 05:29:54.142 UTC [98873] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:54.143Z 2026-04-01 05:29:54.142 UTC [98873] STATEMENT:
+2026-04-01T05:29:54.143Z INSERT INTO security_events (
+2026-04-01T05:29:54.143Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:54.143Z description, action_taken
+2026-04-01T05:29:54.143Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:54.251Z 2026-04-01 05:29:54.251 UTC [98879] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:29:54.251Z 2026-04-01 05:29:54.251 UTC [98879] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:29:54.251Z FROM security_events
+2026-04-01T05:29:54.251Z ORDER BY timestamp DESC
+2026-04-01T05:29:54.251Z LIMIT $1 OFFSET $2
+2026-04-01T05:29:54.261Z 2026-04-01 05:29:54.261 UTC [98878] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:54.261Z 2026-04-01 05:29:54.261 UTC [98878] STATEMENT:
+2026-04-01T05:29:54.261Z INSERT INTO security_events (
+2026-04-01T05:29:54.261Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:54.261Z description, action_taken
+2026-04-01T05:29:54.261Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:29:54.262Z 2026-04-01 05:29:54.262 UTC [98880] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:29:54.262Z 2026-04-01 05:29:54.262 UTC [98880] STATEMENT:
+2026-04-01T05:29:54.262Z INSERT INTO security_events (
+2026-04-01T05:29:54.262Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:29:54.262Z description, action_taken
+2026-04-01T05:29:54.262Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:32:27.263Z 2026-04-01 05:32:27.263 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:32:31.482Z 2026-04-01 05:32:31.481 UTC [55] LOG:  checkpoint complete: wrote 45 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.213 s, sync=0.002 s, total=4.219 s; sync files=9, longest=0.002 s, average=0.001 s; distance=249 kB, estimate=249 kB
+2026-04-01T05:36:36.010Z 2026-04-01 05:36:36.009 UTC [99187] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:36.011Z 2026-04-01 05:36:36.009 UTC [99187] STATEMENT:
+2026-04-01T05:36:36.011Z INSERT INTO security_events (
+2026-04-01T05:36:36.011Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:36.011Z description, action_taken
+2026-04-01T05:36:36.011Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:36.090Z 2026-04-01 05:36:36.089 UTC [99214] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:36.090Z 2026-04-01 05:36:36.089 UTC [99214] STATEMENT:
+2026-04-01T05:36:36.090Z INSERT INTO security_events (
+2026-04-01T05:36:36.090Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:36.090Z description, action_taken
+2026-04-01T05:36:36.090Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:36.302Z 2026-04-01 05:36:36.301 UTC [99215] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:36.302Z 2026-04-01 05:36:36.301 UTC [99215] STATEMENT:
+2026-04-01T05:36:36.302Z INSERT INTO security_events (
+2026-04-01T05:36:36.302Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:36.302Z description, action_taken
+2026-04-01T05:36:36.302Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:36.304Z 2026-04-01 05:36:36.304 UTC [99211] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:36:36.304Z 2026-04-01 05:36:36.304 UTC [99211] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:36:36.304Z FROM audit_events
+2026-04-01T05:36:36.304Z ORDER BY timestamp DESC
+2026-04-01T05:36:36.304Z LIMIT $1 OFFSET $2
+2026-04-01T05:36:36.305Z 2026-04-01 05:36:36.305 UTC [99213] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:36.305Z 2026-04-01 05:36:36.305 UTC [99213] STATEMENT:
+2026-04-01T05:36:36.305Z INSERT INTO security_events (
+2026-04-01T05:36:36.305Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:36.305Z description, action_taken
+2026-04-01T05:36:36.305Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:36.308Z 2026-04-01 05:36:36.308 UTC [99212] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:36:36.308Z 2026-04-01 05:36:36.308 UTC [99212] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:36:36.308Z FROM security_events
+2026-04-01T05:36:36.308Z ORDER BY timestamp DESC
+2026-04-01T05:36:36.308Z LIMIT $1 OFFSET $2
+2026-04-01T05:36:36.425Z 2026-04-01 05:36:36.424 UTC [99217] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:36.425Z 2026-04-01 05:36:36.424 UTC [99217] STATEMENT:
+2026-04-01T05:36:36.425Z INSERT INTO security_events (
+2026-04-01T05:36:36.425Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:36.425Z description, action_taken
+2026-04-01T05:36:36.425Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:36.433Z 2026-04-01 05:36:36.433 UTC [99219] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:36.433Z 2026-04-01 05:36:36.433 UTC [99219] STATEMENT:
+2026-04-01T05:36:36.433Z INSERT INTO security_events (
+2026-04-01T05:36:36.433Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:36.433Z description, action_taken
+2026-04-01T05:36:36.433Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:53.092Z 2026-04-01 05:36:53.092 UTC [99221] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:53.092Z 2026-04-01 05:36:53.092 UTC [99221] STATEMENT:
+2026-04-01T05:36:53.092Z INSERT INTO security_events (
+2026-04-01T05:36:53.092Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:53.092Z description, action_taken
+2026-04-01T05:36:53.092Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:53.197Z 2026-04-01 05:36:53.197 UTC [99241] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:53.197Z 2026-04-01 05:36:53.197 UTC [99241] STATEMENT:
+2026-04-01T05:36:53.197Z INSERT INTO security_events (
+2026-04-01T05:36:53.197Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:53.197Z description, action_taken
+2026-04-01T05:36:53.197Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:53.419Z 2026-04-01 05:36:53.419 UTC [99242] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:53.419Z 2026-04-01 05:36:53.419 UTC [99242] STATEMENT:
+2026-04-01T05:36:53.419Z INSERT INTO security_events (
+2026-04-01T05:36:53.419Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:53.419Z description, action_taken
+2026-04-01T05:36:53.419Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:53.424Z 2026-04-01 05:36:53.423 UTC [99240] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:36:53.424Z 2026-04-01 05:36:53.423 UTC [99240] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:36:53.424Z FROM audit_events
+2026-04-01T05:36:53.424Z ORDER BY timestamp DESC
+2026-04-01T05:36:53.424Z LIMIT $1 OFFSET $2
+2026-04-01T05:36:53.424Z 2026-04-01 05:36:53.424 UTC [99239] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:53.424Z 2026-04-01 05:36:53.424 UTC [99239] STATEMENT:
+2026-04-01T05:36:53.424Z INSERT INTO security_events (
+2026-04-01T05:36:53.424Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:53.424Z description, action_taken
+2026-04-01T05:36:53.424Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:53.432Z 2026-04-01 05:36:53.432 UTC [99238] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:36:53.432Z 2026-04-01 05:36:53.432 UTC [99238] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:36:53.432Z FROM security_events
+2026-04-01T05:36:53.432Z ORDER BY timestamp DESC
+2026-04-01T05:36:53.432Z LIMIT $1 OFFSET $2
+2026-04-01T05:36:53.602Z 2026-04-01 05:36:53.602 UTC [99246] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:53.602Z 2026-04-01 05:36:53.602 UTC [99246] STATEMENT:
+2026-04-01T05:36:53.602Z INSERT INTO security_events (
+2026-04-01T05:36:53.602Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:53.602Z description, action_taken
+2026-04-01T05:36:53.602Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:36:53.609Z 2026-04-01 05:36:53.609 UTC [99244] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:36:53.609Z 2026-04-01 05:36:53.609 UTC [99244] STATEMENT:
+2026-04-01T05:36:53.609Z INSERT INTO security_events (
+2026-04-01T05:36:53.609Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:36:53.609Z description, action_taken
+2026-04-01T05:36:53.609Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:37:27.585Z 2026-04-01 05:37:27.585 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:37:31.831Z 2026-04-01 05:37:31.830 UTC [55] LOG:  checkpoint complete: wrote 45 buffers (0.3%); 0 WAL file(s) added, 0 removed, 1 recycled; write=4.232 s, sync=0.004 s, total=4.247 s; sync files=10, longest=0.002 s, average=0.001 s; distance=270 kB, estimate=270 kB
+2026-04-01T05:42:27.922Z 2026-04-01 05:42:27.921 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:42:29.534Z 2026-04-01 05:42:29.534 UTC [55] LOG:  checkpoint complete: wrote 19 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.606 s, sync=0.003 s, total=1.613 s; sync files=7, longest=0.002 s, average=0.001 s; distance=87 kB, estimate=251 kB
+2026-04-01T05:45:02.632Z 2026-04-01 05:45:02.631 UTC [99657] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:02.632Z 2026-04-01 05:45:02.631 UTC [99657] STATEMENT:
+2026-04-01T05:45:02.632Z INSERT INTO security_events (
+2026-04-01T05:45:02.632Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:02.633Z description, action_taken
+2026-04-01T05:45:02.633Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:02.647Z 2026-04-01 05:45:02.647 UTC [99655] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:02.647Z 2026-04-01 05:45:02.647 UTC [99655] STATEMENT:
+2026-04-01T05:45:02.647Z INSERT INTO security_events (
+2026-04-01T05:45:02.647Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:02.647Z description, action_taken
+2026-04-01T05:45:02.647Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:02.880Z 2026-04-01 05:45:02.879 UTC [99658] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:02.880Z 2026-04-01 05:45:02.879 UTC [99658] STATEMENT:
+2026-04-01T05:45:02.880Z INSERT INTO security_events (
+2026-04-01T05:45:02.880Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:02.880Z description, action_taken
+2026-04-01T05:45:02.880Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:02.884Z 2026-04-01 05:45:02.884 UTC [99659] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:45:02.884Z 2026-04-01 05:45:02.884 UTC [99659] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:45:02.884Z FROM audit_events
+2026-04-01T05:45:02.884Z ORDER BY timestamp DESC
+2026-04-01T05:45:02.884Z LIMIT $1 OFFSET $2
+2026-04-01T05:45:02.885Z 2026-04-01 05:45:02.885 UTC [99640] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:02.885Z 2026-04-01 05:45:02.885 UTC [99640] STATEMENT:
+2026-04-01T05:45:02.885Z INSERT INTO security_events (
+2026-04-01T05:45:02.885Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:02.885Z description, action_taken
+2026-04-01T05:45:02.885Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:03.006Z 2026-04-01 05:45:03.006 UTC [99660] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:45:03.006Z 2026-04-01 05:45:03.006 UTC [99660] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:45:03.006Z FROM security_events
+2026-04-01T05:45:03.006Z ORDER BY timestamp DESC
+2026-04-01T05:45:03.006Z LIMIT $1 OFFSET $2
+2026-04-01T05:45:03.037Z 2026-04-01 05:45:03.037 UTC [99662] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:03.037Z 2026-04-01 05:45:03.037 UTC [99662] STATEMENT:
+2026-04-01T05:45:03.037Z INSERT INTO security_events (
+2026-04-01T05:45:03.037Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:03.037Z description, action_taken
+2026-04-01T05:45:03.037Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:03.070Z 2026-04-01 05:45:03.070 UTC [99666] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:03.070Z 2026-04-01 05:45:03.070 UTC [99666] STATEMENT:
+2026-04-01T05:45:03.070Z INSERT INTO security_events (
+2026-04-01T05:45:03.070Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:03.070Z description, action_taken
+2026-04-01T05:45:03.070Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:36.654Z 2026-04-01 05:45:36.654 UTC [99683] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:36.654Z 2026-04-01 05:45:36.654 UTC [99683] STATEMENT:
+2026-04-01T05:45:36.654Z INSERT INTO security_events (
+2026-04-01T05:45:36.654Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:36.654Z description, action_taken
+2026-04-01T05:45:36.654Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:36.745Z 2026-04-01 05:45:36.745 UTC [99694] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:36.745Z 2026-04-01 05:45:36.745 UTC [99694] STATEMENT:
+2026-04-01T05:45:36.745Z INSERT INTO security_events (
+2026-04-01T05:45:36.745Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:36.745Z description, action_taken
+2026-04-01T05:45:36.745Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:36.981Z 2026-04-01 05:45:36.981 UTC [99695] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:36.981Z 2026-04-01 05:45:36.981 UTC [99695] STATEMENT:
+2026-04-01T05:45:36.981Z INSERT INTO security_events (
+2026-04-01T05:45:36.981Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:36.981Z description, action_taken
+2026-04-01T05:45:36.981Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:36.986Z 2026-04-01 05:45:36.986 UTC [99693] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T05:45:36.986Z 2026-04-01 05:45:36.986 UTC [99693] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T05:45:36.986Z FROM security_events
+2026-04-01T05:45:36.986Z ORDER BY timestamp DESC
+2026-04-01T05:45:36.986Z LIMIT $1 OFFSET $2
+2026-04-01T05:45:37.000Z 2026-04-01 05:45:36.998 UTC [99691] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:37.000Z 2026-04-01 05:45:36.998 UTC [99691] STATEMENT:
+2026-04-01T05:45:37.000Z INSERT INTO security_events (
+2026-04-01T05:45:37.000Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:37.000Z description, action_taken
+2026-04-01T05:45:37.000Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:37.016Z 2026-04-01 05:45:37.015 UTC [99667] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T05:45:37.016Z 2026-04-01 05:45:37.015 UTC [99667] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T05:45:37.016Z FROM audit_events
+2026-04-01T05:45:37.016Z ORDER BY timestamp DESC
+2026-04-01T05:45:37.016Z LIMIT $1 OFFSET $2
+2026-04-01T05:45:37.052Z 2026-04-01 05:45:37.052 UTC [99692] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:37.052Z 2026-04-01 05:45:37.052 UTC [99692] STATEMENT:
+2026-04-01T05:45:37.052Z INSERT INTO security_events (
+2026-04-01T05:45:37.052Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:37.052Z description, action_taken
+2026-04-01T05:45:37.052Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:45:37.170Z 2026-04-01 05:45:37.169 UTC [99696] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T05:45:37.170Z 2026-04-01 05:45:37.169 UTC [99696] STATEMENT:
+2026-04-01T05:45:37.170Z INSERT INTO security_events (
+2026-04-01T05:45:37.170Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T05:45:37.170Z description, action_taken
+2026-04-01T05:45:37.170Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T05:47:27.636Z 2026-04-01 05:47:27.636 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:47:30.572Z 2026-04-01 05:47:30.572 UTC [55] LOG:  checkpoint complete: wrote 32 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.927 s, sync=0.003 s, total=2.936 s; sync files=11, longest=0.002 s, average=0.001 s; distance=155 kB, estimate=242 kB
+2026-04-01T05:52:27.663Z 2026-04-01 05:52:27.663 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:52:28.975Z 2026-04-01 05:52:28.975 UTC [55] LOG:  checkpoint complete: wrote 16 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.305 s, sync=0.004 s, total=1.312 s; sync files=6, longest=0.002 s, average=0.001 s; distance=88 kB, estimate=226 kB
+2026-04-01T05:57:28.075Z 2026-04-01 05:57:28.074 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T05:57:29.488Z 2026-04-01 05:57:29.488 UTC [55] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.406 s, sync=0.003 s, total=1.414 s; sync files=7, longest=0.002 s, average=0.001 s; distance=91 kB, estimate=213 kB
+2026-04-01T06:02:28.587Z 2026-04-01 06:02:28.586 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T06:02:30.005Z 2026-04-01 06:02:30.005 UTC [55] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.409 s, sync=0.003 s, total=1.419 s; sync files=7, longest=0.002 s, average=0.001 s; distance=87 kB, estimate=200 kB
+2026-04-01T06:06:11.616Z 2026-04-01 06:06:11.616 UTC [100690] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:06:11.616Z 2026-04-01 06:06:11.616 UTC [100690] STATEMENT:
+2026-04-01T06:06:11.616Z INSERT INTO security_events (
+2026-04-01T06:06:11.616Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:06:11.616Z description, action_taken
+2026-04-01T06:06:11.616Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:06:11.696Z 2026-04-01 06:06:11.696 UTC [100713] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:06:11.696Z 2026-04-01 06:06:11.696 UTC [100713] STATEMENT:
+2026-04-01T06:06:11.696Z INSERT INTO security_events (
+2026-04-01T06:06:11.696Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:06:11.696Z description, action_taken
+2026-04-01T06:06:11.696Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:06:11.884Z 2026-04-01 06:06:11.884 UTC [100717] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:06:11.884Z 2026-04-01 06:06:11.884 UTC [100717] STATEMENT:
+2026-04-01T06:06:11.884Z INSERT INTO security_events (
+2026-04-01T06:06:11.884Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:06:11.884Z description, action_taken
+2026-04-01T06:06:11.884Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:06:11.887Z 2026-04-01 06:06:11.886 UTC [100714] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T06:06:11.887Z 2026-04-01 06:06:11.886 UTC [100714] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T06:06:11.887Z FROM audit_events
+2026-04-01T06:06:11.887Z ORDER BY timestamp DESC
+2026-04-01T06:06:11.887Z LIMIT $1 OFFSET $2
+2026-04-01T06:06:11.893Z 2026-04-01 06:06:11.893 UTC [100716] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:06:11.893Z 2026-04-01 06:06:11.893 UTC [100716] STATEMENT:
+2026-04-01T06:06:11.893Z INSERT INTO security_events (
+2026-04-01T06:06:11.893Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:06:11.893Z description, action_taken
+2026-04-01T06:06:11.893Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:06:11.898Z 2026-04-01 06:06:11.898 UTC [100689] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T06:06:11.898Z 2026-04-01 06:06:11.898 UTC [100689] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T06:06:11.898Z FROM security_events
+2026-04-01T06:06:11.898Z ORDER BY timestamp DESC
+2026-04-01T06:06:11.898Z LIMIT $1 OFFSET $2
+2026-04-01T06:06:12.054Z 2026-04-01 06:06:12.054 UTC [100718] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:06:12.054Z 2026-04-01 06:06:12.054 UTC [100718] STATEMENT:
+2026-04-01T06:06:12.054Z INSERT INTO security_events (
+2026-04-01T06:06:12.054Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:06:12.054Z description, action_taken
+2026-04-01T06:06:12.054Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:06:12.063Z 2026-04-01 06:06:12.063 UTC [100722] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:06:12.063Z 2026-04-01 06:06:12.063 UTC [100722] STATEMENT:
+2026-04-01T06:06:12.063Z INSERT INTO security_events (
+2026-04-01T06:06:12.063Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:06:12.063Z description, action_taken
+2026-04-01T06:06:12.063Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:07:28.105Z 2026-04-01 06:07:28.105 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T06:07:30.524Z 2026-04-01 06:07:30.524 UTC [55] LOG:  checkpoint complete: wrote 27 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.412 s, sync=0.003 s, total=2.419 s; sync files=8, longest=0.002 s, average=0.001 s; distance=109 kB, estimate=191 kB
+2026-04-01T06:12:28.624Z 2026-04-01 06:12:28.624 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T06:12:30.338Z 2026-04-01 06:12:30.337 UTC [55] LOG:  checkpoint complete: wrote 20 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.707 s, sync=0.003 s, total=1.714 s; sync files=7, longest=0.002 s, average=0.001 s; distance=94 kB, estimate=181 kB
+2026-04-01T06:17:28.434Z 2026-04-01 06:17:28.433 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T06:17:30.854Z 2026-04-01 06:17:30.853 UTC [55] LOG:  checkpoint complete: wrote 27 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.412 s, sync=0.003 s, total=2.421 s; sync files=10, longest=0.002 s, average=0.001 s; distance=131 kB, estimate=176 kB
+2026-04-01T06:22:28.953Z 2026-04-01 06:22:28.953 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T06:22:30.367Z 2026-04-01 06:22:30.367 UTC [55] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.406 s, sync=0.003 s, total=1.414 s; sync files=7, longest=0.002 s, average=0.001 s; distance=79 kB, estimate=167 kB
+2026-04-01T06:27:28.465Z 2026-04-01 06:27:28.464 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T06:27:29.979Z 2026-04-01 06:27:29.979 UTC [55] LOG:  checkpoint complete: wrote 18 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.507 s, sync=0.003 s, total=1.515 s; sync files=7, longest=0.002 s, average=0.001 s; distance=88 kB, estimate=159 kB
+2026-04-01T06:32:23.918Z 2026-04-01 06:32:23.917 UTC [101995] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:23.919Z 2026-04-01 06:32:23.917 UTC [101995] STATEMENT:
+2026-04-01T06:32:23.919Z INSERT INTO security_events (
+2026-04-01T06:32:23.919Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:23.919Z description, action_taken
+2026-04-01T06:32:23.919Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:23.932Z 2026-04-01 06:32:23.932 UTC [101993] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:23.932Z 2026-04-01 06:32:23.932 UTC [101993] STATEMENT:
+2026-04-01T06:32:23.932Z INSERT INTO security_events (
+2026-04-01T06:32:23.932Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:23.932Z description, action_taken
+2026-04-01T06:32:23.932Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:24.181Z 2026-04-01 06:32:24.181 UTC [102006] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:24.181Z 2026-04-01 06:32:24.181 UTC [102006] STATEMENT:
+2026-04-01T06:32:24.181Z INSERT INTO security_events (
+2026-04-01T06:32:24.181Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:24.181Z description, action_taken
+2026-04-01T06:32:24.181Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:24.185Z 2026-04-01 06:32:24.185 UTC [102005] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T06:32:24.185Z 2026-04-01 06:32:24.185 UTC [102005] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T06:32:24.185Z FROM audit_events
+2026-04-01T06:32:24.185Z ORDER BY timestamp DESC
+2026-04-01T06:32:24.185Z LIMIT $1 OFFSET $2
+2026-04-01T06:32:24.193Z 2026-04-01 06:32:24.193 UTC [102003] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:24.193Z 2026-04-01 06:32:24.193 UTC [102003] STATEMENT:
+2026-04-01T06:32:24.193Z INSERT INTO security_events (
+2026-04-01T06:32:24.193Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:24.193Z description, action_taken
+2026-04-01T06:32:24.193Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:24.223Z 2026-04-01 06:32:24.223 UTC [102004] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:24.223Z 2026-04-01 06:32:24.223 UTC [102004] STATEMENT:
+2026-04-01T06:32:24.223Z INSERT INTO security_events (
+2026-04-01T06:32:24.223Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:24.223Z description, action_taken
+2026-04-01T06:32:24.223Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:24.292Z 2026-04-01 06:32:24.292 UTC [102008] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:24.292Z 2026-04-01 06:32:24.292 UTC [102008] STATEMENT:
+2026-04-01T06:32:24.292Z INSERT INTO security_events (
+2026-04-01T06:32:24.292Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:24.292Z description, action_taken
+2026-04-01T06:32:24.292Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:24.304Z 2026-04-01 06:32:24.304 UTC [102007] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T06:32:24.304Z 2026-04-01 06:32:24.304 UTC [102007] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T06:32:24.304Z FROM security_events
+2026-04-01T06:32:24.304Z ORDER BY timestamp DESC
+2026-04-01T06:32:24.304Z LIMIT $1 OFFSET $2
+2026-04-01T06:32:29.073Z 2026-04-01 06:32:29.073 UTC [55] LOG:  checkpoint starting: time
+2026-04-01T06:32:31.799Z 2026-04-01 06:32:31.799 UTC [55] LOG:  checkpoint complete: wrote 30 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.714 s, sync=0.004 s, total=2.727 s; sync files=9, longest=0.002 s, average=0.001 s; distance=112 kB, estimate=154 kB
+2026-04-01T06:32:46.231Z 2026-04-01 06:32:46.231 UTC [102021] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:46.231Z 2026-04-01 06:32:46.231 UTC [102021] STATEMENT:
+2026-04-01T06:32:46.231Z INSERT INTO security_events (
+2026-04-01T06:32:46.231Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:46.231Z description, action_taken
+2026-04-01T06:32:46.231Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:46.243Z 2026-04-01 06:32:46.243 UTC [102022] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:46.243Z 2026-04-01 06:32:46.243 UTC [102022] STATEMENT:
+2026-04-01T06:32:46.243Z INSERT INTO security_events (
+2026-04-01T06:32:46.243Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:46.243Z description, action_taken
+2026-04-01T06:32:46.243Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:46.490Z 2026-04-01 06:32:46.489 UTC [102034] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:46.490Z 2026-04-01 06:32:46.489 UTC [102034] STATEMENT:
+2026-04-01T06:32:46.490Z INSERT INTO security_events (
+2026-04-01T06:32:46.490Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:46.490Z description, action_taken
+2026-04-01T06:32:46.490Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:46.590Z 2026-04-01 06:32:46.589 UTC [102036] ERROR:  relation "security_events" does not exist at character 121
+2026-04-01T06:32:46.590Z 2026-04-01 06:32:46.589 UTC [102036] STATEMENT:  SELECT id, event_type, severity, email, ip_address, description, action_taken, is_resolved, timestamp
+2026-04-01T06:32:46.590Z FROM security_events
+2026-04-01T06:32:46.590Z ORDER BY timestamp DESC
+2026-04-01T06:32:46.590Z LIMIT $1 OFFSET $2
+2026-04-01T06:32:46.591Z 2026-04-01 06:32:46.591 UTC [102037] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:46.591Z 2026-04-01 06:32:46.591 UTC [102037] STATEMENT:
+2026-04-01T06:32:46.591Z INSERT INTO security_events (
+2026-04-01T06:32:46.591Z event_type, severity, email, ip_address, user_agent,
+2026-04-01T06:32:46.591Z description, action_taken
+2026-04-01T06:32:46.591Z ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+2026-04-01T06:32:46.597Z 2026-04-01 06:32:46.597 UTC [102038] ERROR:  relation "audit_events" does not exist at character 129
+2026-04-01T06:32:46.597Z 2026-04-01 06:32:46.597 UTC [102038] STATEMENT:  SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+2026-04-01T06:32:46.597Z FROM audit_events
+2026-04-01T06:32:46.597Z ORDER BY timestamp DESC
+2026-04-01T06:32:46.597Z LIMIT $1 OFFSET $2
+2026-04-01T06:32:46.599Z 2026-04-01 06:32:46.599 UTC [102035] ERROR:  relation "security_events" does not exist at character 22
+2026-04-01T06:32:46.599Z 2026-04-01 06:32:46.599 UTC [102035] STATEMENT:
