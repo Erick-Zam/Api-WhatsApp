@@ -10,6 +10,20 @@ export const __setSessionEngineQueryRunnerForTests = (runner) => {
 
 const runQuery = (text, params) => queryRunner(text, params);
 
+const isMissingSchemaError = (error) => error?.code === '42703' || error?.code === '42P01';
+
+const mapSessionEngineRow = (row) => ({
+    sessionId: row.session_id,
+    userId: row.user_id,
+    status: row.status,
+    engineType: row.engine_type || 'baileys',
+    engineConfig: row.engine_config || {},
+    healthStatus: row.health_status || 'unknown',
+    lastHeartbeatAt: row.last_heartbeat_at || null,
+    lastError: row.last_error || null,
+    updatedAt: row.updated_at,
+});
+
 export const isAllowedEngine = (engineType) => ALLOWED_ENGINES.includes(engineType);
 
 export const getAvailableEngines = () => ([
@@ -33,55 +47,63 @@ export const isEngineEnabled = (engineType) => {
 };
 
 export const getSessionEngineConfig = async (sessionId, userId) => {
-    const result = await runQuery(
-        `SELECT session_id, user_id, status, engine_type, engine_config, health_status, last_heartbeat_at, last_error, updated_at
-         FROM whatsapp_sessions
-         WHERE session_id = $1 AND user_id = $2`,
-        [sessionId, userId]
-    );
+    let result;
+    try {
+        result = await runQuery(
+            `SELECT session_id, user_id, status, engine_type, engine_config, health_status, last_heartbeat_at, last_error, updated_at
+             FROM whatsapp_sessions
+             WHERE session_id = $1 AND user_id = $2`,
+            [sessionId, userId]
+        );
+    } catch (error) {
+        if (!isMissingSchemaError(error)) throw error;
+
+        result = await runQuery(
+            `SELECT session_id, user_id, status,
+                    COALESCE(engine_type, 'baileys') AS engine_type,
+                    COALESCE(engine_config, '{}'::jsonb) AS engine_config,
+                    updated_at
+             FROM whatsapp_sessions
+             WHERE session_id = $1 AND user_id = $2`,
+            [sessionId, userId]
+        );
+    }
 
     if (result.rows.length === 0) {
         return null;
     }
 
-    const row = result.rows[0];
-    return {
-        sessionId: row.session_id,
-        userId: row.user_id,
-        status: row.status,
-        engineType: row.engine_type || 'baileys',
-        engineConfig: row.engine_config || {},
-        healthStatus: row.health_status || 'unknown',
-        lastHeartbeatAt: row.last_heartbeat_at,
-        lastError: row.last_error,
-        updatedAt: row.updated_at,
-    };
+    return mapSessionEngineRow(result.rows[0]);
 };
 
 export const getSessionEngineConfigBySessionId = async (sessionId) => {
-    const result = await runQuery(
-        `SELECT session_id, user_id, status, engine_type, engine_config, health_status, last_heartbeat_at, last_error, updated_at
-         FROM whatsapp_sessions
-         WHERE session_id = $1`,
-        [sessionId]
-    );
+    let result;
+    try {
+        result = await runQuery(
+            `SELECT session_id, user_id, status, engine_type, engine_config, health_status, last_heartbeat_at, last_error, updated_at
+             FROM whatsapp_sessions
+             WHERE session_id = $1`,
+            [sessionId]
+        );
+    } catch (error) {
+        if (!isMissingSchemaError(error)) throw error;
+
+        result = await runQuery(
+            `SELECT session_id, user_id, status,
+                    COALESCE(engine_type, 'baileys') AS engine_type,
+                    COALESCE(engine_config, '{}'::jsonb) AS engine_config,
+                    updated_at
+             FROM whatsapp_sessions
+             WHERE session_id = $1`,
+            [sessionId]
+        );
+    }
 
     if (result.rows.length === 0) {
         return null;
     }
 
-    const row = result.rows[0];
-    return {
-        sessionId: row.session_id,
-        userId: row.user_id,
-        status: row.status,
-        engineType: row.engine_type || 'baileys',
-        engineConfig: row.engine_config || {},
-        healthStatus: row.health_status || 'unknown',
-        lastHeartbeatAt: row.last_heartbeat_at,
-        lastError: row.last_error,
-        updatedAt: row.updated_at,
-    };
+    return mapSessionEngineRow(result.rows[0]);
 };
 
 export const setSessionEngineConfig = async ({ sessionId, userId, engineType, engineConfig }) => {

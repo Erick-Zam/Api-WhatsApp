@@ -50,6 +50,14 @@ export class BaileysAdapter extends EngineAdapter {
         return wa.updatePresence(jid, type, sessionId);
     }
 
+    async getChats(sessionId, options = {}) {
+        return wa.getChats(sessionId, options);
+    }
+
+    async getMessages(sessionId, jid, options = {}) {
+        return wa.getMessages(sessionId, jid, options);
+    }
+
     async health(sessionId) {
         const status = wa.getConnectionStatus(sessionId);
         return {

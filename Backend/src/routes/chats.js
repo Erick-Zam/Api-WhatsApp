@@ -1,7 +1,5 @@
 import express from 'express';
 import {
-    getChats,
-    getMessages,
     createGroup,
     getGroupMetadata,
     groupParticipantsUpdate,
@@ -12,6 +10,7 @@ import {
     groupLeave,
     formatJid
 } from '../whatsapp.js';
+import { getSessionAdapter } from '../services/sessionOrchestrator.js';
 
 const router = express.Router();
 
@@ -34,11 +33,25 @@ router.get('/', async (req, res) => {
     try {
         const limit = Number.parseInt(req.query.limit, 10) || 100;
         const before = typeof req.query.before === 'string' ? req.query.before : undefined;
-        const result = await getChats(req.sessionId, { limit, before });
+
+        const { adapter } = await getSessionAdapter(req.sessionId, req.user?.id || null);
+        if (typeof adapter.getChats !== 'function') {
+            return res.status(501).json({ error: 'Current engine does not support chat listing yet' });
+        }
+
+        const result = await adapter.getChats(req.sessionId, { limit, before });
+        const filteredItems = (result.items || []).filter((chat) => {
+            const id = String(chat?.id || '');
+            if (!id) return false;
+            if (id === 'status@broadcast') return false;
+            if (id.endsWith('@broadcast')) return false;
+            return true;
+        });
+
         res.json({
             success: true,
-            count: result.items.length,
-            chats: result.items,
+            count: filteredItems.length,
+            chats: filteredItems,
             hasMore: result.hasMore,
             nextCursor: result.nextCursor,
         });
@@ -53,11 +66,16 @@ router.get('/:jid/messages', async (req, res) => {
     const limit = Number.parseInt(req.query.limit, 10) || 50;
     const before = typeof req.query.before === 'string' ? req.query.before : undefined;
 
-    // Format JID just in case
-    const formattedJid = formatJid(jid);
+    const decodedJid = decodeURIComponent(jid);
+    const normalizedJid = decodedJid.includes('@') ? decodedJid : formatJid(decodedJid);
 
     try {
-        const result = await getMessages(req.sessionId, formattedJid, { limit, before });
+        const { adapter } = await getSessionAdapter(req.sessionId, req.user?.id || null);
+        if (typeof adapter.getMessages !== 'function') {
+            return res.status(501).json({ error: 'Current engine does not support message listing yet' });
+        }
+
+        const result = await adapter.getMessages(req.sessionId, normalizedJid, { limit, before });
         res.json({
             success: true,
             count: result.items.length,

@@ -268,9 +268,9 @@ router.get('/audit/events', authorizePermission('audit:view_events'), async (req
 
     try {
         const events = await query(
-            `SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, timestamp
+            `SELECT id, user_id, event_type, entity_type, entity_id, action, status, failure_reason, ip_address, created_at AS timestamp
              FROM audit_events
-             ORDER BY timestamp DESC
+             ORDER BY created_at DESC
              LIMIT $1 OFFSET $2`,
             [limit, offset]
         );

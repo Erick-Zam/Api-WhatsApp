@@ -73,7 +73,7 @@ router.get('/me', verifyJwt, async (req, res) => {
                 WHERE u.id = $1
             `, [id]);
         } catch (queryError) {
-            if (queryError?.code !== '42703') {
+            if (queryError?.code !== '42703' && queryError?.code !== '42P01') {
                 throw queryError;
             }
 
@@ -445,6 +445,9 @@ router.get('/mfa/trusted-devices', verifyJwt, async (req, res) => {
         const devices = await getTrustedDevices(req.user.id);
         res.json({ devices });
     } catch (error) {
+        if (error?.code === '42P01' || error?.code === '42703') {
+            return res.json({ devices: [] });
+        }
         logError('Auth', error.message, error.stack, req.user);
         res.status(500).json({ error: 'Failed to retrieve trusted devices' });
     }

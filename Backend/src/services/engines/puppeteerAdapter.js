@@ -2,6 +2,7 @@ import { EngineAdapter } from './engineAdapter.js';
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth } = pkg;
 import { triggerWebhooks } from '../webhooks.js';
+import { saveMessage } from '../messageArchive.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -210,10 +211,14 @@ export class PuppeteerAdapter extends EngineAdapter {
                         message: {
                             conversation: msg.body
                         },
-                        pushName: msg._data?.notifyName || msg.from
+                        pushName: msg._data?.notifyName || msg.from,
+                        messageTimestamp: msg.timestamp,
                     };
 
                     console.log(`[Puppeteer] New Message on ${sessionId}: ${msg.from} - ${msg.body}`);
+                    saveMessage(sessionId, payload).catch((error) => {
+                        console.error(`[Puppeteer] Failed to archive incoming message on ${sessionId}:`, error?.message || error);
+                    });
                     triggerWebhooks(sessionId, 'messages.upsert', payload);
                 } catch (error) {
                     console.error(`[Puppeteer] Message handler error on ${sessionId}:`, error?.message || error);
@@ -464,6 +469,83 @@ export class PuppeteerAdapter extends EngineAdapter {
             type,
             timestamp: new Date().toISOString(),
         };
+    }
+
+    async getChats(sessionId, options = {}) {
+        requireConnected(sessionId);
+        const client = clients.get(sessionId);
+        const { limit = 100, before } = options;
+        const maxItems = Math.max(1, Math.min(limit, 500));
+        const beforeTimestamp = before ? Number.parseInt(String(before), 10) : null;
+
+        const allChats = await client.getChats();
+        const mapped = allChats
+            .map((chat) => {
+                const timestamp = chat.timestamp || 0;
+                return {
+                    id: chat.id?._serialized || chat.id?.server || chat.id || '',
+                    name: chat.name || chat.formattedTitle || chat.id?.user || '',
+                    unreadCount: chat.unreadCount || 0,
+                    conversationTimestamp: timestamp,
+                    lastMessage: chat.lastMessage?.body || 'Click to view history',
+                    isGroup: Boolean(chat.isGroup),
+                };
+            })
+            .filter((chat) => chat.id && chat.id !== 'status@broadcast')
+            .filter((chat) => !chat.id.endsWith('@broadcast'))
+            .sort((a, b) => (b.conversationTimestamp || 0) - (a.conversationTimestamp || 0));
+
+        const filtered = beforeTimestamp
+            ? mapped.filter((chat) => (chat.conversationTimestamp || 0) < beforeTimestamp)
+            : mapped;
+
+        const items = filtered.slice(0, maxItems);
+        const hasMore = filtered.length > items.length;
+        const nextCursor = hasMore && items.length > 0
+            ? String(items[items.length - 1].conversationTimestamp || 0)
+            : null;
+
+        return { items, hasMore, nextCursor };
+    }
+
+    async getMessages(sessionId, jid, options = {}) {
+        requireConnected(sessionId);
+        const client = clients.get(sessionId);
+        const { limit = 50, before } = options;
+        const maxItems = Math.max(1, Math.min(limit, 500));
+        const beforeTimestamp = before ? Number.parseInt(String(before), 10) : null;
+
+        const chatId = jid?.includes('@') ? jid : formatJid(jid);
+        const chat = await client.getChatById(chatId);
+        const fetchLimit = Math.max(maxItems * 3, 150);
+        const rawMessages = await chat.fetchMessages({ limit: fetchLimit });
+
+        let filtered = rawMessages
+            .map((msg) => ({
+                key: {
+                    remoteJid: msg.fromMe ? (msg.to || chatId) : (msg.from || chatId),
+                    fromMe: Boolean(msg.fromMe),
+                    id: msg.id?.id || msg.id?._serialized || String(msg.timestamp || Date.now()),
+                },
+                message: {
+                    conversation: msg.body || '',
+                },
+                pushName: msg._data?.notifyName || null,
+                messageTimestamp: msg.timestamp || 0,
+            }))
+            .sort((a, b) => (a.messageTimestamp || 0) - (b.messageTimestamp || 0));
+
+        if (beforeTimestamp) {
+            filtered = filtered.filter((msg) => (msg.messageTimestamp || 0) < beforeTimestamp);
+        }
+
+        const items = filtered.slice(-maxItems);
+        const hasMore = filtered.length > items.length;
+        const nextCursor = hasMore && items.length > 0
+            ? String(items[0].messageTimestamp || 0)
+            : null;
+
+        return { items, hasMore, nextCursor };
     }
 
     async health(sessionId) {
