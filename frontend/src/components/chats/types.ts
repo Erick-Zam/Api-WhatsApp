@@ -15,11 +15,38 @@ export interface Message {
     };
     message?: {
         conversation?: string;
-        imageMessage?: { caption?: string };
-        videoMessage?: { caption?: string };
-        audioMessage?: { url?: string };
-        documentMessage?: { fileName?: string; mimetype?: string };
-        extendedTextMessage?: { text: string };
+        imageMessage?: { caption?: string; url?: string };
+        videoMessage?: { caption?: string; url?: string };
+        audioMessage?: { url?: string; seconds?: number };
+        documentMessage?: { fileName?: string; mimetype?: string; url?: string };
+        extendedTextMessage?: {
+            text: string;
+            contextInfo?: {
+                stanzaId?: string;
+                participant?: string;
+                quotedMessage?: {
+                    conversation?: string;
+                    extendedTextMessage?: { text?: string };
+                    imageMessage?: { caption?: string };
+                    videoMessage?: { caption?: string };
+                    documentMessage?: { fileName?: string };
+                };
+            };
+        };
+        reactionMessage?: {
+            text?: string;
+            key?: {
+                id?: string;
+                remoteJid?: string;
+                fromMe?: boolean;
+            };
+        };
+        protocolMessage?: {
+            type?: number;
+            key?: {
+                id?: string;
+            };
+        };
     };
     pushName?: string;
     messageTimestamp?: number;

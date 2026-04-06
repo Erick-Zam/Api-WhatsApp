@@ -1,4 +1,5 @@
 import {
+    ArrowTopRightOnSquareIcon,
     InformationCircleIcon,
     MicrophoneIcon,
     PaperClipIcon,
@@ -8,12 +9,64 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { Message } from './types';
 
+function getMessageText(msg: Message) {
+    const m = msg.message;
+    if (!m) return '';
+    if (m.conversation) return m.conversation;
+    if (m.extendedTextMessage?.text) return m.extendedTextMessage.text;
+    return '';
+}
+
+function getQuotedPreview(msg: Message) {
+    const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (!quoted) return null;
+
+    if (quoted.conversation) return quoted.conversation;
+    if (quoted.extendedTextMessage?.text) return quoted.extendedTextMessage.text;
+    if (quoted.imageMessage) return 'Photo';
+    if (quoted.videoMessage) return 'Video';
+    if (quoted.documentMessage?.fileName) return quoted.documentMessage.fileName;
+    if (quoted.documentMessage) return 'Document';
+
+    return 'Quoted message';
+}
+
+function isDeletedMessage(msg: Message) {
+    return msg.message?.protocolMessage?.type === 0;
+}
+
 function renderMessageContent(msg: Message) {
     const m = msg.message;
     if (!m) return <span className="text-xs italic text-zinc-400">Empty message</span>;
 
-    if (m.conversation) return <p className="whitespace-pre-wrap">{m.conversation}</p>;
-    if (m.extendedTextMessage?.text) return <p className="whitespace-pre-wrap">{m.extendedTextMessage.text}</p>;
+    if (isDeletedMessage(msg)) {
+        return <span className="text-xs italic text-zinc-400">This message was deleted</span>;
+    }
+
+    if (m.reactionMessage?.text) {
+        return (
+            <div className="flex items-center gap-2">
+                <span className="text-lg leading-none">{m.reactionMessage.text}</span>
+                <span className="text-xs text-zinc-300">Reaction</span>
+            </div>
+        );
+    }
+
+    const quotedPreview = getQuotedPreview(msg);
+    const bodyText = getMessageText(msg);
+
+    if (bodyText) {
+        return (
+            <div className="space-y-2">
+                {quotedPreview && (
+                    <div className="rounded-lg border border-zinc-600/50 bg-zinc-800/50 px-2.5 py-1.5">
+                        <p className="line-clamp-2 text-[11px] italic text-zinc-300">{quotedPreview}</p>
+                    </div>
+                )}
+                <p className="whitespace-pre-wrap">{bodyText}</p>
+            </div>
+        );
+    }
 
     if (m.imageMessage) {
         return (
@@ -21,6 +74,16 @@ function renderMessageContent(msg: Message) {
                 <div className="h-28 rounded-xl border border-zinc-700/40 bg-zinc-800/60 flex items-center justify-center">
                     <PhotoIcon className="w-8 h-8 text-zinc-500" />
                 </div>
+                {m.imageMessage.url && (
+                    <a
+                        href={m.imageMessage.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200"
+                    >
+                        Open image <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                    </a>
+                )}
                 {m.imageMessage.caption && <p className="text-xs text-zinc-200">{m.imageMessage.caption}</p>}
             </div>
         );
@@ -32,6 +95,16 @@ function renderMessageContent(msg: Message) {
                 <div className="h-28 rounded-xl border border-zinc-700/40 bg-zinc-800/60 flex items-center justify-center">
                     <VideoCameraIcon className="w-8 h-8 text-zinc-500" />
                 </div>
+                {m.videoMessage.url && (
+                    <a
+                        href={m.videoMessage.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200"
+                    >
+                        Open video <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                    </a>
+                )}
                 {m.videoMessage.caption && <p className="text-xs text-zinc-200">{m.videoMessage.caption}</p>}
             </div>
         );
@@ -41,16 +114,37 @@ function renderMessageContent(msg: Message) {
         return (
             <div className="flex items-center gap-2 text-xs">
                 <MicrophoneIcon className="w-4 h-4 text-cyan-400" />
-                <span>Audio message</span>
+                <span>Audio message{typeof m.audioMessage.seconds === 'number' ? ` (${m.audioMessage.seconds}s)` : ''}</span>
+                {m.audioMessage.url && (
+                    <a
+                        href={m.audioMessage.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200"
+                    >
+                        Open <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                    </a>
+                )}
             </div>
         );
     }
 
     if (m.documentMessage) {
         return (
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-2 text-xs flex-wrap">
                 <PaperClipIcon className="w-4 h-4 text-emerald-400" />
                 <span className="truncate">{m.documentMessage.fileName || 'document'}</span>
+                {m.documentMessage.mimetype && <span className="text-zinc-400">({m.documentMessage.mimetype})</span>}
+                {m.documentMessage.url && (
+                    <a
+                        href={m.documentMessage.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200"
+                    >
+                        Download <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                    </a>
+                )}
             </div>
         );
     }
