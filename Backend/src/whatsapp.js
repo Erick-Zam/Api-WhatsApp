@@ -12,6 +12,7 @@ const sessions = new Map(); // sessionId -> socket
 const qrCodes = new Map(); // sessionId -> qrCode
 const retryCounts = new Map(); // sessionId -> retryCount
 const sessionStoreFlushIntervals = new Map(); // sessionId -> intervalId
+const sessionStores = new Map(); // sessionId -> per-session in-memory store
 const MAX_RETRIES = 3; // Reduced from 10 for faster failure detection (~15 min total instead of 70+)
 const BASE_RETRY_DELAY_MS = 5000;
 const MAX_RETRY_DELAY_MS = 180000; // 3 minutes max retry delay (capped to 15 min total)
@@ -50,7 +51,9 @@ const initializeHealthMonitoring = () => {
 };
 
 // Initialize message archive on startup
-await initializeMessageArchive();
+initializeMessageArchive().catch((error) => {
+    console.error('[MessageArchive] Initialization failed:', error?.message || error);
+});
 
 // Call on startup
 initializeHealthMonitoring();
@@ -422,7 +425,6 @@ const initSessions = async () => {
 
 
 // Redoing store logic to be per-session to ensure isolation
-const sessionStores = new Map();
 
 // --- Rate Limiter Helper ---
 const checkRateLimit = (sessionId) => {
