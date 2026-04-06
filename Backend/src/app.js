@@ -25,6 +25,7 @@ import {
 import gdprRoutes from './routes/gdpr.js';
 import { connectSession, disconnectSession } from './services/sessionOrchestrator.js';
 import { verifyJwt } from './middleware/jwtAuth.js';
+import { ensureCriticalSchema } from './startup/ensureCriticalSchema.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -272,30 +273,39 @@ process.on('uncaughtException', (error) => {
     console.error('Uncaught exception:', error);
 });
 
-// Start the server
-app.listen(PORT, async () => {
-    console.log(`Server is running on port ${PORT}`);
+const bootstrap = async () => {
+    // Ensure critical schema pieces exist before accepting requests.
+    await ensureCriticalSchema();
 
-    // Test DB connection
-    try {
-        const dbModule = await import('./db.js');
-        const { rows } = await dbModule.default.query('SELECT NOW()');
-        console.log('Database connected:', rows[0].now);
-    } catch (err) {
-        console.error('Database connection failed:', err);
-    }
+    app.listen(PORT, async () => {
+        console.log(`Server is running on port ${PORT}`);
 
-    // Initialize all sessions
-    // Note: This might resurrect sessions that don't belong to currently active users, logic in whatsapp.js handles files.
-    try {
-        const wa = await import('./whatsapp.js');
-        await wa.initSessions();
-    } catch (err) {
-        console.error('Failed to initialize WhatsApp sessions:', err);
-    }
+        // Test DB connection
+        try {
+            const dbModule = await import('./db.js');
+            const { rows } = await dbModule.default.query('SELECT NOW()');
+            console.log('Database connected:', rows[0].now);
+        } catch (err) {
+            console.error('Database connection failed:', err);
+        }
 
-    // Initialize Scheduler
-    initScheduler();
+        // Initialize all sessions
+        // Note: This might resurrect sessions that don't belong to currently active users, logic in whatsapp.js handles files.
+        try {
+            const wa = await import('./whatsapp.js');
+            await wa.initSessions();
+        } catch (err) {
+            console.error('Failed to initialize WhatsApp sessions:', err);
+        }
+
+        // Initialize Scheduler
+        initScheduler();
+    });
+};
+
+bootstrap().catch((error) => {
+    console.error('Startup bootstrap failed:', error);
+    process.exit(1);
 });
 
 export { app };
