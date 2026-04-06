@@ -104,6 +104,12 @@ function getMessageDateKey(ts?: number) {
     return d.toDateString();
 }
 
+type MessageRow = Message | { type: 'dateSeparator'; date: string; dateKey: string };
+
+function isDateSeparator(item: MessageRow): item is { type: 'dateSeparator'; date: string; dateKey: string } {
+    return 'type' in item && item.type === 'dateSeparator';
+}
+
 export default function MessageThread({
     messages,
     loadingMessages,
@@ -145,29 +151,29 @@ export default function MessageThread({
                 )}
                 {!loadingMessages && messages.length === 0 && <div className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3 text-sm text-slate-500">{t('chats.messages.empty')}</div>}
                 {messages.length > 0 && (() => {
-                    const messagesWithDateSeparators: (typeof messages[0] | { type: 'dateSeparator'; date: string; key: string })[] = [];
+                    const messagesWithDateSeparators: MessageRow[] = [];
                     let lastDateKey = '';
                     
                     messages.forEach((msg) => {
                         const dateKey = getMessageDateKey(msg.messageTimestamp);
                         if (dateKey !== lastDateKey) {
-                            messagesWithDateSeparators.push({ type: 'dateSeparator', date: formatMessageDate(msg.messageTimestamp), key: dateKey });
+                            messagesWithDateSeparators.push({ type: 'dateSeparator', date: formatMessageDate(msg.messageTimestamp), dateKey });
                             lastDateKey = dateKey;
                         }
                         messagesWithDateSeparators.push(msg);
                     });
                     
                     return messagesWithDateSeparators.map((item) => {
-                        if ('type' in item && item.type === 'dateSeparator') {
+                        if (isDateSeparator(item)) {
                             return (
-                                <div key={`date-${item.key}`} className="flex justify-center py-3">
+                                <div key={`date-${item.dateKey}`} className="flex justify-center py-3">
                                     <span className="inline-block rounded-full border border-slate-700/50 bg-slate-900/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                                         {item.date}
                                     </span>
                                 </div>
                             );
                         }
-                        const msg = item;
+                        const msg: Message = item;
                         const mine = msg.key.fromMe;
                         return (
                             <div key={msg.key.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
