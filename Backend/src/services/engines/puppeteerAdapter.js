@@ -10,6 +10,8 @@ const sessionState = new Map();
 const qrCodes = new Map();
 const clients = new Map();
 const sessionUsers = new Map();
+const connectPromises = new Map();
+const sessionGenerations = new Map();
 
 const getStatus = (sessionId) => sessionState.get(sessionId) || 'DISCONNECTED';
 
@@ -27,151 +29,265 @@ const formatJid = (jid) => {
     return `${cleaned}@c.us`; // whatsapp-web.js uses @c.us for contacts
 };
 
+const withTimeout = async (promise, timeoutMs, label) => {
+    let timer;
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs);
+            }),
+        ]);
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
+};
+
+const isNavigationRaceError = (error) => {
+    const msg = String(error?.message || error || '').toLowerCase();
+    return msg.includes('execution context was destroyed')
+        || msg.includes('cannot find context with specified id')
+        || msg.includes('target closed');
+};
+
+const teardownClient = async (sessionId, client) => {
+    if (!client) return;
+
+    try {
+        await withTimeout(Promise.resolve(client.destroy()), 8000, `destroy(${sessionId})`);
+    } catch (error) {
+        const logFn = isNavigationRaceError(error) ? console.warn : console.error;
+        logFn(`[Puppeteer] Error destroying ${sessionId}:`, error?.message || error);
+    }
+};
+
 export class PuppeteerAdapter extends EngineAdapter {
     constructor() {
         super('puppeteer');
     }
 
     async connect(sessionId, options = {}) {
-        sessionState.set(sessionId, 'CONNECTING');
-
-        const storeDir = path.join(process.cwd(), 'store_puppeteer');
-        if (!fs.existsSync(storeDir)) {
-            fs.mkdirSync(storeDir, { recursive: true });
+        if (connectPromises.has(sessionId)) {
+            return connectPromises.get(sessionId);
         }
 
-        if (options.deleteOld) {
-            try {
-                const sessionPath = path.join(storeDir, `session-${sessionId}`);
-                if (fs.existsSync(sessionPath)) {
-                    fs.rmSync(sessionPath, { recursive: true, force: true });
-                    console.log(`[Puppeteer] Cleaned up session data for ${sessionId}`);
+        const existingClient = clients.get(sessionId);
+        if (existingClient && !options.forceReconnect) {
+            const currentStatus = getStatus(sessionId);
+            if (currentStatus === 'CONNECTED' || currentStatus === 'CONNECTING') {
+                return {
+                    engineType: 'puppeteer',
+                    sessionId,
+                    status: currentStatus,
+                    mode: PUPPETEER_RUNTIME_MODE,
+                };
+            }
+        }
+
+        const connectPromise = (async () => {
+            sessionState.set(sessionId, 'CONNECTING');
+
+            const storeDir = path.join(process.cwd(), 'store_puppeteer');
+            if (!fs.existsSync(storeDir)) {
+                fs.mkdirSync(storeDir, { recursive: true });
+            }
+
+            if (options.deleteOld) {
+                try {
+                    const sessionPath = path.join(storeDir, `session-${sessionId}`);
+                    if (fs.existsSync(sessionPath)) {
+                        fs.rmSync(sessionPath, { recursive: true, force: true });
+                        console.log(`[Puppeteer] Cleaned up session data for ${sessionId}`);
+                    }
+                } catch (e) {
+                    console.error(`[Puppeteer] Clean up error for ${sessionId}:`, e);
                 }
+            }
+
+            const currentClient = clients.get(sessionId);
+            if (currentClient) {
+                clients.delete(sessionId);
+                await teardownClient(sessionId, currentClient);
+            }
+
+            const generation = (sessionGenerations.get(sessionId) || 0) + 1;
+            sessionGenerations.set(sessionId, generation);
+
+            const client = new Client({
+                authStrategy: new LocalAuth({
+                    clientId: sessionId,
+                    dataPath: storeDir
+                }),
+                puppeteer: {
+                    headless: true,
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-accelerated-2d-canvas',
+                        '--no-first-run',
+                        '--no-zygote',
+                        '--single-process',
+                        '--disable-gpu'
+                    ]
+                }
+            });
+
+            clients.set(sessionId, client);
+
+            const isCurrentClient = () => clients.get(sessionId) === client && sessionGenerations.get(sessionId) === generation;
+            const onceFlags = {
+                authenticated: false,
+                ready: false,
+                disconnected: false,
+            };
+
+            client.on('qr', (qr) => {
+                if (!isCurrentClient()) return;
+                if (getStatus(sessionId) === 'CONNECTED') return;
+
+                qrCodes.set(sessionId, qr);
+                console.log(`[QR GENERATED] Puppeteer Session '${sessionId}' - Length: ${qr.length}`);
+                triggerWebhooks(sessionId, 'connection.update', { connection: 'open', qr: 'QR_RECEIVED' });
+            });
+
+            client.on('ready', () => {
+                if (!isCurrentClient()) return;
+                if (onceFlags.ready) return;
+                onceFlags.ready = true;
+
+                qrCodes.delete(sessionId);
+                sessionState.set(sessionId, 'CONNECTED');
+                sessionUsers.set(sessionId, client.info ? client.info.wid.user : null);
+                console.log(`[Puppeteer] Session '${sessionId}' connected to WhatsApp!`);
+                triggerWebhooks(sessionId, 'connection.update', { connection: 'open' });
+            });
+
+            client.on('authenticated', () => {
+                if (!isCurrentClient()) return;
+                if (onceFlags.authenticated) return;
+                onceFlags.authenticated = true;
+
+                console.log(`[Puppeteer] Session '${sessionId}' authenticated!`);
+                qrCodes.delete(sessionId);
+            });
+
+            client.on('auth_failure', (msg) => {
+                if (!isCurrentClient()) return;
+
+                console.error(`[Puppeteer] Session '${sessionId}' auth failure:`, msg);
+                sessionState.set(sessionId, 'DISCONNECTED');
+                qrCodes.delete(sessionId);
+                sessionUsers.delete(sessionId);
+                triggerWebhooks(sessionId, 'connection.update', { connection: 'close', error: msg });
+            });
+
+            client.on('disconnected', async (reason) => {
+                if (!isCurrentClient()) return;
+                if (onceFlags.disconnected) return;
+                onceFlags.disconnected = true;
+
+                console.log(`[Puppeteer] Session '${sessionId}' disconnected:`, reason);
+                sessionState.set(sessionId, 'DISCONNECTED');
+                qrCodes.delete(sessionId);
+                sessionUsers.delete(sessionId);
+                clients.delete(sessionId);
+                triggerWebhooks(sessionId, 'connection.update', { connection: 'close', reason });
+
+                await teardownClient(sessionId, client);
+            });
+
+            client.on('message', async (msg) => {
+                if (!isCurrentClient()) return;
+                try {
+                    // Trigger webhook matching Baileys-like format
+                    const payload = {
+                        key: {
+                            remoteJid: msg.from,
+                            fromMe: msg.fromMe,
+                            id: msg.id.id
+                        },
+                        message: {
+                            conversation: msg.body
+                        },
+                        pushName: msg._data?.notifyName || msg.from
+                    };
+
+                    console.log(`[Puppeteer] New Message on ${sessionId}: ${msg.from} - ${msg.body}`);
+                    triggerWebhooks(sessionId, 'messages.upsert', payload);
+                } catch (error) {
+                    console.error(`[Puppeteer] Message handler error on ${sessionId}:`, error?.message || error);
+                }
+            });
+
+            client.on('message_ack', (msg, ack) => {
+                if (!isCurrentClient()) return;
+                try {
+                    // map acks
+                    const statusMap = { 1: 1, 2: 2, 3: 3, 4: 4 }; // sent, received, read, etc.
+                    const payload = {
+                        key: { remoteJid: msg.from, fromMe: msg.fromMe, id: msg.id.id },
+                        update: { status: statusMap[ack] || ack }
+                    };
+                    triggerWebhooks(sessionId, 'messages.update', payload);
+                } catch (error) {
+                    console.error(`[Puppeteer] Ack handler error on ${sessionId}:`, error?.message || error);
+                }
+            });
+
+            try {
+                await Promise.resolve(client.initialize());
             } catch (e) {
-                console.error(`[Puppeteer] Clean up error for ${sessionId}:`, e);
+                console.error(`[Puppeteer] Initialization error for ${sessionId}:`, e);
+                sessionState.set(sessionId, 'DISCONNECTED');
+                clients.delete(sessionId);
+                sessionUsers.delete(sessionId);
+                qrCodes.delete(sessionId);
+                await teardownClient(sessionId, client);
+                throw e;
             }
-        }
 
-        const client = new Client({
-            authStrategy: new LocalAuth({
-                clientId: sessionId,
-                dataPath: storeDir
-            }),
-            puppeteer: {
-                headless: true,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--single-process',
-                    '--disable-gpu'
-                ]
-            }
-        });
-
-        clients.set(sessionId, client);
-
-        client.on('qr', (qr) => {
-            qrCodes.set(sessionId, qr);
-            console.log(`[QR GENERATED] Puppeteer Session '${sessionId}' - Length: ${qr.length}`);
-            triggerWebhooks(sessionId, 'connection.update', { connection: 'open', qr: 'QR_RECEIVED' });
-        });
-
-        client.on('ready', () => {
-            qrCodes.delete(sessionId);
-            sessionState.set(sessionId, 'CONNECTED');
-            sessionUsers.set(sessionId, client.info ? client.info.wid.user : null);
-            console.log(`[Puppeteer] Session '${sessionId}' connected to WhatsApp!`);
-            triggerWebhooks(sessionId, 'connection.update', { connection: 'open' });
-        });
-
-        client.on('authenticated', () => {
-            console.log(`[Puppeteer] Session '${sessionId}' authenticated!`);
-            qrCodes.delete(sessionId);
-        });
-
-        client.on('auth_failure', (msg) => {
-            console.error(`[Puppeteer] Session '${sessionId}' auth failure:`, msg);
-            sessionState.set(sessionId, 'DISCONNECTED');
-            qrCodes.delete(sessionId);
-            triggerWebhooks(sessionId, 'connection.update', { connection: 'close', error: msg });
-        });
-
-        client.on('disconnected', (reason) => {
-            console.log(`[Puppeteer] Session '${sessionId}' disconnected:`, reason);
-            sessionState.set(sessionId, 'DISCONNECTED');
-            qrCodes.delete(sessionId);
-            sessionUsers.delete(sessionId);
-            clients.delete(sessionId);
-            triggerWebhooks(sessionId, 'connection.update', { connection: 'close', reason });
-        });
-
-        client.on('message', async (msg) => {
-            // Trigger webhook matching Baileys-like format
-            const payload = {
-                key: {
-                    remoteJid: msg.from,
-                    fromMe: msg.fromMe,
-                    id: msg.id.id
-                },
-                message: {
-                    conversation: msg.body
-                },
-                pushName: msg._data?.notifyName || msg.from
+            return {
+                engineType: 'puppeteer',
+                sessionId,
+                status: 'CONNECTING',
+                mode: PUPPETEER_RUNTIME_MODE,
             };
-            
-            console.log(`[Puppeteer] New Message on ${sessionId}: ${msg.from} - ${msg.body}`);
-            triggerWebhooks(sessionId, 'messages.upsert', payload);
+        })().finally(() => {
+            connectPromises.delete(sessionId);
         });
 
-        client.on('message_ack', (msg, ack) => {
-            // map acks
-            const statusMap = { 1: 1, 2: 2, 3: 3, 4: 4 }; // sent, received, read, etc.
-            const payload = {
-                key: { remoteJid: msg.from, fromMe: msg.fromMe, id: msg.id.id },
-                update: { status: statusMap[ack] || ack }
-            };
-            triggerWebhooks(sessionId, 'messages.update', payload);
-        });
-
-        try {
-            client.initialize();
-        } catch (e) {
-            console.error(`[Puppeteer] Initialization error for ${sessionId}:`, e);
-            sessionState.set(sessionId, 'DISCONNECTED');
-            throw e;
-        }
-
-        return {
-            engineType: 'puppeteer',
-            sessionId,
-            status: 'CONNECTING',
-            mode: PUPPETEER_RUNTIME_MODE,
-        };
+        connectPromises.set(sessionId, connectPromise);
+        return connectPromise;
     }
 
     async disconnect(sessionId) {
+        sessionState.set(sessionId, 'DISCONNECTED');
+
+        if (connectPromises.has(sessionId)) {
+            try {
+                await connectPromises.get(sessionId);
+            } catch {
+                // Ignore in-flight connect error while forcing disconnect.
+            }
+        }
+
         const client = clients.get(sessionId);
         if (client) {
             try {
-                await client.logout();
+                await withTimeout(Promise.resolve(client.logout()), 8000, `logout(${sessionId})`);
             } catch (e) {
-                console.error(`[Puppeteer] Error logging out ${sessionId}:`, e);
+                const logFn = isNavigationRaceError(e) ? console.warn : console.error;
+                logFn(`[Puppeteer] Error logging out ${sessionId}:`, e?.message || e);
             }
-            try {
-                await client.destroy();
-            } catch (e) {
-                console.error(`[Puppeteer] Error destroying ${sessionId}:`, e);
-            }
+            clients.delete(sessionId);
+            await teardownClient(sessionId, client);
         }
-        
-        sessionState.set(sessionId, 'DISCONNECTED');
+
         qrCodes.delete(sessionId);
-        clients.delete(sessionId);
         sessionUsers.delete(sessionId);
+        sessionGenerations.delete(sessionId);
+        connectPromises.delete(sessionId);
 
         return {
             engineType: 'puppeteer',

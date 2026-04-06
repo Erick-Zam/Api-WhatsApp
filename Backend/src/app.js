@@ -266,6 +266,17 @@ app.use((err, req, res, next) => {
 });
 
 process.on('unhandledRejection', (reason) => {
+    const message = String(reason?.message || reason || '');
+    const lower = message.toLowerCase();
+    const isPuppeteerNavigationRace = lower.includes('execution context was destroyed')
+        || lower.includes('cannot find context with specified id')
+        || lower.includes('target closed');
+
+    if (isPuppeteerNavigationRace) {
+        console.warn('Transient Puppeteer navigation race:', message);
+        return;
+    }
+
     console.error('Unhandled promise rejection:', reason);
 });
 
