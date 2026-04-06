@@ -41,7 +41,7 @@ export default function ChatRailContent({
 }: ChatRailContentProps) {
     const { t } = useTranslation();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+    const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Handle infinite scroll - load more when user scrolls near bottom
     useEffect(() => {
